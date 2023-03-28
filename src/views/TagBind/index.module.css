@@ -1,0 +1,81 @@
+.top {
+  display: flex;
+  justify-content: space-between;
+  font-size: 16px;
+}
+
+.bill {
+  line-height: 40px;
+}
+
+.body {
+  height: calc(100% - 45px);
+  padding: 10px 20px;
+}
+
+.detailsBox {
+  background: #ebf8fe;
+  margin-top: 10px;
+  overflow: hidden; /* 形成bfc,外边距不重叠 */
+}
+
+.details {
+  text-align: center;
+  font-size: 20px;
+}
+
+.buttonStyle {
+  display: flex;
+  justify-content: space-around;
+  margin: 10px 0px;
+}
+
+.bottom {
+  height: calc(100% - 263px);
+}
+
+.list {
+  margin-top: 50px;
+  font-size: 20px;
+}
+
+.listContent {
+  overflow: auto;
+  height: 100%;
+  margin-top: 5px;
+}
+
+.code,
+.name {
+  height: 30px;
+  line-height: 30px;
+}
+
+.select {
+  width: 80%;
+}
+
+.listItem {
+  background: rgba(242, 242, 242, 1);
+  margin-top: 5px;
+  border-radius: 5px;
+  padding: 5px;
+}
+
+.listAndAmount {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-top: 20px;
+}
+
+.machineList {
+  font-size: 17px;
+  font-weight: 600;
+  padding: 5px 10px;
+}
+
+.amount {
+  margin-bottom: 8px;
+  margin-right: 10px;
+}

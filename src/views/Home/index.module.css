@@ -1,0 +1,162 @@
+.container {
+  /* width: 100vh; */
+  width: 100vh;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.inventory {
+  background: #089dea;
+  color: white;
+  text-align: center;
+  height: 40px;
+  line-height: 40px;
+  font-size: 23px;
+  position: relative;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  height: calc(100% - 40px);
+  padding: 10px 20px;
+}
+.main {
+  display: flex;
+  /* flex-wrap: wrap; */
+  width: 100%;
+  height: 50vh;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  /* background-color: red; */
+}
+
+/* .main > div:nth-child(2) {
+  margin-top: 50px;
+}
+
+.main > div:nth-child(3) {
+  margin-top: 50px;
+}
+
+.main > div:nth-child(4) {
+  margin-top: 50px;
+} */
+
+.download,
+.scan,
+.upload,
+.specialDevice {
+  width: 80%;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #f60;
+  padding: 8px 20px;
+}
+/* 
+.main > div > div:first-child {
+  display: flex;
+} */
+
+.main > div > div img {
+  width: 50px;
+  vertical-align: middle;
+}
+
+.icon {
+  font-size: 90px;
+}
+
+.main > div {
+  background: #79a8ff;
+  border-radius: 10px;
+}
+
+.text {
+  color: #fff;
+}
+
+.showImage {
+  width: 100%;
+  height: 35%;
+  background-image: url("./luqiao_home.jpg");
+  background-size: cover;
+}
+
+.shows {
+  width: 100%;
+  height: 80%;
+  background: #ebf8fe;
+  display: flex;
+  flex-wrap: wrap;
+  padding: 10px;
+}
+
+.shows > div {
+  width: 50%;
+  padding: 10px;
+}
+
+.shows > div > div {
+  background: #2eb1fc;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 900;
+  border-radius: 5px;
+}
+
+.dataSync {
+  background: #2eb1fc;
+  height: 50px;
+  text-align: center;
+  line-height: 50px;
+  font-size: 20px;
+  border-radius: 5px;
+}
+
+.machineBox,
+.toolBox {
+  background: #ebf8fe;
+}
+
+.machine,
+.tool {
+  font-size: 20px;
+  text-align: center;
+}
+
+.machineContent {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.toolContent {
+  display: flex;
+  justify-content: space-between;
+}
+.machineContent > div,
+.toolContent > div {
+  width: 33.333%;
+  padding: 0 10px;
+  margin: 10px 0px;
+}
+
+.machineContent > div > div,
+.toolContent > div > div {
+  height: 50px;
+  background: #2eb1fc;
+  text-align: center;
+  line-height: 50px;
+  border-radius: 5px;
+}

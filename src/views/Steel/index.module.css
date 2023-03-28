@@ -1,0 +1,39 @@
+.title {
+  text-align: center;
+  font-size: 20px;
+  margin-top: 20px;
+}
+
+.outside {
+  font-size: 20px;
+}
+
+.inside {
+  font-size: 16px;
+  padding: 0 45px;
+  white-space: pre-line;
+  word-break:break-all;
+  line-height: 25px;
+}
+
+.show {
+  font-size: 20px;
+  min-height: 30vh;
+  margin-top: 20px;
+}
+
+.center {
+  text-align: center;
+}
+
+.detail,
+.image {
+  padding: 5px 15px;
+}
+
+.loading {
+  text-align: center;
+  font-size: 20px;
+  margin: auto;
+  margin-top: 40%;
+}

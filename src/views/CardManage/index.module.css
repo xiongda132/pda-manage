@@ -1,0 +1,84 @@
+.cardContainer {
+  height: 100vh;
+}
+
+.machineContainer {
+  background: #ebf8fe;
+  padding: 0px 10px;
+  overflow: hidden;
+}
+
+.machineInfo {
+  text-align: center;
+  font-size: 20px;
+}
+
+.mainContainer {
+  height: calc(100% - 45px);
+  padding: 10px;
+}
+
+.machineContent {
+  margin-bottom: 10px;
+}
+
+.listContainer {
+  margin-top: 40px;
+  height: calc(100% - 190px);
+}
+
+.listInfo {
+  font-size: 20px;
+}
+
+.cardInfo {
+  background: rgba(242, 242, 242, 1);
+  margin-top: 5px;
+  border-radius: 5px;
+  padding: 5px;
+}
+
+.listContent {
+  height: calc(100% - 40px);
+  overflow-y: scroll;
+}
+
+.saveContainer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+
+.save {
+  width: 90px;
+  margin-right: 35px;
+}
+
+.listAndAmount {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.cardList {
+  font-size: 17px;
+  font-weight: 600;
+  padding: 5px 10px;
+}
+
+.amount {
+  margin-bottom: 8px;
+  margin-right: 10px;
+}
+
+.waitScan {
+  font-size: 20px;
+  margin-top: 40%;
+  text-align: center;
+}
+
+.scanQrcode {
+  margin-top: 40%;
+  text-align: center;
+  font-size: 20px;
+}

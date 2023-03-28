@@ -1,0 +1,39 @@
+.unbindContainer {
+  height: 100vh;
+}
+
+.unbindWrapper {
+  height: calc(100% - 45px);
+  padding: 0px 10px;
+}
+
+.buttonStyle {
+  float: right;
+  padding: 6px 40px;
+}
+
+.buttonWrapper {
+  overflow: hidden;
+  margin-top: 10px;
+}
+
+.listAndAmount > span {
+  font-size: 20px;
+}
+
+.listAndAmount > span:last-child {
+  margin-left: 40px;
+}
+
+.productList {
+  height: 80vh;
+  overflow: auto;
+}
+
+.singleWrapper {
+  border: 1px solid rgb(208, 203, 203);
+  padding: 12px 6px;
+  border-radius: 3px;
+  background: rgb(239, 242, 246);
+  margin-bottom: 15px;
+}
