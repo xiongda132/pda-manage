@@ -17,7 +17,7 @@ export const getDataInfo = () => {
 };
 
 export const getWorkFlow = () => {
-  return getRequest("/seeyon/rest/api/dataInfo/workflow");
+  return getRequest("/seeyon/rest/api/dataInfo/workFlow");
 };
 
 export const getNode = () => {
@@ -51,7 +51,7 @@ export const saveCardInfo = (params) => {
 };
 
 export const saveWorkFlow = (params) => {
-  return request("/seeyon/rest/api/workflow", {
+  return request("/seeyon/rest/api/saveWorkFlow", {
     ...params,
   });
 };

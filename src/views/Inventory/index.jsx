@@ -1,5 +1,5 @@
 import styles from "./index.module.css";
-import { useCallback, useEffect, useState, useMemo } from "react";
+import { useCallback, useEffect, useState, useMemo, useRef } from "react";
 import { NavBar, Grid, Button, Toast } from "antd-mobile";
 import { useHistory } from "react-router-dom";
 import Detail from "./Detail";
@@ -16,6 +16,7 @@ export default () => {
   const [detailVis, setDetailVis] = useState(false);
   const [inventoryData, setInventoryData] = useState([]);
   const [memberCode, setMemberCode] = useState("");
+  const memberCodeRef = useRef("");
 
   const back = () => {
     history.go(-1);
@@ -60,7 +61,7 @@ export default () => {
     const twoPart = data.slice(2, 4).map((item) => ({ ...item, checkId: "2" }));
     const threePart = data.slice(4).map((item) => ({ ...item, checkId: "3" }));
     data = [...onePart, ...twoPart, ...threePart]; //从后端拿到的数据
-    // const res = await getInventoryInfo({ memberCode });
+    // const res = await getInventoryInfo({ memberCodeRef.current });
     // if (res.status) {
     //   setInventoryData(res.data.checkList);
     // } else {
@@ -94,7 +95,8 @@ export default () => {
       const { memberCode } = res.data.memberList.find(
         (item) => item.memberLogin === memberLogin
       );
-      setMemberCode(memberCode);
+      memberCodeRef.current = memberCode;
+      // setMemberCode(memberCode);
     } else {
       Toast.show({
         icon: "fail",
@@ -124,10 +126,10 @@ export default () => {
             return (
               <div key={id} className={styles.listItem}>
                 <Grid columns={24} gap={8}>
-                  <Item span={15} style={{ lineHeight: "35px" }}>
+                  <Item span={13} style={{ lineHeight: "35px" }}>
                     盘点单号: {id}
                   </Item>
-                  <Item span={9}>
+                  <Item span={11}>
                     <Button
                       className={styles.viewDetail}
                       onClick={() => viewDetail(id)}

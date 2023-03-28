@@ -47,8 +47,8 @@ export default () => {
   const onFinish = (formObj) => {
     const cloneObj = Object.assign({}, formObj); //浅拷贝, 接口实参
     const res = {};
-    res.code = 1;
-    if (res.code === 1) {
+    res.status = 0;
+    if (res.status === 1) {
       Toast.show({
         icon: "success",
         content: "提交成功",
@@ -56,7 +56,7 @@ export default () => {
     } else {
       Toast.show({
         icon: "fail",
-        content: `${res.message}`,
+        content: `提交失败`,
       });
     }
   };
