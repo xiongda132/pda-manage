@@ -62,3 +62,26 @@ export const memberObj = {
     ],
   },
 };
+
+export const locationObj = {
+  status: true,
+  data: {
+    locationList: [
+      {
+        field0001: "位置1",
+      },
+      {
+        field0001: "位置2",
+      },
+      {
+        field0001: "位置3",
+      },
+      {
+        field0001: "位置4",
+      },
+      {
+        field0001: "位置5",
+      },
+    ],
+  },
+};

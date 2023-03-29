@@ -1,6 +1,10 @@
 import { request, getRequest } from "./serverRequest";
 import { getUserToken } from "utils/auth";
+import { accountObj, memberObj } from "views/TagBind/test";
+import { locationObj } from "views/Procedure/test";
+import { Inventoryobj } from "views/Inventory/test";
 const token = getUserToken();
+const serverPort = sessionStorage.getItem("serverPort");
 
 export const getToken = (userName, passWord) => {
   return getRequest(`/seeyon/rest/token/${userName}/${passWord}`);
@@ -68,14 +72,46 @@ export const saveLedger = (params) => {
   });
 };
 
-// const machineApi = {
-//   getToken,
-//   getFileTable,
-//   getDataInfo,
-//   getWorkFlow,
-//   getNode,
-//   saveFileTable,
-//   saveCardInfo,
-//   saveWorkFlow,
-//   saveNode,
-// };
+export const switchFileTable = (deptCode) => {
+  if (serverPort) {
+    return getFileTable(deptCode);
+  } else {
+    return accountObj;
+  }
+};
+
+export const switchMember = () => {
+  if (serverPort) {
+    return getMember();
+  } else {
+    return memberObj;
+  }
+};
+
+export const switchToken = (userName, passWord) => {
+  if (serverPort) {
+    return getToken(userName, passWord);
+  } else {
+    return {
+      bindingUser: null,
+      userName: userName,
+      id: "77b8dd8a-052e-48db-ba0e-8d499883485e",
+    };
+  }
+};
+
+export const switchInventoryInfo = (params) => {
+  if (serverPort) {
+    return getInventoryInfo(params);
+  } else {
+    return Inventoryobj;
+  }
+};
+
+export const switchLocation = () => {
+  if (serverPort) {
+    return getLocation();
+  } else {
+    return locationObj;
+  }
+};

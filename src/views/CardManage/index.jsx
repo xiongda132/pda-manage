@@ -153,37 +153,24 @@ export default () => {
 
   const addTag = (tag, index) => {
     console.log(tag, index);
+    console.log(machineInfo.card);
+    const cardList = [...machineInfo.card];
+    cardList[index].codeList.push(tag);
     setMachineInfo({
       ...machineInfo,
-      card: [
-        {
-          ...machineInfo.card[index],
-          codeList: [...machineInfo.card[index].codeList, tag],
-        },
-        ...machineInfo.card.filter((tags, indexs) => {
-          return indexs !== index;
-        }),
-      ],
+      card: cardList,
     });
   };
 
   const deleteTag = (itemIndex, index) => {
     console.log(itemIndex, index);
+    const cardList = [...machineInfo.card];
+    cardList[index].codeList = cardList[index].codeList.filter(
+      (item, indexs) => indexs !== itemIndex
+    );
     setMachineInfo({
       ...machineInfo,
-      card: [
-        {
-          ...machineInfo.card[index],
-          codeList: [
-            ...machineInfo.card[index].codeList.filter(
-              (item, index) => index !== itemIndex
-            ),
-          ],
-        },
-        ...machineInfo.card.filter((tags, indexs) => {
-          return indexs !== index;
-        }),
-      ],
+      card: cardList,
     });
   };
 
@@ -345,7 +332,7 @@ export default () => {
           板卡管理
         </NavBar>
         <div className={styles.mainContainer}>
-          {loading ? (
+          {!loading ? (
             <div className={styles.scanQrcode}>
               请选择扫描模后, 进行扫描...
               <Group onChange={handleChange}>

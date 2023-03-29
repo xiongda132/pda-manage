@@ -18,7 +18,6 @@ export default ({
 }) => {
   const configTime = useRef(dayjs().format("YYYY-MM-DD HH:mm:ss"));
   const history = useHistory();
-  // const [epcData, setEpcData] = useState([]);
   const [predata, setPreData] = useState(() =>
     inventoryData.filter((item) => item.checkId === id)
   );

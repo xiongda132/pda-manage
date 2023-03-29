@@ -16,18 +16,24 @@ import styles from "./index.module.css";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { pdaConfig, pdaStart, padStop, queryPdaData } from "api/pda";
 import dayjs from "dayjs";
-import { getLocation } from "api/machine";
-import { getMemberLogin, getMember } from "api/machine";
+import { getLocation, saveWorkFlow } from "api/machine";
+import {
+  getMember,
+  switchMember,
+  switchFileTable,
+  switchLocation,
+} from "api/machine";
+import { getMemberLogin } from "utils/auth";
 
 const { Item } = Grid;
 
 const rankData = [
   { label: "请选择密级", value: "" },
-  { label: "非密", value: 1 },
-  { label: "内部", value: 2 },
-  { label: "秘密", value: 3 },
-  { label: "机密", value: 4 },
-  { label: "绝密", value: 5 },
+  { label: "非密", value: "非密" },
+  { label: "内部", value: "内部" },
+  { label: "秘密", value: "秘密" },
+  { label: "机密", value: "机密" },
+  { label: "绝密", value: "绝密" },
 ];
 
 export default () => {
@@ -41,14 +47,22 @@ export default () => {
   const [detailVis, setDetailVis] = useState(false);
   const [deptCode, setDeptCode] = useState("");
   const [checkboxValue, setCheckboxValue] = useState(false);
+  const depCodeRef = useRef(null);
 
-  // const [deviceList, setDeviceList] = useState([]);
-
-  const onFinish = (formObj) => {
-    const cloneObj = Object.assign({}, formObj); //浅拷贝, 接口实参
-    const res = {};
-    res.status = 0;
-    if (res.status === 1) {
+  const onFinish = async (formObj) => {
+    const { nbName, nodeName, productionMember, nodeSec, location, gdhId } =
+      Object.assign({}, formObj);
+    const workflowForm = epcList.map((item) => ({
+      facilityCode: item,
+      nbName,
+      nodeName,
+      productionMember,
+      nodeSec,
+      location,
+      gdhId,
+    }));
+    const { status } = await saveWorkFlow({ workflowForm });
+    if (status) {
       Toast.show({
         icon: "success",
         content: "提交成功",
@@ -62,34 +76,50 @@ export default () => {
   };
 
   const getBillNo = async () => {
-    const billNos = [
-      { label: "请选择工单", value: "" },
-      { label: "工单1", value: "1" },
-      { label: "工单2", value: "2" },
-      { label: "工单3", value: "3" },
-    ];
-    setBillNo(billNos);
-    // const memberLogin = getMemberLogin();
-    // const res = await getMember();
-    // if (res.status) {
-    //   const { deptCode } = res.data.memberList.find(
-    //     (item) => item.memberLogin === memberLogin
-    //   );
-    //   setDeptCode(deptCode);
-    // } else {
-    //   Toast.show({
-    //     icon: "fail",
-    //     content: "获取部门信息失败",
-    //   });
-    // }
+    const memberLogin = getMemberLogin();
+    const {
+      status,
+      data: { memberList },
+    } = await switchMember();
+    if (status) {
+      const { deptCode } = memberList.find(
+        (item) => item.memberLogin === memberLogin
+      );
+      if (deptCode) {
+        depCodeRef.current = deptCode;
+        sessionStorage.setItem("deptCode", deptCode);
+        const {
+          status,
+          data: { zjtzData },
+        } = await switchFileTable(deptCode);
+        if (status) {
+          const gdhList = [...new Set(zjtzData.map((item) => item.gdhId))].map(
+            (item) => ({ label: item, value: item })
+          );
+          const data = [...gdhList];
+          data.unshift({ label: "请选择工单", value: "" });
+          setBillNo(data);
+        } else {
+          Toast.show({
+            icon: "fail",
+            content: "获取整机台账信息失败",
+          });
+        }
+      }
+    } else {
+      Toast.show({
+        icon: "fail",
+        content: "获取部门信息失败",
+      });
+    }
   };
 
   const getprojectGroup = async () => {
     const projectGroup = [
       { label: "请选择项目组", value: "" },
-      { label: "项目组1", value: "1" },
-      { label: "项目组2", value: "2" },
-      { label: "项目组3", value: "3" },
+      { label: "项目组1", value: "项目组1" },
+      { label: "项目组2", value: "项目组2" },
+      { label: "项目组3", value: "项目组3" },
     ];
     setProjectGroup(projectGroup);
   };
@@ -97,48 +127,59 @@ export default () => {
   const getProcedureData = () => {
     const procedureData = [
       { label: "请选择工序", value: "" },
-      { label: "整机", value: 1 },
-      { label: "整机升级", value: 2 },
-      { label: "整机调测", value: 3 },
-      { label: "常温", value: 4 },
-      { label: "所检", value: 5 },
-      { label: "试验", value: 6 },
-      { label: "军检(军品)", value: 7 },
-      { label: "恢复出厂", value: 8 },
-      { label: "注正式参数", value: 9 },
+      { label: "整机", value: "整机" },
+      { label: "整机升级", value: "整机升级" },
+      { label: "整机调测", value: "整机调测" },
+      { label: "常温", value: "常温" },
+      { label: "所检", value: "所检" },
+      { label: "试验", value: "试验" },
+      { label: "军检(军品)", value: "军检(军品)" },
+      { label: "恢复出厂", value: "恢复出厂" },
+      { label: "注正式参数", value: "注正式参数" },
     ];
     setProcedureData(procedureData);
   };
 
   const getPositionData = async () => {
-    const positionData = [
-      { field0001: "请选择位置", value: "" },
-      { field0001: "位置1", value: 1 },
-      { field0001: "位置2", value: 2 },
-      { field0001: "位置3", value: 3 },
-      { field0001: "位置4", value: 4 },
-    ];
-    setPositionData(positionData);
-    // const res = await getLocation();
-    // if (res.status) {
-    //   const data = res.data.locationList.map((item) => ({
-    //     label: item.field0001,
-    //     value: item.field0001,
-    //   }));
-    //   setPositionData(data);
-    // } else {
-    //   Toast.show({
-    //     icon: "fail",
-    //     content: "获取位置信息失败",
-    //   });
-    // }
+    const {
+      status,
+      data: { locationList },
+    } = await switchLocation();
+    if (status) {
+      const data = locationList.map((item) => ({
+        label: item.field0001,
+        value: item.field0001,
+      }));
+      console.log(data);
+      setPositionData(data);
+    } else {
+      Toast.show({
+        icon: "fail",
+        content: "获取位置列表失败",
+      });
+    }
   };
 
-  const getDefaultFields = () => {
-    formRef.current.setFieldsValue({
-      innerName: "内部名称",
-      operator: "张三",
-    });
+  const getDefaultFields = async () => {
+    const memberLogin = getMemberLogin();
+    const {
+      status,
+      data: { memberList },
+    } = await switchMember();
+    if (status) {
+      const { memberName } = memberList.find(
+        (item) => item.memberLogin === memberLogin
+      );
+      formRef.current.setFieldsValue({
+        nbName: "未知",
+        productionMember: memberName,
+      });
+    } else {
+      Toast.show({
+        icon: "fail",
+        content: "获取操作人失败",
+      });
+    }
   };
 
   const handleSave = () => {
@@ -302,7 +343,7 @@ export default () => {
                   onFinish={onFinish}
                   mode="card"
                 >
-                  <Form.Item label="工单号" name="billNo" s>
+                  <Form.Item label="工单号" name="gdhId">
                     <select className={styles.select}>
                       {billNo.map((item) => {
                         return (
@@ -313,7 +354,7 @@ export default () => {
                       })}
                     </select>
                   </Form.Item>
-                  <Form.Item label="内部名称" name="innerName">
+                  <Form.Item label="内部名称" name="nbName">
                     <Input readOnly />
                   </Form.Item>
                   <Form.Item label="项目组" name="projectGroup">
@@ -327,16 +368,16 @@ export default () => {
                       })}
                     </select>
                   </Form.Item>
-                  <Form.Item label="操作人" name="operator">
+                  <Form.Item label="操作人" name="productionMember">
                     <Input readOnly />
                   </Form.Item>
-                  <Form.Item label="当前位置" name="field0001">
+                  <Form.Item label="当前位置" name="location">
                     {!checkboxValue ? (
                       <select className={styles.select}>
                         {positionData.map((item) => {
                           return (
-                            <option key={item.field0001} value={item.value}>
-                              {item.field0001}
+                            <option key={item.label} value={item.value}>
+                              {item.label}
                             </option>
                           );
                         })}
@@ -351,7 +392,7 @@ export default () => {
                   </Form.Item>
                   <Checkbox onChange={handleChange}>手动输入</Checkbox>
 
-                  <Form.Item label="涉密等级" name="rank">
+                  <Form.Item label="涉密等级" name="nodeSec">
                     <select className={styles.select}>
                       {rankData.map((item) => {
                         return (
@@ -362,7 +403,7 @@ export default () => {
                       })}
                     </select>
                   </Form.Item>
-                  <Form.Item label="流程节点" name="node">
+                  <Form.Item label="流程节点" name="nodeName">
                     <select className={styles.select}>
                       {procedureData.map((item) => {
                         return (

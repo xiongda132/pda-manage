@@ -29,7 +29,13 @@ import {
 } from "api/pda";
 import dayjs from "dayjs";
 import styles from "./index.module.css";
-import { getFileTable, getMember, saveLedger } from "api/machine";
+import {
+  getFileTable,
+  getMember,
+  saveLedger,
+  switchFileTable,
+  switchMember,
+} from "api/machine";
 import { getMemberLogin } from "utils/auth";
 import { accountObj, memberObj } from "./test";
 
@@ -52,34 +58,22 @@ export default () => {
   };
 
   const getBillNo = async () => {
-    const billNos = [
-      { label: "请选择工单", value: "" },
-      { label: "工单1", value: "1" },
-    ];
-    setBillNo(billNos);
     const memberLogin = getMemberLogin();
-    // const {
-    //   status,
-    //   data: { memberList },
-    // } = await getMember();
     const {
       status,
       data: { memberList },
-    } = memberObj;
+    } = await switchMember();
     if (status) {
       const { deptCode } = memberList.find(
         (item) => item.memberLogin === memberLogin
       );
       if (deptCode) {
         depCodeRef.current = deptCode;
-        // const {
-        //   status,
-        //   data: { zjtzData },
-        // } = await getFileTable(deptCode);
+        sessionStorage.setItem("deptCode", deptCode);
         const {
           status,
           data: { zjtzData },
-        } = accountObj;
+        } = await switchFileTable(deptCode);
         if (status) {
           const gdhList = [...new Set(zjtzData.map((item) => item.gdhId))].map(
             (item) => ({ label: item, value: item })
@@ -209,22 +203,22 @@ export default () => {
         };
       }
     });
-    // const { status } = await saveLedger({ zjtzData });
-    // if (status) {
-    //   Toast.show({
-    //     icon: "success",
-    //     content: "上传成功",
-    //   });
-    // } else {
-    //   Toast.show({
-    //     icon: "fail",
-    //     content: "上传失败",
-    //   });
-    // }
     Toast.show({
       icon: "success",
       content: "已绑定",
     });
+    const { status } = await saveLedger({ zjtzData });
+    if (status) {
+      Toast.show({
+        icon: "success",
+        content: "上传成功",
+      });
+    } else {
+      Toast.show({
+        icon: "fail",
+        content: "上传失败",
+      });
+    }
     setMachineList(dataMap);
     setEpcCodeVal("");
     setQrCodeVal("");
@@ -262,14 +256,10 @@ export default () => {
     const {
       target: { value },
     } = e;
-    // const {
-    //   status,
-    //   data: { zjtzData },
-    // } = await getFileTable(depCodeRef.current);
     const {
       status,
       data: { zjtzData },
-    } = accountObj;
+    } = await switchFileTable(depCodeRef.current);
     if (status) {
       const machineList = zjtzData
         .filter((item) => item.gdhId === value)

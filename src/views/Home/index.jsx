@@ -150,7 +150,7 @@ const CLogin = (props) => {
                 <div onClick={handleTagBind}>标签绑定</div>
               </div>
               <div>
-                <div /* onClick={handleCardManage} */>板卡管理</div>
+                <div onClick={handleCardManage}>板卡管理</div>
               </div>
               <div>
                 <div onClick={handleProcedure}>整机批量</div>

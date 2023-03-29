@@ -1,5 +1,5 @@
 import { getUserToken } from "utils/auth";
-const baseUrl = window.g.testURL;
+const baseUrl = `http://${sessionStorage.getItem("serverPort")}`;
 const token = getUserToken();
 
 export function request(api, params) {

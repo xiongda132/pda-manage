@@ -1,7 +1,7 @@
 import { setAuthentication } from "../utils/auth";
 import { Toast } from "antd-mobile";
 // import axios from "axios";
-import { getToken } from "api/machine";
+import { getToken, switchToken } from "api/machine";
 import { setUserToken, setMemberLogin } from "utils/auth";
 
 let downloadData = [];
@@ -10,13 +10,7 @@ const authActions = {
   async login(params, cb) {
     try {
       const { tenantId, userId, pwd } = params;
-      const { id } = await getToken(userId, pwd);
-      console.log(id);
-      // const { id } = {
-      //   bindingUser: null,
-      //   userName: userId,
-      //   id: "77b8dd8a-052e-48db-ba0e-8d499883485e",
-      // };
+      const { id } = await switchToken(userId, pwd);
       if (id) {
         setUserToken(id);
         setMemberLogin(userId);
