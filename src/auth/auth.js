@@ -10,6 +10,7 @@ const authActions = {
   async login(params, cb) {
     try {
       const { tenantId, userId, pwd } = params;
+      console.log(userId, pwd);
       const { id } = await switchToken(userId, pwd);
       if (id) {
         setUserToken(id);

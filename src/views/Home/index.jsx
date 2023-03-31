@@ -162,7 +162,7 @@ const CLogin = (props) => {
                 <div onClick={handleInventory}>盘点管理</div>
               </div>
               <div>
-                <div /* onClick={handleUnbind} */>批量解绑</div>
+                <div onClick={handleUnbind}>批量解绑</div>
               </div>
             </div>
           </div>
