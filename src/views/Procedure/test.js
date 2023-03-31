@@ -54,7 +54,8 @@ export const memberObj = {
     memberList: [
       {
         memberCode: "qwer",
-        memberLogin: "admin",
+        memberLogin: "rest",
+        // memberLogin: "admin",
         memberName: "管理员",
         deptName: "总经办",
         deptCode: "1234",
