@@ -156,7 +156,7 @@ const CLogin = (props) => {
                 <div onClick={handleProcedure}>整机批量</div>
               </div>
               <div>
-                <div /* onClick={handleManage} */>流程管理</div>
+                <div onClick={handleManage}>流程管理</div>
               </div>
               <div>
                 <div onClick={handleInventory}>盘点管理</div>

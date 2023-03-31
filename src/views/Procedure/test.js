@@ -85,3 +85,44 @@ export const locationObj = {
     ],
   },
 };
+
+export const nodeObj = {
+  status: true,
+  data: {
+    flowNodeForm: [
+      {
+        nbName: "内部名称1",
+        nodeSort: "节点序号1",
+        reNodeNumber: "细化节点序号1",
+        lcProperty: "流程属性1",
+        flowNodeName: "节点1",
+        nodeSecurity: "男1",
+        fourCode: "1",
+        flowName: "流程名称1",
+        detailNodeName: "细化流程节点1",
+      },
+      {
+        nbName: "内部名称2",
+        nodeSort: "节点序号2",
+        reNodeNumber: "细化节点序号2",
+        lcProperty: "流程属性2",
+        flowNodeName: "节点2",
+        nodeSecurity: "男2",
+        fourCode: "2",
+        flowName: "流程名称2",
+        detailNodeName: "细化流程节点2",
+      },
+      {
+        nbName: "内部名称3",
+        nodeSort: "节点序号3",
+        reNodeNumber: "细化节点序号3",
+        lcProperty: "流程属性3",
+        flowNodeName: "节点3",
+        nodeSecurity: "男3",
+        fourCode: "3",
+        flowName: "流程名称2",
+        detailNodeName: "细化流程节点2",
+      },
+    ],
+  },
+};

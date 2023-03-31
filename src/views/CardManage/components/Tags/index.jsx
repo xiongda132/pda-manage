@@ -21,7 +21,7 @@ export default ({ index, tags, addTag, deleteTag, clickTag }) => {
         handleAddition={handleAddition}
         handleTagClick={handleTagClick}
         inputFieldPosition="bottom"
-        placeholder="请扫描"
+        placeholder="请扫描..."
         autofocus={false}
       ></ReactTags>
     </>

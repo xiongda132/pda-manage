@@ -16,14 +16,16 @@ import styles from "./index.module.css";
 import { useEffect, useState, useRef, useCallback } from "react";
 import { pdaConfig, pdaStart, padStop, queryPdaData } from "api/pda";
 import dayjs from "dayjs";
-import { getLocation, saveWorkFlow } from "api/machine";
 import {
   getMember,
   switchMember,
   switchFileTable,
   switchLocation,
+  saveWorkFlow,
+  switchNode,
 } from "api/machine";
 import { getMemberLogin } from "utils/auth";
+import { nodeObj } from "./test";
 
 const { Item } = Grid;
 
@@ -40,22 +42,29 @@ export default () => {
   const configTime = useRef(dayjs().format("YYYY-MM-DD HH:mm:ss"));
   const history = useHistory();
   const formRef = useRef(null);
-  const [billNo, setBillNo] = useState([]);
-  const [projectGroup, setProjectGroup] = useState([]);
-  const [procedureData, setProcedureData] = useState([]);
-  const [positionData, setPositionData] = useState([]);
   const [detailVis, setDetailVis] = useState(false);
   const [deptCode, setDeptCode] = useState("");
   const [checkboxValue, setCheckboxValue] = useState(false);
+  const [procedureData, setProcedureData] = useState([]);
+  const [positionData, setPositionData] = useState([]);
+  const [billNo, setBillNo] = useState([]);
+  const [projectGroup, setProjectGroup] = useState([]);
   const depCodeRef = useRef(null);
+  const zjtzDataRef = useRef(null);
 
   const onFinish = async (formObj) => {
-    const { nbName, nodeName, productionMember, nodeSec, location, gdhId } =
-      Object.assign({}, formObj);
+    const {
+      nbName,
+      procedureName,
+      productionMember,
+      nodeSec,
+      location,
+      gdhId,
+    } = Object.assign({}, formObj);
     const workflowForm = epcList.map((item) => ({
       facilityCode: item,
       nbName,
-      nodeName,
+      nodeName: procedureName,
       productionMember,
       nodeSec,
       location,
@@ -71,113 +80,6 @@ export default () => {
       Toast.show({
         icon: "fail",
         content: `提交失败`,
-      });
-    }
-  };
-
-  const getBillNo = async () => {
-    const memberLogin = getMemberLogin();
-    const {
-      status,
-      data: { memberList },
-    } = await switchMember();
-    if (status) {
-      const { deptCode } = memberList.find(
-        (item) => item.memberLogin === memberLogin
-      );
-      if (deptCode) {
-        depCodeRef.current = deptCode;
-        sessionStorage.setItem("deptCode", deptCode);
-        const {
-          status,
-          data: { zjtzData },
-        } = await switchFileTable(deptCode);
-        if (status) {
-          const gdhList = [...new Set(zjtzData.map((item) => item.gdhId))].map(
-            (item) => ({ label: item, value: item })
-          );
-          const data = [...gdhList];
-          data.unshift({ label: "请选择工单", value: "" });
-          setBillNo(data);
-        } else {
-          Toast.show({
-            icon: "fail",
-            content: "获取整机台账信息失败",
-          });
-        }
-      }
-    } else {
-      Toast.show({
-        icon: "fail",
-        content: "获取部门信息失败",
-      });
-    }
-  };
-
-  const getprojectGroup = async () => {
-    const projectGroup = [
-      { label: "请选择项目组", value: "" },
-      { label: "项目组1", value: "项目组1" },
-      { label: "项目组2", value: "项目组2" },
-      { label: "项目组3", value: "项目组3" },
-    ];
-    setProjectGroup(projectGroup);
-  };
-
-  const getProcedureData = () => {
-    const procedureData = [
-      { label: "请选择工序", value: "" },
-      { label: "整机", value: "整机" },
-      { label: "整机升级", value: "整机升级" },
-      { label: "整机调测", value: "整机调测" },
-      { label: "常温", value: "常温" },
-      { label: "所检", value: "所检" },
-      { label: "试验", value: "试验" },
-      { label: "军检(军品)", value: "军检(军品)" },
-      { label: "恢复出厂", value: "恢复出厂" },
-      { label: "注正式参数", value: "注正式参数" },
-    ];
-    setProcedureData(procedureData);
-  };
-
-  const getPositionData = async () => {
-    const {
-      status,
-      data: { locationList },
-    } = await switchLocation();
-    if (status) {
-      const data = locationList.map((item) => ({
-        label: item.field0001,
-        value: item.field0001,
-      }));
-      console.log(data);
-      setPositionData(data);
-    } else {
-      Toast.show({
-        icon: "fail",
-        content: "获取位置列表失败",
-      });
-    }
-  };
-
-  const getDefaultFields = async () => {
-    const memberLogin = getMemberLogin();
-    const {
-      status,
-      data: { memberList },
-    } = await switchMember();
-    if (status) {
-      const { memberName } = memberList.find(
-        (item) => item.memberLogin === memberLogin
-      );
-      formRef.current.setFieldsValue({
-        nbName: "未知",
-        productionMember: memberName,
-      });
-    } else {
-      Toast.show({
-        icon: "fail",
-        content: "获取操作人失败",
       });
     }
   };
@@ -307,6 +209,127 @@ export default () => {
     };
   }, [pdaReady, refreshData]);
 
+  const getBillNo = async () => {
+    const memberLogin = getMemberLogin();
+    const {
+      status,
+      data: { memberList },
+    } = await switchMember();
+    if (status) {
+      const { deptCode } = memberList.find(
+        (item) => item.memberLogin === memberLogin
+      );
+      if (deptCode) {
+        depCodeRef.current = deptCode;
+        sessionStorage.setItem("deptCode", deptCode);
+        const {
+          status,
+          data: { zjtzData },
+        } = await switchFileTable(deptCode);
+        if (status) {
+          zjtzDataRef.current = zjtzData;
+          const gdhList = [...new Set(zjtzData.map((item) => item.gdhId))].map(
+            (item) => ({ label: item, value: item })
+          );
+          const data = [...gdhList];
+          data.unshift({ label: "请选择工单", value: "" });
+          setBillNo(data);
+        } else {
+          Toast.show({
+            icon: "fail",
+            content: "获取整机台账信息失败",
+          });
+        }
+      }
+    } else {
+      Toast.show({
+        icon: "fail",
+        content: "获取部门信息失败",
+      });
+    }
+  };
+
+  const getprojectGroup = async () => {
+    const {
+      status,
+      data: { memberList },
+    } = await switchMember();
+    if (status) {
+      const deptList = memberList.map((item) => ({
+        label: item.deptName,
+        value: item.deptCode,
+      }));
+      deptList.unshift({ label: "请选择项目组", value: "" });
+      setProjectGroup(deptList);
+    } else {
+      Toast.show({
+        icon: "fail",
+        content: "获取节点信息失败",
+      });
+    }
+  };
+
+  const getProcedureData = async () => {
+    const {
+      status,
+      data: { flowNodeForm },
+    } = await switchNode();
+    if (status) {
+      const procedureData = flowNodeForm.map((item) => ({
+        label: item.flowNodeName,
+        value: item.nodeSort,
+      }));
+      procedureData.unshift({ label: "请选择工序", value: "" });
+      setProcedureData(procedureData);
+    } else {
+      Toast.show({
+        icon: "fail",
+        content: "获取节点信息失败",
+      });
+    }
+  };
+
+  const getPositionData = async () => {
+    const {
+      status,
+      data: { locationList },
+    } = await switchLocation();
+    if (status) {
+      const data = locationList.map((item) => ({
+        label: item.field0001,
+        value: item.field0001,
+      }));
+      data.unshift({ label: "请选择位置", value: "" });
+      setPositionData(data);
+    } else {
+      Toast.show({
+        icon: "fail",
+        content: "获取位置列表失败",
+      });
+    }
+  };
+
+  const getDefaultFields = async () => {
+    const memberLogin = getMemberLogin();
+    const {
+      status,
+      data: { memberList },
+    } = await switchMember();
+    if (status) {
+      const { memberName } = memberList.find(
+        (item) => item.memberLogin === memberLogin
+      );
+      formRef.current.setFieldsValue({
+        productionMember: memberName,
+      });
+    } else {
+      Toast.show({
+        icon: "fail",
+        content: "获取操作人失败",
+      });
+    }
+  };
+
   useEffect(() => {
     getBillNo();
     getprojectGroup();
@@ -320,6 +343,20 @@ export default () => {
   };
   const handleChange = (value) => {
     setCheckboxValue(value);
+  };
+  const handleBillChange = (e) => {
+    if (e.target.value) {
+      const nbName = zjtzDataRef.current.find(
+        (item) => item.gdhId === e.target.value
+      ).nbName;
+      formRef.current.setFieldsValue({
+        nbName,
+      });
+    } else {
+      formRef.current.setFieldsValue({
+        nbName: "无",
+      });
+    }
   };
 
   return (
@@ -344,7 +381,10 @@ export default () => {
                   mode="card"
                 >
                   <Form.Item label="工单号" name="gdhId">
-                    <select className={styles.select}>
+                    <select
+                      className={styles.select}
+                      onChange={handleBillChange}
+                    >
                       {billNo.map((item) => {
                         return (
                           <option key={item.label} value={item.value}>
@@ -403,7 +443,7 @@ export default () => {
                       })}
                     </select>
                   </Form.Item>
-                  <Form.Item label="流程节点" name="nodeName">
+                  <Form.Item label="流程节点" name="procedureName">
                     <select className={styles.select}>
                       {procedureData.map((item) => {
                         return (

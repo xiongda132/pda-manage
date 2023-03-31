@@ -9,11 +9,21 @@ import {
   scanStop,
   scanQuery,
   pdaSingle,
-  // pdaStart,
-  // padStop,
-  // queryPdaData,
+  pdaStart,
+  padStop,
+  queryPdaData,
 } from "api/pda";
 import dayjs from "dayjs";
+import {
+  getFileTable,
+  getMember,
+  saveLedger,
+  switchFileTable,
+  switchMember,
+  saveCardInfo,
+} from "api/machine";
+import { getMemberLogin } from "utils/auth";
+import { cardData } from "./test";
 
 const { Item } = Grid;
 const { Group } = Radio;
@@ -132,83 +142,289 @@ const getCardInfo = () => {
 };
 
 export default () => {
-  const [machineInfo, setMachineInfo] = useState(machineData[0]);
+  const [machineInfo, setMachineInfo] = useState(null);
   const history = useHistory();
   const [cardInfo, setCardInfo] = useState([]);
   const [isScan, setIsScan] = useState(false);
-  const [epcList, setEpcList] = useState([1, 2, 3]);
   const [loading, setLoading] = useState(true);
   const [scanMode, setScanMode] = useState("");
   const configTime = useRef(dayjs().format("YYYY-MM-DD HH:mm:ss"));
   const [qrCodeVal, setQrCodeVal] = useState("");
+  const depCodeRef = useRef();
+  const [card, setCard] = useState([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [scanValue, setScanValue] = useState("");
+  const [epcValue, setEpcValue] = useState("");
+  const [flag, setFlag] = useState(false);
+  const cardRef = useRef(null);
 
-  const handleSave = () => {
-    Toast.show({
-      icon: "success",
-      content: "保存信息成功",
+  const getFileTable = async () => {
+    const memberLogin = getMemberLogin();
+    const {
+      status,
+      data: { memberList },
+    } = await switchMember();
+    if (status) {
+      const { deptCode } = memberList.find(
+        (item) => item.memberLogin === memberLogin
+      );
+      if (deptCode) {
+        depCodeRef.current = deptCode;
+        sessionStorage.setItem("deptCode", deptCode);
+        const {
+          status,
+          data: { zjtzData },
+        } = await switchFileTable(deptCode);
+        if (status) {
+          console.log(zjtzData, scanValue);
+          const filterObj = zjtzData.find(
+            (item) => item.facilityCode === scanValue
+          );
+          const {
+            status,
+            data: { cardMessageForm },
+          } = cardData;
+          if (status) {
+            cardRef.current = cardMessageForm;
+            const allObj = cardMessageForm.filter(
+              (item) => item.facilityCode === scanValue
+            );
+            const cardList = [...new Set(allObj.map((item) => item.cardName))];
+            const card = [];
+            cardList.forEach((item1) => {
+              const cardObj = allObj
+                .filter((item2) => item2.cardName === item1 && item2.cardNumber)
+                .map((item) => ({
+                  id: item.cardNumber,
+                  text: item.cardNumber,
+                  className: item.isCardBreak === "是" ? styles.break : "",
+                }));
+              card.push({
+                name: item1,
+                codeList: cardObj,
+              });
+            });
+            setFlag(true);
+            setLoading(false);
+            setCard(card);
+            setMachineInfo(filterObj);
+          } else {
+            Toast.show({
+              icon: "fail",
+              content: "获取板卡信息失败",
+            });
+          }
+        } else {
+          Toast.show({
+            icon: "fail",
+            content: "获取整机台账信息失败",
+          });
+        }
+      }
+    } else {
+      Toast.show({
+        icon: "fail",
+        content: "获取部门信息失败",
+      });
+    }
+  };
+
+  const getFileTableEpc = async () => {
+    const memberLogin = getMemberLogin();
+    const {
+      status,
+      data: { memberList },
+    } = await switchMember();
+    if (status) {
+      const { deptCode } = memberList.find(
+        (item) => item.memberLogin === memberLogin
+      );
+      if (deptCode) {
+        depCodeRef.current = deptCode;
+        sessionStorage.setItem("deptCode", deptCode);
+        const {
+          status,
+          data: { zjtzData },
+        } = await switchFileTable(deptCode);
+        if (status) {
+          console.log(zjtzData, epcValue);
+          const filterObj = zjtzData.find((item) => item.epcData === epcValue);
+          if (!filterObj) {
+            Toast.show({
+              icon: "fail",
+              content: "epc未绑定整机",
+            });
+          } else {
+            const {
+              status,
+              data: { cardMessageForm },
+            } = cardData;
+            if (status) {
+              cardRef.current = cardMessageForm;
+              console.log(cardRef.current);
+              const allObj = cardMessageForm.filter(
+                (item) => item.facilityCode === filterObj.facilityCode
+              );
+              const cardList = [
+                ...new Set(allObj.map((item) => item.cardName)),
+              ];
+              const card = [];
+              cardList.forEach((item1) => {
+                const cardObj = allObj
+                  .filter(
+                    (item2) => item2.cardName === item1 && item2.cardNumber
+                  )
+                  .map((item) => ({
+                    id: item.cardNumber,
+                    text: item.cardNumber,
+                    className: item.isCardBreak === "是" ? styles.break : "",
+                  }));
+                card.push({
+                  name: item1,
+                  codeList: cardObj,
+                });
+              });
+              setPdaReadyEpc(false);
+              setScanMode("qrcode");
+              setFlag(true);
+              setLoading(false);
+              setCard(card);
+              setMachineInfo(filterObj);
+            } else {
+              Toast.show({
+                icon: "fail",
+                content: "获取板卡信息失败",
+              });
+            }
+          }
+        } else {
+          Toast.show({
+            icon: "fail",
+            content: "获取整机台账信息失败",
+          });
+        }
+      }
+    } else {
+      Toast.show({
+        icon: "fail",
+        content: "获取部门信息失败",
+      });
+    }
+  };
+
+  useEffect(() => {
+    console.log(scanValue);
+    if (scanValue) {
+      getFileTable();
+    }
+  }, [scanValue]);
+
+  useEffect(() => {
+    console.log(epcValue);
+    if (epcValue) {
+      getFileTableEpc();
+    }
+  }, [epcValue]);
+
+  const handleSave = async () => {
+    const cardMap = [...card];
+    const cardMessageForm = [];
+    console.log(cardRef.current);
+    cardMap.forEach((item1) => {
+      if (item1.codeList.length) {
+        item1.codeList.forEach((item2) => {
+          console.log(item2.text);
+          cardMessageForm.push({
+            cardName: item1.name,
+            cardNumber: item2.text,
+            nbName: cardRef.current.find((item) => item.cardName === item1.name)
+              .nbName,
+            facilityCode: cardRef.current.find(
+              (item) => item.cardName === item1.name
+            ).facilityCode,
+            cardBreakMessage: cardRef.current.find(
+              (item) => item.cardNumber === item2.text
+            )
+              ? cardRef.current.find((item) => item.cardNumber === item2.text)
+                  .cardBreakMessage
+              : "",
+            errorDate: cardRef.current.find(
+              (item) => item.cardNumber === item2.text
+            )
+              ? cardRef.current.find((item) => item.cardNumber === item2.text)
+                  .errorDate
+              : "",
+            isCardBreak: cardRef.current.find(
+              (item) => item.cardNumber === item2.text
+            )
+              ? cardRef.current.find((item) => item.cardNumber === item2.text)
+                  .isCardBreak
+              : "否",
+            gdhId: cardRef.current.find((item) => item.cardName === item1.name)
+              .gdhId,
+          });
+        });
+      } else {
+        cardMessageForm.push({
+          cardName: item1.name,
+          cardNumber: "",
+          nbName: cardRef.current.find((item) => item.cardName === item1.name)
+            .nbName,
+          facilityCode: cardRef.current.find(
+            (item) => item.cardName === item1.name
+          ).facilityCode,
+          cardBreakMessage: "",
+          errorDate: "",
+          isCardBreak: "",
+          gdhId: cardRef.current.find((item) => item.cardName === item1.name)
+            .gdhId,
+        });
+      }
     });
-    setCardInfo([]);
-    setIsScan(false);
+    console.log(cardMessageForm);
+    const { status } = await saveCardInfo({ cardMessageForm });
+    if (status) {
+      Toast.show({
+        icon: "success",
+        content: "保存信息成功",
+      });
+    } else {
+      Toast.show({
+        icon: "fail",
+        content: "保存信息失败",
+      });
+    }
+    // setCardInfo([]);
+    // setIsScan(false);
   };
 
   const addTag = (tag, index) => {
     console.log(tag, index);
-    console.log(machineInfo.card);
-    const cardList = [...machineInfo.card];
+    const cardList = [...card];
     cardList[index].codeList.push(tag);
-    setMachineInfo({
-      ...machineInfo,
-      card: cardList,
-    });
+    setCard([...cardList]);
   };
 
   const deleteTag = (itemIndex, index) => {
     console.log(itemIndex, index);
-    const cardList = [...machineInfo.card];
+    const cardList = [...card];
     cardList[index].codeList = cardList[index].codeList.filter(
       (item, indexs) => indexs !== itemIndex
     );
-    setMachineInfo({
-      ...machineInfo,
-      card: cardList,
-    });
+    setCard([...cardList]);
   };
 
   const clickTag = (item) => {
     console.log(item);
   };
 
-  const handleChange = (e) => {
-    setScanMode(e);
+  const handleChange = (mode) => {
+    setScanMode(mode);
+    setPdaReady(false);
+    setPdaReadyEpc(false);
   };
 
   const [pdaReady, setPdaReady] = useState(false);
-  // const initPda = useCallback(async () => {
-  //   const pdaConfigRes = await pdaConfig({
-  //     scanType: 0,
-  //     rfidReadpower: 30,
-  //   });
-  //   if (pdaConfigRes.code === 1) {
-  //     const pdaStartRes = await pdaStart({
-  //       startTime: configTime.current,
-  //     });
-  //     console.log(pdaStartRes);
-  //     if (pdaStartRes.code === 1) {
-  //       console.log("初始化RFID扫描成功");
-  //     } else {
-  //       Toast.show({
-  //         icon: "fail",
-  //         content: "启动失败, " + pdaStartRes.msg,
-  //       });
-  //     }
-  //   } else {
-  //     Toast.show({
-  //       icon: "fail",
-  //       content: "参数配置失败, " + pdaConfigRes.msg,
-  //     });
-  //   }
-  // }, []);
-
   const initQrcode = useCallback(async () => {
     const pdaConfigRes = await pdaConfig({
       scanType: 1,
@@ -224,6 +440,33 @@ export default () => {
       if (pdaStartRes.code === 1) {
         console.log("初始化二维码扫描成功");
         setPdaReady(true);
+      } else {
+        Toast.show({
+          icon: "fail",
+          content: "启动失败, " + pdaStartRes.msg,
+        });
+      }
+    } else {
+      Toast.show({
+        icon: "fail",
+        content: "参数配置失败, " + pdaConfigRes.msg,
+      });
+    }
+  }, []);
+
+  const initPda = useCallback(async () => {
+    const pdaConfigRes = await pdaConfig({
+      scanType: 0,
+      rfidReadpower: 10,
+    });
+    if (pdaConfigRes.code === 1) {
+      const pdaStartRes = await pdaStart({
+        startTime: configTime.current,
+      });
+      console.log(pdaStartRes);
+      if (pdaStartRes.code === 1) {
+        console.log("初始化RFID扫描成功");
+        setPdaReadyEpc(true);
       } else {
         Toast.show({
           icon: "fail",
@@ -262,8 +505,6 @@ export default () => {
   }, []);
 
   useEffect(() => {
-    // initPda();
-    // initQrcode();
     initDevicePlus();
     return () => {
       console.log("执行了qrcode的停止");
@@ -285,8 +526,13 @@ export default () => {
     if (res.code === 1) {
       if (res.scancode) {
         console.log("scancode", res.scancode);
-        setQrCodeVal(res.scancode);
-        setPdaReady(false); //状态改变, 自行清理已存在的定时器
+        if (!flag) {
+          console.log("走了模式1");
+          setScanValue(res.scancode);
+        } else {
+          console.log("走了模式2");
+          setQrCodeVal(res.scancode);
+        }
       }
       if (timer.current !== null) {
         timer.current = setTimeout(refreshData, 200);
@@ -296,34 +542,85 @@ export default () => {
         timer.current = setTimeout(refreshData, 200);
       }
     }
+  }, [flag]);
+
+  const refreshEpcData = useCallback(async () => {
+    if (timerEpc.current) clearTimeout(timerEpc.current);
+    const res = await queryPdaData({
+      startTime: configTime.current,
+    });
+    console.log(res);
+    if (res.code === 1) {
+      const epcData = res.data.map(({ epc }) => epc);
+      console.log("scancode", res.scancode);
+      if (epcData.length > 1) {
+        Toast.show({
+          icon: "fail",
+          content: "扫描到了多个epc",
+        });
+      } else {
+        if (epcData.length === 1) {
+          Toast.show({
+            icon: "fail",
+            content: "扫描到了1个epc",
+          });
+          setEpcValue(epcData[0]);
+        }
+      }
+      if (timerEpc.current !== null) {
+        timerEpc.current = setTimeout(refreshEpcData, 200);
+      }
+    } else {
+      if (timerEpc.current !== null) {
+        timerEpc.current = setTimeout(refreshEpcData, 200);
+      }
+    }
   }, []);
+
+  useEffect(() => {
+    if (qrCodeVal) {
+      const tag = { id: qrCodeVal, text: qrCodeVal };
+      addTag(tag, currentIndex);
+    }
+  }, [qrCodeVal]);
 
   const timer = useRef(null);
   useEffect(() => {
     if (pdaReady) {
-      console.log("后执行");
       timer.current = 0;
       refreshData();
     }
     return () => {
+      console.log("退出停止");
       if (timer.current) {
         clearTimeout(timer.current);
         timer.current = null;
       }
     };
-  }, [pdaReady]);
+  }, [pdaReady, refreshData]);
+
+  const [pdaReadyEpc, setPdaReadyEpc] = useState(false);
+  const timerEpc = useRef(null);
+  useEffect(() => {
+    if (pdaReadyEpc) {
+      timerEpc.current = 0;
+      refreshEpcData();
+    }
+    return () => {
+      if (timerEpc.current) {
+        clearTimeout(timerEpc.current);
+        timerEpc.current = null;
+      }
+    };
+  }, [pdaReadyEpc]);
 
   useEffect(() => {
     if (scanMode === "qrcode") {
       initQrcode();
+    } else if (scanMode === "rfid") {
+      initPda();
     }
   }, [scanMode]);
-
-  // useEffect(() => {
-  //   if (qrCodeVal) {
-  //     const data =
-  //   }
-  // }, [qrCodeVal]);
 
   return (
     <>
@@ -332,9 +629,9 @@ export default () => {
           板卡管理
         </NavBar>
         <div className={styles.mainContainer}>
-          {!loading ? (
+          {loading ? (
             <div className={styles.scanQrcode}>
-              请选择扫描模后, 进行扫描...
+              请选择扫描模式, 进行扫描...
               <Group onChange={handleChange}>
                 <Space>
                   <Radio value="qrcode">二维码</Radio>
@@ -351,22 +648,20 @@ export default () => {
                     <Item span={24}>工单号: {machineInfo?.gdhId}</Item>
                     <Item span={13}>设备编号: {machineInfo?.facilityCode}</Item>
                     <Item span={11}>内部名称: {machineInfo?.nbName}</Item>
-                    <Item span={13}>需求名称: {machineInfo?.rqName}</Item>
-                    <Item span={11}>涉密等级: {machineInfo?.rank}</Item>
-                    <Item span={13}>
+                    <Item span={13}>需求名称: {machineInfo?.ReqName}</Item>
+                    <Item span={11}>涉密等级: {machineInfo?.nodeSecurity}</Item>
+                    {/* <Item span={13}>
                       生产人员: {machineInfo?.productionPerson}
-                    </Item>
-                    <Item span={11}>位置: {machineInfo?.position}</Item>
-                    <Item span={24}>epc: {machineInfo?.epc}</Item>
+                    </Item> */}
+                    <Item span={13}>位置: {machineInfo?.currentPlace}</Item>
+                    <Item span={11}>epc: {machineInfo?.epcData}</Item>
                   </Grid>
                 </div>
               </div>
               <div className={styles.listContainer}>
                 <div className={styles.listAndAmount}>
                   <span className={styles.cardList}>板卡列表</span>
-                  <span className={styles.amount}>
-                    数量: {machineInfo.card?.length}
-                  </span>
+                  <span className={styles.amount}>数量: {card?.length}</span>
                   <Button
                     className={styles.save}
                     color="primary"
@@ -376,9 +671,19 @@ export default () => {
                   </Button>
                 </div>
                 <div className={styles.listContent}>
-                  {machineInfo.card.map((item, index) => {
+                  {card?.map((item, index) => {
                     return (
-                      <div key={item.name} className={styles.cardInfo}>
+                      <div
+                        key={item.name}
+                        className={
+                          currentIndex === index
+                            ? styles.heightLight
+                            : styles.cardInfo
+                        }
+                        onClick={() => {
+                          setCurrentIndex(index);
+                        }}
+                      >
                         <Grid columns={24} gap={8}>
                           <Item span={24}>板卡名称: {item?.name}</Item>
                           <Item span={24}>

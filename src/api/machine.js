@@ -1,8 +1,9 @@
 import { request, getRequest } from "./serverRequest";
 import { getUserToken } from "utils/auth";
 import { accountObj, memberObj } from "views/TagBind/test";
-import { locationObj } from "views/Procedure/test";
+import { locationObj, nodeObj } from "views/Procedure/test";
 import { Inventoryobj } from "views/Inventory/test";
+import { workFlow } from "views/Manage/test";
 const token = getUserToken();
 const serverPort = sessionStorage.getItem("serverPort");
 
@@ -20,8 +21,10 @@ export const getDataInfo = () => {
   return getRequest("/seeyon/rest/api/dataInfo/card");
 };
 
-export const getWorkFlow = () => {
-  return getRequest("/seeyon/rest/api/dataInfo/workFlow");
+export const getWorkFlow = (params) => {
+  return request("/seeyon/rest/api/dataInfo/workFlow", {
+    ...params,
+  });
 };
 
 export const getNode = () => {
@@ -113,5 +116,21 @@ export const switchLocation = () => {
     return getLocation();
   } else {
     return locationObj;
+  }
+};
+
+export const switchNode = () => {
+  if (serverPort) {
+    return getNode();
+  } else {
+    return nodeObj;
+  }
+};
+
+export const switchWorkFlow = (params) => {
+  if (serverPort) {
+    return getWorkFlow(params);
+  } else {
+    return workFlow;
   }
 };
