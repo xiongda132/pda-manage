@@ -10,7 +10,7 @@ import {
   Space,
 } from "antd-mobile";
 import styles from "./index.module.css";
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import { getMemberLogin } from "utils/auth";
 import {
   getMember,
@@ -20,6 +20,7 @@ import {
   saveWorkFlow,
   switchNode,
   switchWorkFlow,
+  savaUnbindInfo,
 } from "api/machine";
 import {
   pdaConfig,
@@ -38,13 +39,22 @@ const { Group } = Radio;
 const { Item } = Grid;
 
 const ListItemWithCheckbox = ({ obj }) => {
-  const { code, major, model, name, rank, position } = obj;
+  const {
+    gdhId,
+    facilityCode,
+    nbName,
+    ReqName,
+    nodeSecurity,
+    currentPlace,
+    detailNodeName,
+    productionMember,
+  } = obj;
   const checkboxRef = useRef(null);
   return (
     <List.Item
       prefix={
         <div onClick={(e) => e.stopPropagation()}>
-          <Checkbox value={code} ref={checkboxRef}></Checkbox>
+          <Checkbox value={facilityCode} ref={checkboxRef}></Checkbox>
         </div>
       }
       onClick={() => {
@@ -54,12 +64,14 @@ const ListItemWithCheckbox = ({ obj }) => {
     >
       <div className={styles.singleWrapper}>
         <Grid columns={24} gap={8}>
-          <Item span={15}>产品编码: {code}</Item>
-          <Item span={9}>负责人: {major}</Item>
-          <Item span={15}>规格型号: {model}</Item>
-          <Item span={9}>名称: {name}</Item>
-          <Item span={15}>保密等级: {rank}</Item>
-          <Item span={9}>位置: {position}</Item>
+          <Item span={10}>工单号: {gdhId}</Item>
+          <Item span={14}>设备编号: {facilityCode}</Item>
+          <Item span={12}>内部名称: {nbName}</Item>
+          <Item span={12}>需求名称: {ReqName}</Item>
+          <Item span={12}>保密等级: {nodeSecurity}</Item>
+          <Item span={12}>位置: {currentPlace}</Item>
+          <Item span={12}>细化流程节点: {detailNodeName}</Item>
+          <Item span={12}>生产人员: {productionMember}</Item>
         </Grid>
       </div>
     </List.Item>
@@ -74,117 +86,28 @@ export default () => {
   const [loading, setLoading] = useState(true);
   const [scanMode, setScanMode] = useState("");
   const configTime = useRef(dayjs().format("YYYY-MM-DD HH:mm:ss"));
-  const [scanValue, setScanValue] = useState("");
+  const [scanValue, setScanValue] = useState([]);
   const [epcValue, setEpcValue] = useState("");
   const formRef = useRef(null);
   const [flag, setFlag] = useState(false);
 
-  // const back = () => {
-  //   history.go(-1);
-  // };
-
-  const getProductInfo = () => {
-    const productData = [
-      {
-        code: "202210130001",
-        major: "张三",
-        model: "HXB87234",
-        name: "测试产品",
-        rank: "密级1",
-        position: "位置1",
-      },
-      {
-        code: "202210130002",
-        major: "张三",
-        model: "HXB87234",
-        name: "测试产品",
-        rank: "密级1",
-        position: "位置1",
-      },
-      {
-        code: "202210130003",
-        major: "张三",
-        model: "HXB87234",
-        name: "测试产品",
-        rank: "密级1",
-        position: "位置1",
-      },
-      {
-        code: "202210130004",
-        major: "张三",
-        model: "HXB87234",
-        name: "测试产品",
-        rank: "密级1",
-        position: "位置1",
-      },
-      {
-        code: "202210130005",
-        major: "张三",
-        model: "HXB87234",
-        name: "测试产品",
-        rank: "密级1",
-        position: "位置1",
-      },
-      {
-        code: "202210130006",
-        major: "张三",
-        model: "HXB87234",
-        name: "测试产品",
-        rank: "密级1",
-        position: "位置1",
-      },
-      {
-        code: "202210130007",
-        major: "张三",
-        model: "HXB87234",
-        name: "测试产品",
-        rank: "密级1",
-        position: "位置1",
-      },
-      {
-        code: "202210130008",
-        major: "张三",
-        model: "HXB87234",
-        name: "测试产品",
-        rank: "密级1",
-        position: "位置1",
-      },
-      {
-        code: "202210130009",
-        major: "张三",
-        model: "HXB87234",
-        name: "测试产品",
-        rank: "密级1",
-        position: "位置1",
-      },
-      {
-        code: "2022101300010",
-        major: "张三",
-        model: "HXB87234",
-        name: "测试产品",
-        rank: "密级1",
-        position: "位置1",
-      },
-    ];
-    setTimeout(() => {
-      setProduct(productData);
-    }, 1 * 1000);
+  const handleUnbind = async () => {
+    const unbindList = viewList?.map((item) => ({
+      facilityCode: item.facilityCode,
+    }));
+    const { status, msg } = await savaUnbindInfo({ unbindList });
+    if (status) {
+      Toast.show({
+        icon: "success",
+        content: msg,
+      });
+    } else {
+      Toast.show({
+        icon: "fail",
+        content: msg,
+      });
+    }
   };
-
-  const handleUnbind = () => {
-    Toast.show({
-      icon: "success",
-      content: "解绑成功",
-    });
-  };
-
-  // const handleChange = (list) => {
-  //   console.log(list);
-  // };
-
-  useEffect(() => {
-    getProductInfo();
-  }, []);
 
   const getFileTable = async () => {
     const memberLogin = getMemberLogin();
@@ -204,32 +127,7 @@ export default () => {
           data: { zjtzData },
         } = await switchFileTable(deptCode);
         if (status) {
-          // zjtzDataRef.current = zjtzData;
-          const filterObj = zjtzData.find(
-            (item) => item.facilityCode === scanValue
-          );
-          const {
-            facilityCode,
-            nbName,
-            gdhId,
-            projectTeam,
-            nodeName,
-            currentPlace,
-            nodeSecurity,
-            productionMember,
-          } = filterObj;
-          console.log("formRef.current", formRef.current);
-          formRef.current.setFieldsValue({
-            facilityCode,
-            nbName,
-            gdhId,
-            department: projectTeam,
-            procedureName: nodeName,
-            currentPlace: currentPlace ? currentPlace : "",
-            nodeSecurity,
-            productionMember,
-            department: projectTeam,
-          });
+          zjtzDataRef.current = zjtzData; //保存接口数据
         } else {
           Toast.show({
             icon: "fail",
@@ -312,25 +210,25 @@ export default () => {
     }
   };
 
-  useEffect(() => {
-    if (scanValue) {
-      setLoading(false);
-    }
-  }, [scanValue]);
+  // useEffect(() => {
+  //   if (scanValue) {
+  //     setLoading(false);
+  //   }
+  // }, [scanValue]);
 
-  useEffect(() => {
-    const func = async () => {
-      if (!loading) {
-        if (scanValue) {
-          getFileTable();
-        }
-        if (epcValue) {
-          getFileTableEpc();
-        }
-      }
-    };
-    func();
-  }, [loading]);
+  // useEffect(() => {
+  //   const func = async () => {
+  //     if (!loading) {
+  //       if (scanValue) {
+  //         getFileTable();
+  //       }
+  //       if (epcValue) {
+  //         getFileTableEpc();
+  //       }
+  //     }
+  //   };
+  //   func();
+  // }, [loading]);
 
   // useEffect(() => {
   //   if (accountData.length) {
@@ -338,12 +236,12 @@ export default () => {
   //   }
   // }, [accountData.length]);
 
-  useEffect(() => {
-    console.log(epcValue);
-    if (epcValue) {
-      setLoading(false);
-    }
-  }, [epcValue]);
+  // useEffect(() => {
+  //   console.log(epcValue);
+  //   if (epcValue) {
+  //     setLoading(false);
+  //   }
+  // }, [epcValue]);
 
   const handleChange = (mode) => {
     setScanMode(mode);
@@ -433,6 +331,7 @@ export default () => {
 
   useEffect(() => {
     initDevicePlus();
+    getFileTable();
     return () => {
       console.log("执行了qrcode的停止");
       const plus = window.plus || {};
@@ -454,8 +353,15 @@ export default () => {
       if (res.scancode) {
         console.log("scancode", res.scancode);
         if (!flag) {
-          console.log("走了模式1");
-          setScanValue(res.scancode);
+          console.log("此次扫描值为", res.scancode);
+          setScanValue((preQrcodeList) => {
+            const newQrcodeList = [...preQrcodeList];
+            if (!newQrcodeList.includes(res.scancode)) {
+              newQrcodeList.unshift(res.scancode);
+            }
+            return newQrcodeList;
+          });
+          setLoading(false);
         } else {
           console.log("走了模式2");
           // setQrCodeVal(res.scancode);
@@ -478,22 +384,18 @@ export default () => {
     });
     console.log(res);
     if (res.code === 1) {
-      const epcData = res.data.map(({ epc }) => epc);
-      console.log("scancode", res.scancode);
-      if (epcData.length > 1) {
-        Toast.show({
-          icon: "fail",
-          content: "扫描到了多个epc",
+      const curEpcList = res.data.map(({ epc }) => epc);
+      setScanValue((preEpcList) => {
+        const newEpcList = [...preEpcList];
+        curEpcList.forEach((epc) => {
+          if (newEpcList.indexOf(epc) === -1) {
+            newEpcList.unshift(epc);
+          }
         });
-      } else {
-        if (epcData.length === 1) {
-          Toast.show({
-            icon: "fail",
-            content: "扫描到了1个epc",
-          });
-          setEpcValue(epcData[0]);
-        }
-      }
+        return newEpcList;
+      });
+      setLoading(false);
+
       if (timerEpc.current !== null) {
         timerEpc.current = setTimeout(refreshEpcData, 200);
       }
@@ -542,6 +444,19 @@ export default () => {
     }
   }, [scanMode]);
 
+  const viewList = useMemo(() => {
+    if (scanMode === "qrcode") {
+      return zjtzDataRef.current?.filter(
+        ({ facilityCode }) => scanValue.indexOf(facilityCode) !== -1
+      );
+    }
+    if (scanMode === "rfid") {
+      return zjtzDataRef.current?.filter(
+        ({ epcData }) => scanValue.indexOf(epcData) !== -1
+      );
+    }
+  }, [scanValue]);
+
   return (
     <>
       <div className={styles.unbindContainer}>
@@ -567,7 +482,7 @@ export default () => {
                 size="large"
                 onClick={handleUnbind}
                 style={{
-                  visibility: product.length ? "visible" : "hidden",
+                  visibility: viewList.length ? "visible" : "hidden",
                 }} /* 其他方案opacity、display */
               >
                 解绑
@@ -575,13 +490,13 @@ export default () => {
             </div>
             <div className={styles.listAndAmount}>
               <span className={styles.productList}>产品列表</span>
-              <span className={styles.amount}>数量: {product.length}</span>
+              <span className={styles.amount}>数量: {viewList.length}</span>
             </div>
             <div className={styles.productList}>
               <Checkbox.Group onChange={handleChange}>
                 <List>
-                  {product.map((item) => (
-                    <ListItemWithCheckbox key={item.code} obj={item} />
+                  {viewList.map((item) => (
+                    <ListItemWithCheckbox key={item.facilityCode} obj={item} />
                   ))}
                 </List>
               </Checkbox.Group>

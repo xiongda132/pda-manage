@@ -19,7 +19,7 @@ function Login() {
       ),
       onConfirm: async () => {
         if (serverPort.current) {
-          sessionStorage.setItem("serverPort", serverPort.current);
+          localStorage.setItem("serverPort", serverPort.current);
         }
       },
     });

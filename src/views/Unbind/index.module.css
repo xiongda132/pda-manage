@@ -4,7 +4,7 @@
 
 .unbindWrapper {
   height: calc(100% - 45px);
-  padding: 0px 10px;
+  /* padding: 0px 10px; */
 }
 
 .buttonStyle {

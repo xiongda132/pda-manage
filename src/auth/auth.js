@@ -11,7 +11,13 @@ const authActions = {
     try {
       const { tenantId, userId, pwd } = params;
       console.log(userId, pwd);
-      const { id } = await switchToken(userId, pwd);
+      const res = await switchToken(userId, pwd);
+      alert(JSON.stringify(res));
+      // Toast.show({
+      //   content: `${JSON.stringify(res)}`,
+      //   position: "top",
+      // });
+      let id = res.id;
       if (id) {
         setUserToken(id);
         setMemberLogin(userId);

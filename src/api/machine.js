@@ -51,6 +51,12 @@ export const savaInventoryInfo = (params) => {
   });
 };
 
+export const savaUnbindInfo = (params) => {
+  return request("/seeyon/rest/api/unbind", {
+    ...params,
+  });
+};
+
 export const saveCardInfo = (params) => {
   return request("/seeyon/rest/api/saveCard", {
     ...params,
@@ -76,61 +82,61 @@ export const saveLedger = (params) => {
 };
 
 export const switchFileTable = (deptCode) => {
-  if (serverPort) {
-    return getFileTable(deptCode);
-  } else {
-    return accountObj;
-  }
+  // if (serverPort) {
+  return getFileTable(deptCode);
+  // } else {
+  //   return accountObj;
+  // }
 };
 
 export const switchMember = () => {
-  if (serverPort) {
-    return getMember();
-  } else {
-    return memberObj;
-  }
+  // if (serverPort) {
+  return getMember();
+  // } else {
+  //   return memberObj;
+  // }
 };
 
 export const switchToken = (userName, passWord) => {
-  if (serverPort) {
-    return getToken(userName, passWord);
-  } else {
-    return {
-      bindingUser: null,
-      userName: userName,
-      id: "77b8dd8a-052e-48db-ba0e-8d499883485e",
-    };
-  }
+  // if (serverPort) {
+  return getToken(userName, passWord);
+  // } else {
+  //   return {
+  //     bindingUser: null,
+  //     userName: userName,
+  //     id: "77b8dd8a-052e-48db-ba0e-8d499883485e",
+  //   };
+  // }
 };
 
 export const switchInventoryInfo = (params) => {
-  if (serverPort) {
-    return getInventoryInfo(params);
-  } else {
-    return Inventoryobj;
-  }
+  // if (serverPort) {
+  return getInventoryInfo(params);
+  // } else {
+  //   return Inventoryobj;
+  // }
 };
 
 export const switchLocation = () => {
-  if (serverPort) {
-    return getLocation();
-  } else {
-    return locationObj;
-  }
+  // if (serverPort) {
+  return getLocation();
+  // } else {
+  //   return locationObj;
+  // }
 };
 
 export const switchNode = () => {
-  if (serverPort) {
-    return getNode();
-  } else {
-    return nodeObj;
-  }
+  // if (serverPort) {
+  return getNode();
+  // } else {
+  //   return nodeObj;
+  // }
 };
 
 export const switchWorkFlow = (params) => {
-  if (serverPort) {
-    return getWorkFlow(params);
-  } else {
-    return workFlow;
-  }
+  // if (serverPort) {
+  return getWorkFlow(params);
+  // } else {
+  //   return workFlow;
+  // }
 };
