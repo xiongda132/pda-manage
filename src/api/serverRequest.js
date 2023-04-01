@@ -18,7 +18,7 @@ export function request(api, params) {
       }
     )
       .then((res) => {
-        alert(res.json());
+        alert(JSON.stringify(res.json()));
         resolve(res.json());
       })
       .catch((err) => {
@@ -50,7 +50,7 @@ export function getRequest(api) {
       },
     })
       .then((res) => {
-        alert(res.json());
+        alert(JSON.stringify(res.json()));
         resolve(res.json());
       })
       .catch((err) => {
