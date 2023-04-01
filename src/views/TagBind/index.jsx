@@ -74,7 +74,7 @@ export default () => {
         const {
           status,
           data: { zjtzData },
-        } = await switchFileTable(deptCode);
+        } = await switchFileTable({ deptCode });
         if (status) {
           const gdhList = [...new Set(zjtzData.map((item) => item.gdhId))].map(
             (item) => ({ label: item, value: item })

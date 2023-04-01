@@ -225,7 +225,7 @@ export default () => {
         const {
           status,
           data: { zjtzData },
-        } = await switchFileTable(deptCode);
+        } = await switchFileTable({deptCode});
         if (status) {
           zjtzDataRef.current = zjtzData;
           const gdhList = [...new Set(zjtzData.map((item) => item.gdhId))].map(

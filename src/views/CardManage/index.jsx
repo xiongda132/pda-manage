@@ -174,7 +174,7 @@ export default () => {
         const {
           status,
           data: { zjtzData },
-        } = await switchFileTable(deptCode);
+        } = await switchFileTable({deptCode});
         if (status) {
           console.log(zjtzData, scanValue);
           const filterObj = zjtzData.find(
@@ -245,7 +245,7 @@ export default () => {
         const {
           status,
           data: { zjtzData },
-        } = await switchFileTable(deptCode);
+        } = await switchFileTable({deptCode});
         if (status) {
           console.log(zjtzData, epcValue);
           const filterObj = zjtzData.find((item) => item.epcData === epcValue);

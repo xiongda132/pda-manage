@@ -38,7 +38,7 @@ const { Group } = Radio;
 
 const { Item } = Grid;
 
-const ListItemWithCheckbox = ({ obj }) => {
+const ListItemWithCheckbox = ({ obj, setSeletedData }) => {
   const {
     gdhId,
     facilityCode,
@@ -54,7 +54,22 @@ const ListItemWithCheckbox = ({ obj }) => {
     <List.Item
       prefix={
         <div onClick={(e) => e.stopPropagation()}>
-          <Checkbox value={facilityCode} ref={checkboxRef}></Checkbox>
+          <Checkbox
+            value={facilityCode}
+            ref={checkboxRef}
+            onChange={(e) => {
+              console.log("e", e);
+              setSeletedData((prev) => {
+                let cur = [...prev];
+                if (e) {
+                  cur.push(facilityCode);
+                } else {
+                  cur = cur.filter((item) => facilityCode !== item);
+                }
+                return cur;
+              });
+            }}
+          ></Checkbox>
         </div>
       }
       onClick={() => {
@@ -90,10 +105,12 @@ export default () => {
   const [epcValue, setEpcValue] = useState("");
   const formRef = useRef(null);
   const [flag, setFlag] = useState(false);
+  const [seletedData, setSeletedData] = useState([]);
 
   const handleUnbind = async () => {
-    const unbindList = viewList?.map((item) => ({
-      facilityCode: item.facilityCode,
+    console.log("seletedData", seletedData);
+    const unbindList = seletedData?.map((item) => ({
+      facilityCode: item,
     }));
     const { status, msg } = await savaUnbindInfo({ unbindList });
     if (status) {
@@ -125,7 +142,7 @@ export default () => {
         const {
           status,
           data: { zjtzData },
-        } = await switchFileTable(deptCode);
+        } = await switchFileTable({ deptCode });
         if (status) {
           zjtzDataRef.current = zjtzData; //保存接口数据
         } else {
@@ -159,7 +176,7 @@ export default () => {
         const {
           status,
           data: { zjtzData },
-        } = await switchFileTable(deptCode);
+        } = await switchFileTable({ deptCode });
         if (status) {
           zjtzDataRef.current = zjtzData;
           // setAccountData(zjtzData);
@@ -319,7 +336,7 @@ export default () => {
     if (res.code === 1) {
       if (res.scancode) {
         console.log("scancode", res.scancode);
-        if (!flag) {
+        // if (!flag) {
           console.log("此次扫描值为", res.scancode);
           setScanValue((preQrcodeList) => {
             const newQrcodeList = [...preQrcodeList];
@@ -329,10 +346,10 @@ export default () => {
             return newQrcodeList;
           });
           setLoading(false);
-        } else {
-          console.log("走了模式2");
-          // setQrCodeVal(res.scancode);
-        }
+        // } else {
+        //   console.log("走了模式2");
+        //   setQrCodeVal(res.scancode);
+        // }
       }
       if (timer.current !== null) {
         timer.current = setTimeout(refreshData, 200);
@@ -362,7 +379,6 @@ export default () => {
         return newEpcList;
       });
       setLoading(false);
-
       if (timerEpc.current !== null) {
         timerEpc.current = setTimeout(refreshEpcData, 200);
       }
@@ -386,7 +402,7 @@ export default () => {
         timer.current = null;
       }
     };
-  }, [pdaReady, refreshData]);
+  }, [pdaReady, /* refreshData */]);
 
   const [pdaReadyEpc, setPdaReadyEpc] = useState(false);
   const timerEpc = useRef(null);
@@ -460,10 +476,14 @@ export default () => {
               <span className={styles.amount}>数量: {viewList.length}</span>
             </div>
             <div className={styles.productList}>
-              <Checkbox.Group onChange={handleChange}>
+              <Checkbox.Group /* onChange={handleChange} */>
                 <List>
                   {viewList.map((item) => (
-                    <ListItemWithCheckbox key={item.facilityCode} obj={item} />
+                    <ListItemWithCheckbox
+                      key={item.facilityCode}
+                      obj={item}
+                      setSeletedData={setSeletedData}
+                    />
                   ))}
                 </List>
               </Checkbox.Group>

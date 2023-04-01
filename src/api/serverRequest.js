@@ -4,6 +4,7 @@ import { getUserToken } from "utils/auth";
 
 export function request(api, params) {
   console.log(localStorage.getItem("serverPort"));
+  console.log("params", params);
   return new Promise((resolve, reject) => {
     fetch(
       `http://${localStorage.getItem("serverPort")}` +

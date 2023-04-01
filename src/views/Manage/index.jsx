@@ -287,7 +287,7 @@ export default () => {
         const {
           status,
           data: { zjtzData },
-        } = await switchFileTable(deptCode);
+        } = await switchFileTable({deptCode});
         if (status) {
           // zjtzDataRef.current = zjtzData;
           const filterObj = zjtzData.find(
@@ -346,7 +346,7 @@ export default () => {
         const {
           status,
           data: { zjtzData },
-        } = await switchFileTable(deptCode);
+        } = await switchFileTable({deptCode});
         if (status) {
           zjtzDataRef.current = zjtzData;
           setAccountData(zjtzData);
@@ -658,7 +658,7 @@ export default () => {
         const {
           status,
           data: { zjtzData },
-        } = await switchFileTable(deptCode);
+        } = await switchFileTable({deptCode});
         if (status) {
           console.log(zjtzData, scanValue);
           const filterObj = zjtzData.find(

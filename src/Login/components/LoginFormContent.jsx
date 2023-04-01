@@ -22,7 +22,7 @@ const LoginFormContent = () => {
     <div className={styles.container}>
       <Form
         initialValues={{
-          userId: "rest",
+          userId: "X001",
           pwd: "4420c0f0-7789-464a-9269-ab075b8164b3",
         }}
         onFinish={onFinish}

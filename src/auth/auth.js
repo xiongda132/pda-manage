@@ -36,9 +36,9 @@ const authActions = {
     try {
       const { tenantId, userId, pwd } = params;
       console.log(userId, pwd);
-      console.log("接口前");
+      // console.log("接口前");
       const res = await switchToken(userId, pwd);
-      console.log("接口后", res);
+      // console.log("接口后", res);
       // alert(JSON.stringify(res));
       // Toast.show({
       //   content: `${JSON.stringify(res)}`,
