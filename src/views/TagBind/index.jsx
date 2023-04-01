@@ -66,7 +66,7 @@ export default () => {
     } = await switchMember();
     if (status) {
       const { deptCode } = memberList.find(
-        (item) => item.memberLogin === memberLogin
+        (item) => item.memberCode === memberLogin
       );
       if (deptCode) {
         depCodeRef.current = deptCode;
@@ -288,6 +288,7 @@ export default () => {
   }, []);
 
   const [pdaReady, setPdaReady] = useState(false);
+  //初始化二维码扫描
   const initQrcode = useCallback(async () => {
     const pdaConfigRes = await pdaConfig({
       scanType: 1,
@@ -316,6 +317,7 @@ export default () => {
     }
   }, []);
 
+  //初始化epc扫描
   // const initPda = useCallback(async () => {
   //   const pdaConfigRes = await pdaConfig({
   //     scanType: 0,
@@ -388,6 +390,7 @@ export default () => {
     };
   }, []);
 
+  //二维码扫描轮询
   const refreshData = useCallback(async () => {
     if (timer.current) clearTimeout(timer.current);
     const res = await scanQuery({
@@ -411,6 +414,7 @@ export default () => {
     }
   }, []);
 
+  //epc扫描
   // const refreshEpcData = useCallback(async () => {
   //   if (timerEpc.current) clearTimeout(timerEpc.current);
   //   const res = await queryPdaData({
@@ -437,6 +441,7 @@ export default () => {
   // }, []);
 
   const timer = useRef(null);
+  //启动和停止二维码扫描轮询的副作用
   useEffect(() => {
     if (pdaReady) {
       console.log("后执行");
@@ -452,6 +457,7 @@ export default () => {
   }, [pdaReady]);
 
   // const [pdaReadyEpc, setPdaReadyEpc] = useState(false);
+  // 启动和停止epc扫描轮询的副作用
   // const timerEpc = useRef(null);
   // useEffect(() => {
   //   if (pdaReadyEpc) {

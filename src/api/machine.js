@@ -30,7 +30,7 @@ export const getWorkFlow = (params) => {
 };
 
 export const getNode = () => {
-  return getRequest("/seeyon/rest/api/dataInfo/node");
+  return request(`/seeyon/rest/api/dataInfo/node?token=${getUserToken()}`);
 };
 
 export const getMember = () => {
@@ -42,7 +42,7 @@ export const getLocation = () => {
 };
 
 export const getInventoryInfo = (params) => {
-  return request("seeyon/rest/api/syncheck", {
+  return request("/seeyon/rest/api/syncheck", {
     ...params,
   });
 };

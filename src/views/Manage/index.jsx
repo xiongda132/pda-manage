@@ -212,7 +212,7 @@ export default () => {
     } = await switchMember();
     if (status) {
       const { memberName } = memberList.find(
-        (item) => item.memberLogin === memberLogin
+        (item) => item.memberCode === memberLogin
       );
       formRef.current.setFieldsValue({
         productionMember: memberName,
@@ -279,7 +279,7 @@ export default () => {
     } = await switchMember();
     if (status) {
       const { deptCode } = memberList.find(
-        (item) => item.memberLogin === memberLogin
+        (item) => item.memberCode === memberLogin
       );
       if (deptCode) {
         depCodeRef.current = deptCode;
@@ -338,7 +338,7 @@ export default () => {
     } = await switchMember();
     if (status) {
       const { deptCode } = memberList.find(
-        (item) => item.memberLogin === memberLogin
+        (item) => item.memberCode === memberLogin
       );
       if (deptCode) {
         depCodeRef.current = deptCode;
@@ -650,7 +650,7 @@ export default () => {
     } = await switchMember();
     if (status) {
       const { deptCode } = memberList.find(
-        (item) => item.memberLogin === memberLogin
+        (item) => item.memberCode === memberLogin
       );
       if (deptCode) {
         depCodeRef.current = deptCode;

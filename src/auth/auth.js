@@ -8,13 +8,15 @@ let downloadData = [];
 
 const getTip = async () => {
   const memberLogin = getMemberLogin();
+  console.log("memberLogin", memberLogin);
   const {
     status,
     data: { memberList },
   } = await switchMember();
+
   if (status) {
     const { deptCode } = memberList.find(
-      (item) => item.memberLogin === memberLogin
+      (item) => item.memberCode === memberLogin
     );
     if (deptCode) {
       alert(`登录id为${memberLogin}; \n部门代码为${deptCode}`);

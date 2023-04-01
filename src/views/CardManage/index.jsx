@@ -166,7 +166,7 @@ export default () => {
     } = await switchMember();
     if (status) {
       const { deptCode } = memberList.find(
-        (item) => item.memberLogin === memberLogin
+        (item) => item.memberCode === memberLogin
       );
       if (deptCode) {
         depCodeRef.current = deptCode;
@@ -237,7 +237,7 @@ export default () => {
     } = await switchMember();
     if (status) {
       const { deptCode } = memberList.find(
-        (item) => item.memberLogin === memberLogin
+        (item) => item.memberCode === memberLogin
       );
       if (deptCode) {
         depCodeRef.current = deptCode;

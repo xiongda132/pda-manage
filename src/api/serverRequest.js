@@ -20,7 +20,7 @@ export function request(api, params) {
       .then((res) => {
         let resObj = res.json();
 
-        alert(JSON.stringify(resObj));
+        // alert(JSON.stringify(resObj));
         resolve(resObj);
       })
       .catch((err) => {
@@ -54,7 +54,7 @@ export function getRequest(api) {
       .then((res) => {
         let resObj = res.json();
 
-        alert(JSON.stringify(resObj));
+        // alert(JSON.stringify(resObj));
         resolve(resObj);
       })
       .catch((err) => {
