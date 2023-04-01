@@ -4,7 +4,7 @@ import { accountObj, memberObj } from "views/TagBind/test";
 import { locationObj, nodeObj } from "views/Procedure/test";
 import { Inventoryobj } from "views/Inventory/test";
 import { workFlow } from "views/Manage/test";
-const token = getUserToken();
+// const token = getUserToken();
 const isDev = false;
 
 export const getToken = async (userName, passWord) => {
@@ -34,11 +34,11 @@ export const getNode = () => {
 };
 
 export const getMember = () => {
-  return getRequest(`/seeyon/rest/api/findMember?token=${token}`);
+  return getRequest(`/seeyon/rest/api/findMember?token=${getUserToken()}`);
 };
 
 export const getLocation = () => {
-  return getRequest(`/seeyon/rest/api/synlocation?token=${token}`);
+  return getRequest(`/seeyon/rest/api/synlocation?token=${getUserToken()}`);
 };
 
 export const getInventoryInfo = (params) => {

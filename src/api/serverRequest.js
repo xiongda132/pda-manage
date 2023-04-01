@@ -1,6 +1,6 @@
 import { getUserToken } from "utils/auth";
 // const baseUrl = `http://${sessionStorage.getItem("serverPort")}`;
-const token = getUserToken();
+// const token = getUserToken();
 
 export function request(api, params) {
   console.log(localStorage.getItem("serverPort"));
@@ -8,7 +8,7 @@ export function request(api, params) {
     fetch(
       `http://${localStorage.getItem("serverPort")}` +
         api +
-        `?token=${token || ""}`,
+        `?token=${getUserToken() || ""}`,
       {
         method: "post",
         headers: {
@@ -18,8 +18,10 @@ export function request(api, params) {
       }
     )
       .then((res) => {
-        alert(JSON.stringify(res.json()));
-        resolve(res.json());
+        let resObj = res.json();
+
+        alert(JSON.stringify(resObj));
+        resolve(resObj);
       })
       .catch((err) => {
         let err_ = {
@@ -50,8 +52,10 @@ export function getRequest(api) {
       },
     })
       .then((res) => {
-        alert(JSON.stringify(res.json()));
-        resolve(res.json());
+        let resObj = res.json();
+
+        alert(JSON.stringify(resObj));
+        resolve(resObj);
       })
       .catch((err) => {
         let err_ = {
