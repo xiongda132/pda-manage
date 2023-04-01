@@ -9,11 +9,19 @@ function Login() {
   const handleChange = (value) => {
     serverPort.current = value;
   };
+  const getServerPort = () => {
+    if (localStorage.getItem("serverPort")) {
+      return localStorage.getItem("serverPort");
+    } else {
+      return "未设置";
+    }
+  };
   const handleClick = () => {
     Modal.confirm({
       title: "设置服务及端口",
       content: (
         <div>
+          当前地址: {getServerPort()}
           <Input onChange={handleChange} placeholder="请输入..." />
         </div>
       ),

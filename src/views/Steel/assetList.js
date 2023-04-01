@@ -12,7 +12,7 @@ assetList.forEach((item) => {
   const images = [];
   const { imageCount, epc } = item;
   for (let i = 0; i < imageCount; i++) {
-    const img = require(`./images/${epc} (${i + 1}).png`);
+    const img = "require(`./images/${epc} (${i + 1}).png`)";
     images.push(img);
   }
   item["images"] = images;

@@ -52,6 +52,7 @@ export default () => {
   const qrRef = useRef(null);
   const epcRef = useRef(null);
   const depCodeRef = useRef(null);
+  // const [scanMode, setScanMode] = useState("");
 
   const handleBackMainPage = () => {
     history.push("/");
@@ -222,6 +223,7 @@ export default () => {
     setMachineList(dataMap);
     setEpcCodeVal("");
     setQrCodeVal("");
+    // setPdaReadyEpc(false)
     setPdaReady(true);
     setTimeout(() => {
       qrRef.current.focus();
@@ -286,32 +288,6 @@ export default () => {
   }, []);
 
   const [pdaReady, setPdaReady] = useState(false);
-  // const initPda = useCallback(async () => {
-  //   const pdaConfigRes = await pdaConfig({
-  //     scanType: 0,
-  //     rfidReadpower: 30,
-  //   });
-  //   if (pdaConfigRes.code === 1) {
-  //     const pdaStartRes = await pdaStart({
-  //       startTime: configTime.current,
-  //     });
-  //     console.log(pdaStartRes);
-  //     if (pdaStartRes.code === 1) {
-  //       console.log("初始化RFID扫描成功");
-  //     } else {
-  //       Toast.show({
-  //         icon: "fail",
-  //         content: "启动失败, " + pdaStartRes.msg,
-  //       });
-  //     }
-  //   } else {
-  //     Toast.show({
-  //       icon: "fail",
-  //       content: "参数配置失败, " + pdaConfigRes.msg,
-  //     });
-  //   }
-  // }, []);
-
   const initQrcode = useCallback(async () => {
     const pdaConfigRes = await pdaConfig({
       scanType: 1,
@@ -339,6 +315,33 @@ export default () => {
       });
     }
   }, []);
+
+  // const initPda = useCallback(async () => {
+  //   const pdaConfigRes = await pdaConfig({
+  //     scanType: 0,
+  //     rfidReadpower: 10,
+  //   });
+  //   if (pdaConfigRes.code === 1) {
+  //     const pdaStartRes = await pdaStart({
+  //       startTime: configTime.current,
+  //     });
+  //     console.log(pdaStartRes);
+  //     if (pdaStartRes.code === 1) {
+  //       console.log("初始化RFID扫描成功");
+  //       setPdaReadyEpc(true);
+  //     } else {
+  //       Toast.show({
+  //         icon: "fail",
+  //         content: "启动失败, " + pdaStartRes.msg,
+  //       });
+  //     }
+  //   } else {
+  //     Toast.show({
+  //       icon: "fail",
+  //       content: "参数配置失败, " + pdaConfigRes.msg,
+  //     });
+  //   }
+  // }, []);
 
   const back = useCallback(() => {
     const plus = window.plus || {};
@@ -396,6 +399,7 @@ export default () => {
         console.log("scancode", res.scancode);
         setQrCodeVal(res.scancode);
         setPdaReady(false); //状态改变, 自行清理已存在的定时器
+        // setScanMode("rfid")
       }
       if (timer.current !== null) {
         timer.current = setTimeout(refreshData, 200);
@@ -406,6 +410,31 @@ export default () => {
       }
     }
   }, []);
+
+  // const refreshEpcData = useCallback(async () => {
+  //   if (timerEpc.current) clearTimeout(timerEpc.current);
+  //   const res = await queryPdaData({
+  //     startTime: configTime.current,
+  //   });
+  //   console.log(res);
+  //   if (res.code === 1) {
+  //     const curEpcList = res.data.map(({ epc }) => epc);
+  //     if (curEpcList.length > 1) {
+  //       Toast.show({
+  //         content: "扫到了多个epc",
+  //       });
+  //     } else if (curEpcList.length === 1) {
+  //       setEpcCodeVal(curEpcList?.[0]);
+  //     }
+  //     if (timerEpc.current !== null) {
+  //       timerEpc.current = setTimeout(refreshEpcData, 200);
+  //     }
+  //   } else {
+  //     if (timerEpc.current !== null) {
+  //       timerEpc.current = setTimeout(refreshEpcData, 200);
+  //     }
+  //   }
+  // }, []);
 
   const timer = useRef(null);
   useEffect(() => {
@@ -422,12 +451,35 @@ export default () => {
     };
   }, [pdaReady]);
 
+  // const [pdaReadyEpc, setPdaReadyEpc] = useState(false);
+  // const timerEpc = useRef(null);
+  // useEffect(() => {
+  //   if (pdaReadyEpc) {
+  //     timerEpc.current = 0;
+  //     refreshEpcData();
+  //   }
+  //   return () => {
+  //     if (timerEpc.current) {
+  //       clearTimeout(timerEpc.current);
+  //       timerEpc.current = null;
+  //     }
+  //   };
+  // }, [pdaReadyEpc]);
+
   //根据已扫qrcode状态, 进行下一步聚焦,
   useEffect(() => {
     if (qrCodeVal) {
       epcRef.current.focus();
     }
   }, [qrCodeVal]);
+
+  // useEffect(() => {
+  //   if (scanMode === "qrcode") {
+  //     initQrcode();
+  //   } else if (scanMode === "rfid") {
+  //     initPda();
+  //   }
+  // }, [scanMode]);
 
   return (
     <>

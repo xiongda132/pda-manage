@@ -17,19 +17,31 @@ export function request(api, params) {
         body: JSON.stringify(params),
       }
     )
-      .then((res) => resolve(res.json()))
+      .then((res) => {
+        alert(res.json());
+        resolve(res.json());
+      })
       .catch((err) => {
-        reject(err);
+        let err_ = {
+          ...err,
+          url: `http://${localStorage.getItem("serverPort")}` + api,
+        };
+        // alert(JSON.stringify(err_));
+        reject(err_);
       });
-  }).catch((error) => ({
-    code: -1,
-    message: error.message,
-    url: `http://${localStorage.getItem("serverPort")}` + api,
-  }));
+  }).catch((error) => {
+    let err = {
+      code: -1,
+      message: error.message,
+      url: `http://${localStorage.getItem("serverPort")}` + api,
+    };
+    alert(JSON.stringify(err));
+    return err;
+  });
 }
 
 export function getRequest(api) {
-  console.log(localStorage.getItem("serverPort"));
+  console.log("serverPort", localStorage.getItem("serverPort"));
   return new Promise((resolve, reject) => {
     fetch(`http://${localStorage.getItem("serverPort")}` + api, {
       method: "GET",
@@ -37,13 +49,25 @@ export function getRequest(api) {
         "Content-Type": "application/json",
       },
     })
-      .then((res) => resolve(res.json()))
+      .then((res) => {
+        alert(res.json());
+        resolve(res.json());
+      })
       .catch((err) => {
-        reject(err);
+        let err_ = {
+          ...err,
+          url: `http://${localStorage.getItem("serverPort")}` + api,
+        };
+        // alert(JSON.stringify(err_));
+        reject(err_);
       });
-  }).catch((error) => ({
-    code: -1,
-    message: error.message,
-    url: `http://${localStorage.getItem("serverPort")}` + api,
-  }));
+  }).catch((error) => {
+    let err = {
+      code: -1,
+      message: error.message,
+      url: `http://${localStorage.getItem("serverPort")}` + api,
+    };
+    alert(JSON.stringify(err));
+    return err;
+  });
 }

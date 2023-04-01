@@ -210,38 +210,6 @@ export default () => {
     }
   };
 
-  // useEffect(() => {
-  //   if (scanValue) {
-  //     setLoading(false);
-  //   }
-  // }, [scanValue]);
-
-  // useEffect(() => {
-  //   const func = async () => {
-  //     if (!loading) {
-  //       if (scanValue) {
-  //         getFileTable();
-  //       }
-  //       if (epcValue) {
-  //         getFileTableEpc();
-  //       }
-  //     }
-  //   };
-  //   func();
-  // }, [loading]);
-
-  // useEffect(() => {
-  //   if (accountData.length) {
-  //     getFlowInfo();
-  //   }
-  // }, [accountData.length]);
-
-  // useEffect(() => {
-  //   console.log(epcValue);
-  //   if (epcValue) {
-  //     setLoading(false);
-  //   }
-  // }, [epcValue]);
 
   const handleChange = (mode) => {
     setScanMode(mode);

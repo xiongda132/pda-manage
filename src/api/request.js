@@ -1,7 +1,7 @@
 const baseUrl = window.g.pdaURL;
 
 export function request(api, params) {
-  return new Promise((resolve, reject) => {
+  return new Promise((resole, reject) => {
     fetch(baseUrl + api, {
       method: "post",
       headers: {
@@ -9,7 +9,7 @@ export function request(api, params) {
       },
       body: JSON.stringify(params),
     })
-      .then((res) => resolve(res.json()))
+      .then((res) => resole(res.json()))
       .catch((err) => {
         reject(err);
       });
