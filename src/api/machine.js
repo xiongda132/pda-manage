@@ -4,8 +4,10 @@ import { accountObj, memberObj } from "views/TagBind/test";
 import { locationObj, nodeObj } from "views/Procedure/test";
 import { Inventoryobj } from "views/Inventory/test";
 import { workFlow } from "views/Manage/test";
+import { cardData } from "views/CardManage/test";
 // const token = getUserToken();
 const isDev = false;
+// const isDev = true;
 
 export const getToken = async (userName, passWord) => {
   return await getRequest(
@@ -19,8 +21,10 @@ export const getFileTable = (params) => {
   });
 };
 
-export const getDataInfo = () => {
-  return getRequest("/seeyon/rest/api/dataInfo/card");
+export const getDataInfo = (params) => {
+  return request(`/seeyon/rest/api/dataInfo/card?token=${getUserToken()}`, {
+    ...params,
+  });
 };
 
 export const getWorkFlow = (params) => {
@@ -153,6 +157,16 @@ export const switchWorkFlow = (params) => {
   } else {
     if (localStorage.getItem("serverPort")) {
       return getWorkFlow(params);
+    }
+  }
+};
+
+export const switchCard = (params) => {
+  if (isDev) {
+    return cardData;
+  } else {
+    if (localStorage.getItem("serverPort")) {
+      return getDataInfo(params);
     }
   }
 };

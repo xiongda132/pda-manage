@@ -21,3 +21,19 @@ export const setMemberLogin = (member) => {
 export const getMemberLogin = () => {
   return sessionStorage.getItem("memberLogin");
 };
+
+export const setDeptCode = (deptCode) => {
+  return sessionStorage.setItem("deptCode", deptCode);
+};
+
+export const getDeptCode = () => {
+  return sessionStorage.getItem("deptCode");
+};
+
+export const setLocalStorage = (key, value) => {
+  localStorage.setItem(key, JSON.stringify(value));
+};
+
+export const getLocalStorage = (key) => {
+  return JSON.parse(localStorage.getItem(key));
+};

@@ -23,9 +23,9 @@ import {
   scanStop,
   scanQuery,
   pdaSingle,
-  // pdaStart,
-  // padStop,
-  // queryPdaData,
+  pdaStart,
+  padStop,
+  queryPdaData,
 } from "api/pda";
 import dayjs from "dayjs";
 import styles from "./index.module.css";
@@ -52,7 +52,7 @@ export default () => {
   const qrRef = useRef(null);
   const epcRef = useRef(null);
   const depCodeRef = useRef(null);
-  // const [scanMode, setScanMode] = useState("");
+  const [scanMode, setScanMode] = useState("");
 
   const handleBackMainPage = () => {
     history.push("/");
@@ -97,47 +97,13 @@ export default () => {
     }
   };
 
-  // const getMachineList = () => {
-  //   const machineList = [];
-  //   for (let i = 0; i < 10; i++) {
-  //     if (i % 2 === 0) {
-  //       machineList.push({
-  //         gdhId: `XB00${i + 1}s`,
-  //         facilityCode: `20221013000${i + 1}`,
-  //         nbName: `内部名称${i + 1}`,
-  //         ReqName: `需求名称${i + 1}`,
-  //         nodeSecurity: `密级${i + 1}`,
-  //         currentPlace: `位置${i + 1}`,
-  //         epcData: `2023032${i + 1}`,
-  //         bindState: "已绑",
-  //         cardAmount: `${i + 1}`,
-  //         nodeAmount: `${i + 1}`,
-  //       });
-  //     } else {
-  //       machineList.push({
-  //         gdhId: `XB00${i + 1}s`,
-  //         facilityCode: `20221013000${i + 1}`,
-  //         nbName: `内部名称${i + 1}`,
-  //         ReqName: `需求名称${i + 1}`,
-  //         nodeSecurity: `密级${i + 1}`,
-  //         currentPlace: `位置${i + 1}`,
-  //         epcData: `2023032${i + 1}`,
-  //         bindState: "未绑",
-  //         cardAmount: `${i + 1}`,
-  //         nodeAmount: `${i + 1}`,
-  //       });
-  //     }
-  //   }
-  //   setMachineList(machineList);
-  //   setPdaReady(true);
-  //   setLoading(true);
-  // };
-
   const handleCancel = () => {
     if (epcCodeVal || qrCodeVal) {
       setEpcCodeVal("");
       setQrCodeVal("");
       setPdaReady(true);
+      setPdaReadyEpc(false);
+      setScanMode("qrcode");
       setTimeout(() => {
         qrRef.current.focus();
       }, 0);
@@ -148,6 +114,7 @@ export default () => {
       Toast.show({
         content: "绑定过程才能进行取消",
       });
+      qrRef.current.focus();
     }
   };
 
@@ -223,36 +190,38 @@ export default () => {
     setMachineList(dataMap);
     setEpcCodeVal("");
     setQrCodeVal("");
-    // setPdaReadyEpc(false)
-    setPdaReady(true);
+    setPdaReadyEpc(false); //关闭epc轮询
+    setPdaReady(true); //开启qrcode轮询
+    setScanMode("qrcode");
     setTimeout(() => {
       qrRef.current.focus();
     }, 0);
   };
 
-  const handleScan = async () => {
-    if (!epcCodeVal && !qrCodeVal) {
-      return Toast.show({
-        content: "绑定过程才能进行取消",
-      });
-    }
-    const res = await pdaSingle({
-      address: "2", //默认
-      blockCount: "2", //epc长度/4
-      password: "", //默认
-    });
-    console.log(res);
-    if (res.code === 1) {
-      if (res.epc) {
-        setEpcCodeVal(res.epc);
-      }
-    } else {
-      Toast.show({
-        icon: "fail",
-        content: "扫描epc失败",
-      });
-    }
-  };
+  //点击读取epc逻辑
+  // const handleScan = async () => {
+  //   if (!epcCodeVal && !qrCodeVal) {
+  //     return Toast.show({
+  //       content: "绑定过程才能进行取消",
+  //     });
+  //   }
+  //   const res = await pdaSingle({
+  //     address: "2", //默认
+  //     blockCount: "2", //epc长度/4
+  //     password: "", //默认
+  //   });
+  //   console.log(res);
+  //   if (res.code === 1) {
+  //     if (res.epc) {
+  //       setEpcCodeVal(res.epc);
+  //     }
+  //   } else {
+  //     Toast.show({
+  //       icon: "fail",
+  //       content: "扫描epc失败",
+  //     });
+  //   }
+  // };
 
   const handleChange = async (e) => {
     const {
@@ -318,32 +287,34 @@ export default () => {
   }, []);
 
   //初始化epc扫描
-  // const initPda = useCallback(async () => {
-  //   const pdaConfigRes = await pdaConfig({
-  //     scanType: 0,
-  //     rfidReadpower: 10,
-  //   });
-  //   if (pdaConfigRes.code === 1) {
-  //     const pdaStartRes = await pdaStart({
-  //       startTime: configTime.current,
-  //     });
-  //     console.log(pdaStartRes);
-  //     if (pdaStartRes.code === 1) {
-  //       console.log("初始化RFID扫描成功");
-  //       setPdaReadyEpc(true);
-  //     } else {
-  //       Toast.show({
-  //         icon: "fail",
-  //         content: "启动失败, " + pdaStartRes.msg,
-  //       });
-  //     }
-  //   } else {
-  //     Toast.show({
-  //       icon: "fail",
-  //       content: "参数配置失败, " + pdaConfigRes.msg,
-  //     });
-  //   }
-  // }, []);
+  const initPda = useCallback(async () => {
+    const pdaConfigRes = await pdaConfig({
+      scanType: 0,
+      rfidReadpower: localStorage.getItem("readPower")
+        ? localStorage.getItem("readPower")
+        : 10,
+    });
+    if (pdaConfigRes.code === 1) {
+      const pdaStartRes = await pdaStart({
+        startTime: configTime.current,
+      });
+      console.log(pdaStartRes);
+      if (pdaStartRes.code === 1) {
+        console.log("初始化RFID扫描成功");
+        setPdaReadyEpc(true);
+      } else {
+        Toast.show({
+          icon: "fail",
+          content: "启动失败, " + pdaStartRes.msg,
+        });
+      }
+    } else {
+      Toast.show({
+        icon: "fail",
+        content: "参数配置失败, " + pdaConfigRes.msg,
+      });
+    }
+  }, []);
 
   const back = useCallback(() => {
     const plus = window.plus || {};
@@ -385,6 +356,9 @@ export default () => {
       scanStop({
         endTime: configTime.current,
       });
+      padStop({
+        endTime: configTime.current,
+      });
       document.removeEventListener("plusReady", plusReady);
       plus?.key.removeEventListener("backbutton", back);
     };
@@ -402,7 +376,7 @@ export default () => {
         console.log("scancode", res.scancode);
         setQrCodeVal(res.scancode);
         setPdaReady(false); //状态改变, 自行清理已存在的定时器
-        // setScanMode("rfid")
+        setScanMode("rfid");
       }
       if (timer.current !== null) {
         timer.current = setTimeout(refreshData, 200);
@@ -415,36 +389,36 @@ export default () => {
   }, []);
 
   //epc扫描
-  // const refreshEpcData = useCallback(async () => {
-  //   if (timerEpc.current) clearTimeout(timerEpc.current);
-  //   const res = await queryPdaData({
-  //     startTime: configTime.current,
-  //   });
-  //   console.log(res);
-  //   if (res.code === 1) {
-  //     const curEpcList = res.data.map(({ epc }) => epc);
-  //     if (curEpcList.length > 1) {
-  //       Toast.show({
-  //         content: "扫到了多个epc",
-  //       });
-  //     } else if (curEpcList.length === 1) {
-  //       setEpcCodeVal(curEpcList?.[0]);
-  //     }
-  //     if (timerEpc.current !== null) {
-  //       timerEpc.current = setTimeout(refreshEpcData, 200);
-  //     }
-  //   } else {
-  //     if (timerEpc.current !== null) {
-  //       timerEpc.current = setTimeout(refreshEpcData, 200);
-  //     }
-  //   }
-  // }, []);
+  const refreshEpcData = useCallback(async () => {
+    if (timerEpc.current) clearTimeout(timerEpc.current);
+    const res = await queryPdaData({
+      startTime: configTime.current,
+    });
+    console.log(res);
+    if (res.code === 1) {
+      const curEpcList = res.data.map(({ epc }) => epc);
+      if (curEpcList.length > 1) {
+        Toast.show({
+          content: "扫到了多个epc",
+        });
+      } else if (curEpcList.length === 1) {
+        setEpcCodeVal(curEpcList?.[0]);
+      }
+      if (timerEpc.current !== null) {
+        timerEpc.current = setTimeout(refreshEpcData, 200);
+      }
+    } else {
+      if (timerEpc.current !== null) {
+        timerEpc.current = setTimeout(refreshEpcData, 200);
+      }
+    }
+  }, []);
 
   const timer = useRef(null);
   //启动和停止二维码扫描轮询的副作用
   useEffect(() => {
     if (pdaReady) {
-      console.log("后执行");
+      // console.log("后执行");
       timer.current = 0;
       refreshData();
     }
@@ -456,21 +430,22 @@ export default () => {
     };
   }, [pdaReady]);
 
-  // const [pdaReadyEpc, setPdaReadyEpc] = useState(false);
+  const [pdaReadyEpc, setPdaReadyEpc] = useState(false);
+
   // 启动和停止epc扫描轮询的副作用
-  // const timerEpc = useRef(null);
-  // useEffect(() => {
-  //   if (pdaReadyEpc) {
-  //     timerEpc.current = 0;
-  //     refreshEpcData();
-  //   }
-  //   return () => {
-  //     if (timerEpc.current) {
-  //       clearTimeout(timerEpc.current);
-  //       timerEpc.current = null;
-  //     }
-  //   };
-  // }, [pdaReadyEpc]);
+  const timerEpc = useRef(null);
+  useEffect(() => {
+    if (pdaReadyEpc) {
+      timerEpc.current = 0;
+      refreshEpcData();
+    }
+    return () => {
+      if (timerEpc.current) {
+        clearTimeout(timerEpc.current);
+        timerEpc.current = null;
+      }
+    };
+  }, [pdaReadyEpc]);
 
   //根据已扫qrcode状态, 进行下一步聚焦,
   useEffect(() => {
@@ -479,13 +454,13 @@ export default () => {
     }
   }, [qrCodeVal]);
 
-  // useEffect(() => {
-  //   if (scanMode === "qrcode") {
-  //     initQrcode();
-  //   } else if (scanMode === "rfid") {
-  //     initPda();
-  //   }
-  // }, [scanMode]);
+  useEffect(() => {
+    if (scanMode === "qrcode") {
+      initQrcode();
+    } else if (scanMode === "rfid") {
+      initPda();
+    }
+  }, [scanMode]);
 
   return (
     <>
@@ -529,9 +504,9 @@ export default () => {
                 style={{ display: "inline-block", width: "49%" }}
                 value={epcCodeVal}
               />
-              <Button style={{ width: "30%" }} onClick={handleScan}>
+              {/* <Button style={{ width: "30%" }} onClick={handleScan}>
                 读取epc
-              </Button>
+              </Button> */}
             </div>
             <div className={styles.buttonStyle}>
               <Button

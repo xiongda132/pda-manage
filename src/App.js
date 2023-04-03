@@ -23,6 +23,7 @@ import Procedure from "./views/Procedure";
 import Manage from "./views/Manage";
 import Unbind from "./views/Unbind";
 import Inventory from "./views/Inventory";
+import DataSync from "./views/DataSync";
 
 function App() {
   return (
@@ -47,6 +48,9 @@ function App() {
             </Route>
             <Route path="/unbind">
               <Unbind />
+            </Route>
+            <Route path="/dataSync">
+              <DataSync />
             </Route>
             <Route path="/inventory">
               <Inventory />

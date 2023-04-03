@@ -1,0 +1,25 @@
+.content {
+  height: calc(100% - 45px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.operate {
+  height: 50%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  padding: 0px 10px;
+}
+
+.downLoad,
+.upLoad {
+  height: 50px;
+  background: #2eb1fc;
+  text-align: center;
+  line-height: 50px;
+  border-radius: 5px;
+  margin-bottom: 20px;
+}

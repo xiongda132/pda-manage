@@ -2,7 +2,12 @@ import { setAuthentication } from "../utils/auth";
 import { Toast } from "antd-mobile";
 // import axios from "axios";
 import { getToken, switchToken, switchMember } from "api/machine";
-import { setUserToken, setMemberLogin, getMemberLogin } from "utils/auth";
+import {
+  setUserToken,
+  setMemberLogin,
+  getMemberLogin,
+  setDeptCode,
+} from "utils/auth";
 
 let downloadData = [];
 
@@ -19,6 +24,7 @@ const getTip = async () => {
       (item) => item.memberCode === memberLogin
     );
     if (deptCode) {
+      setDeptCode(deptCode);
       alert(`登录id为${memberLogin}; \n部门代码为${deptCode}`);
     } else {
       alert(`部门代码为空`);

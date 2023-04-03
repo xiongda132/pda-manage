@@ -23,6 +23,7 @@ import {
   saveWorkFlow,
   switchNode,
   switchWorkFlow,
+  switchCard,
 } from "api/machine";
 import {
   pdaConfig,
@@ -287,7 +288,7 @@ export default () => {
         const {
           status,
           data: { zjtzData },
-        } = await switchFileTable({deptCode});
+        } = await switchFileTable({ deptCode });
         if (status) {
           // zjtzDataRef.current = zjtzData;
           const filterObj = zjtzData.find(
@@ -346,7 +347,7 @@ export default () => {
         const {
           status,
           data: { zjtzData },
-        } = await switchFileTable({deptCode});
+        } = await switchFileTable({ deptCode });
         if (status) {
           zjtzDataRef.current = zjtzData;
           setAccountData(zjtzData);
@@ -475,7 +476,9 @@ export default () => {
   const initPda = useCallback(async () => {
     const pdaConfigRes = await pdaConfig({
       scanType: 0,
-      rfidReadpower: 10,
+      rfidReadpower: localStorage.getItem("readPower")
+        ? localStorage.getItem("readPower")
+        : 10,
     });
     if (pdaConfigRes.code === 1) {
       const pdaStartRes = await pdaStart({
@@ -658,7 +661,7 @@ export default () => {
         const {
           status,
           data: { zjtzData },
-        } = await switchFileTable({deptCode});
+        } = await switchFileTable({ deptCode });
         if (status) {
           console.log(zjtzData, scanValue);
           const filterObj = zjtzData.find(
@@ -667,7 +670,7 @@ export default () => {
           const {
             status,
             data: { cardMessageForm },
-          } = cardData;
+          } = await switchCard({ deptCode });
           if (status) {
             cardRef.current = cardMessageForm;
             let allObj;

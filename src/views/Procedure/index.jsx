@@ -94,7 +94,9 @@ export default () => {
   const initPda = useCallback(async () => {
     const pdaConfigRes = await pdaConfig({
       scanType: 0,
-      rfidReadpower: 10,
+      rfidReadpower: localStorage.getItem("readPower")
+      ? localStorage.getItem("readPower")
+      : 10,
     });
     if (pdaConfigRes.code === 1) {
       const pdaStartRes = await pdaStart({

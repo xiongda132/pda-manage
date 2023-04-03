@@ -266,7 +266,9 @@ export default () => {
   const initPda = useCallback(async () => {
     const pdaConfigRes = await pdaConfig({
       scanType: 0,
-      rfidReadpower: 10,
+      rfidReadpower: localStorage.getItem("readPower")
+        ? localStorage.getItem("readPower")
+        : 10,
     });
     if (pdaConfigRes.code === 1) {
       const pdaStartRes = await pdaStart({
@@ -337,15 +339,15 @@ export default () => {
       if (res.scancode) {
         console.log("scancode", res.scancode);
         // if (!flag) {
-          console.log("此次扫描值为", res.scancode);
-          setScanValue((preQrcodeList) => {
-            const newQrcodeList = [...preQrcodeList];
-            if (!newQrcodeList.includes(res.scancode)) {
-              newQrcodeList.unshift(res.scancode);
-            }
-            return newQrcodeList;
-          });
-          setLoading(false);
+        console.log("此次扫描值为", res.scancode);
+        setScanValue((preQrcodeList) => {
+          const newQrcodeList = [...preQrcodeList];
+          if (!newQrcodeList.includes(res.scancode)) {
+            newQrcodeList.unshift(res.scancode);
+          }
+          return newQrcodeList;
+        });
+        setLoading(false);
         // } else {
         //   console.log("走了模式2");
         //   setQrCodeVal(res.scancode);
@@ -402,7 +404,7 @@ export default () => {
         timer.current = null;
       }
     };
-  }, [pdaReady, /* refreshData */]);
+  }, [pdaReady /* refreshData */]);
 
   const [pdaReadyEpc, setPdaReadyEpc] = useState(false);
   const timerEpc = useRef(null);
