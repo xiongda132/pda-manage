@@ -36,7 +36,7 @@ import {
   switchFileTable,
   switchMember,
 } from "api/machine";
-import { getMemberLogin } from "utils/auth";
+import { getMemberLogin, getLocalStorage, setLocalStorage } from "utils/auth";
 import { accountObj, memberObj } from "./test";
 
 const { Item } = Grid;
@@ -53,48 +53,69 @@ export default () => {
   const epcRef = useRef(null);
   const depCodeRef = useRef(null);
   const [scanMode, setScanMode] = useState("");
+  const valueRef = useRef("");
 
   const handleBackMainPage = () => {
     history.push("/");
   };
 
   const getBillNo = async () => {
-    const memberLogin = getMemberLogin();
+    //本地逻辑
     const {
       status,
-      data: { memberList },
-    } = await switchMember();
+      data: { zjtzData },
+    } = getLocalStorage("zjtzData");
     if (status) {
-      const { deptCode } = memberList.find(
-        (item) => item.memberCode === memberLogin
+      const gdhList = [...new Set(zjtzData.map((item) => item.gdhId))].map(
+        (item) => ({ label: item, value: item })
       );
-      if (deptCode) {
-        depCodeRef.current = deptCode;
-        sessionStorage.setItem("deptCode", deptCode);
-        const {
-          status,
-          data: { zjtzData },
-        } = await switchFileTable({ deptCode });
-        if (status) {
-          const gdhList = [...new Set(zjtzData.map((item) => item.gdhId))].map(
-            (item) => ({ label: item, value: item })
-          );
-          const data = [...gdhList];
-          data.unshift({ label: "请选择工单", value: "" });
-          setBillNo(data);
-        } else {
-          Toast.show({
-            icon: "fail",
-            content: "获取整机台账信息失败",
-          });
-        }
-      }
+      const data = [...gdhList];
+      data.unshift({ label: "请选择工单", value: "" });
+      setBillNo(data);
     } else {
       Toast.show({
         icon: "fail",
-        content: "获取部门信息失败",
+        content: "获取整机台账信息失败",
       });
     }
+
+    //在线逻辑
+    // const memberLogin = getMemberLogin();
+    // const {
+    //   status,
+    //   data: { memberList },
+    // } = await switchMember();
+    // if (status) {
+    //   const { deptCode } = memberList.find(
+    //     (item) => item.memberCode === memberLogin
+    //   );
+    //   if (deptCode) {
+    //     depCodeRef.current = deptCode;
+    //     sessionStorage.setItem("deptCode", deptCode);
+    //     const {
+    //       status,
+    //       data: { zjtzData },
+    //     } = await switchFileTable({ deptCode });
+    //     if (status) {
+    //       const gdhList = [...new Set(zjtzData.map((item) => item.gdhId))].map(
+    //         (item) => ({ label: item, value: item })
+    //       );
+    //       const data = [...gdhList];
+    //       data.unshift({ label: "请选择工单", value: "" });
+    //       setBillNo(data);
+    //     } else {
+    //       Toast.show({
+    //         icon: "fail",
+    //         content: "获取整机台账信息失败",
+    //       });
+    //     }
+    //   }
+    // } else {
+    //   Toast.show({
+    //     icon: "fail",
+    //     content: "获取部门信息失败",
+    //   });
+    // }
   };
 
   const handleCancel = () => {
@@ -163,30 +184,56 @@ export default () => {
         });
       }
     });
-    const zjtzData = dataMap.map((item) => {
+    const zjtzData = [];
+    dataMap.forEach((item) => {
       if (item.bindState === "已绑") {
-        return {
+        zjtzData.push({
           facilityCode: item.facilityCode,
           epcData: item.epcData,
-        };
+        });
       }
     });
     Toast.show({
       icon: "success",
       content: "已绑定",
     });
-    const { status } = await saveLedger({ zjtzData });
-    if (status) {
-      Toast.show({
-        icon: "success",
-        content: "上传成功",
+
+    //本地逻辑, 获取本地数据进行更新
+    if (getLocalStorage("zjtzData")) {
+      let zjtzDataRes = { ...getLocalStorage("zjtzData") };
+      zjtzDataRes.data.zjtzData.forEach((item) => {
+        if (item.facilityCode === qrCodeVal) {
+          item.epcData = epcCodeVal;
+        }
       });
-    } else {
-      Toast.show({
-        icon: "fail",
-        content: "上传失败",
-      });
+      setLocalStorage("zjtzData", zjtzDataRes);
     }
+
+    //本地逻辑, 对操作数据进行存储
+    if (getLocalStorage("zjtzDataUpload")) {
+      const zjtzDataUpload = [...getLocalStorage("zjtzDataUpload")];
+      zjtzDataUpload.push({
+        facilityCode: qrCodeVal,
+        epcData: epcCodeVal,
+      });
+      setLocalStorage("zjtzDataUpload", zjtzDataUpload);
+    } else {
+      setLocalStorage("zjtzDataUpload", zjtzData);
+    }
+
+    //在线逻辑
+    // const { status } = await saveLedger({ zjtzData });
+    // if (status) {
+    //   Toast.show({
+    //     icon: "success",
+    //     content: "上传成功",
+    //   });
+    // } else {
+    //   Toast.show({
+    //     icon: "fail",
+    //     content: "上传失败",
+    //   });
+    // }
     setMachineList(dataMap);
     setEpcCodeVal("");
     setQrCodeVal("");
@@ -227,10 +274,19 @@ export default () => {
     const {
       target: { value },
     } = e;
+    valueRef.current = value;
+
+    //本地逻辑
     const {
       status,
       data: { zjtzData },
-    } = await switchFileTable(depCodeRef.current);
+    } = getLocalStorage("zjtzData");
+
+    //在线逻辑
+    // const {
+    //   status,
+    //   data: { zjtzData },
+    // } = await switchFileTable({ deptCode: depCodeRef.current });
     if (status) {
       const machineList = zjtzData
         .filter((item) => item.gdhId === value)

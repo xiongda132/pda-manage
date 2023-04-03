@@ -22,7 +22,12 @@ import {
   switchNode,
   switchInventoryInfo,
 } from "api/machine";
-import { getMemberLogin, getDeptCode, setLocalStorage } from "utils/auth";
+import {
+  getMemberLogin,
+  getDeptCode,
+  setLocalStorage,
+  getLocalStorage,
+} from "utils/auth";
 import { useState } from "react";
 import styles from "./index.module.css";
 
@@ -35,16 +40,17 @@ export default () => {
 
   //下载整机台账主表信息
   const getFileTable = async () => {
-    const {
-      status,
-      data: { zjtzData },
-    } = await switchFileTable({ deptCode });
-    if (status) {
+    const res = await switchFileTable({ deptCode });
+    // const {
+    //   status,
+    //   data: { zjtzData },
+    // } = await switchFileTable({ deptCode });
+    if (res.status) {
       Toast.show({
         icon: "success",
         content: "获取整机台账信息成功",
       });
-      setLocalStorage("zjtzData", zjtzData);
+      setLocalStorage("zjtzData", res);
     } else {
       Toast.show({
         icon: "fail",
@@ -55,16 +61,17 @@ export default () => {
 
   //下载板卡明细表信息
   const getCard = async () => {
-    const {
-      status,
-      data: { cardMessageForm },
-    } = await switchCard({ deptCode });
-    if (status) {
+    const res = await switchCard({ deptCode });
+    // const {
+    //   status,
+    //   data: { cardMessageForm },
+    // } = await switchCard({ deptCode });
+    if (res.status) {
       Toast.show({
         icon: "success",
         content: "获取板卡信息成功",
       });
-      setLocalStorage("cardMessageForm", cardMessageForm);
+      setLocalStorage("cardMessageForm", res);
     } else {
       Toast.show({
         icon: "fail",
@@ -75,16 +82,17 @@ export default () => {
 
   //下载位置信息
   const getLocation = async () => {
-    const {
-      status,
-      data: { locationList },
-    } = await switchLocation({ deptCode });
-    if (status) {
+    const res = await switchLocation({ deptCode });
+    // const {
+    //   status,
+    //   data: { locationList },
+    // } = await switchLocation({ deptCode });
+    if (res.status) {
       Toast.show({
         icon: "success",
         content: "获取位置信息成功",
       });
-      setLocalStorage("locationList", locationList);
+      setLocalStorage("locationList", res);
     } else {
       Toast.show({
         icon: "fail",
@@ -95,16 +103,17 @@ export default () => {
 
   //下载生产流程推进记录表信息
   const getWorkFlow = async () => {
-    const {
-      status,
-      data: { workflowForm },
-    } = await switchWorkFlow({ deptCode });
-    if (status) {
+    const res = await switchWorkFlow({ deptCode });
+    // const {
+    //   status,
+    //   data: { workflowForm },
+    // } = await switchWorkFlow({ deptCode });
+    if (res.status) {
       Toast.show({
         icon: "success",
         content: "获取生产流程推进记录表信息成功",
       });
-      setLocalStorage("workflowForm", workflowForm);
+      setLocalStorage("workflowForm", res);
     } else {
       Toast.show({
         icon: "fail",
@@ -115,16 +124,17 @@ export default () => {
 
   //下载内部名称关联流程节点档案表信息
   const getNode = async () => {
-    const {
-      status,
-      data: { flowNodeForm },
-    } = await switchNode({ deptCode });
-    if (status) {
+    const res = await switchNode({ deptCode });
+    // const {
+    //   status,
+    //   data: { flowNodeForm },
+    // } = await switchNode({ deptCode });
+    if (res.status) {
       Toast.show({
         icon: "success",
         content: "获取内部名称关联流程节点档案表信息成功",
       });
-      setLocalStorage("flowNodeForm", flowNodeForm);
+      setLocalStorage("flowNodeForm", res);
     } else {
       Toast.show({
         icon: "fail",
@@ -135,16 +145,17 @@ export default () => {
 
   //下载盘点信息
   const getInventoryInfo = async () => {
-    const {
-      status,
-      data: { checkList },
-    } = await switchInventoryInfo({ deptCode });
-    if (status) {
+    const res = await switchInventoryInfo({ deptCode });
+    // const {
+    //   status,
+    //   data: { checkList },
+    // } = await switchInventoryInfo({ deptCode });
+    if (res.status) {
       Toast.show({
         icon: "success",
         content: "获取盘点信息成功",
       });
-      setLocalStorage("checkList", checkList);
+      setLocalStorage("checkList", res);
     } else {
       Toast.show({
         icon: "fail",
@@ -167,7 +178,33 @@ export default () => {
     });
   };
 
-  const hanldeUpLoad = async () => {};
+  //上传绑定数据
+  const zjtzDataUpload = async () => {
+    const zjtzData = getLocalStorage("zjtzDataUpload");
+    if (zjtzData) {
+      const { status } = await saveLedger({ zjtzData });
+      if (status) {
+        Toast.show({
+          icon: "success",
+          content: "上传绑定数据成功",
+        });
+      } else {
+        Toast.show({
+          icon: "fail",
+          content: "上传绑定数据失败",
+        });
+      }
+    }
+  };
+
+  //上传所有数据
+  const hanldeUpLoad = async () => {
+    await zjtzDataUpload();
+    Toast.show({
+      icon: "success",
+      content: "上传已完成",
+    });
+  };
 
   return (
     <>
