@@ -9,7 +9,7 @@ import {
   switchInventoryInfo,
   switchMember,
 } from "api/machine";
-import { getMemberLogin } from "utils/auth";
+import { getLocalStorage, getMemberLogin } from "utils/auth";
 
 const { Item } = Grid;
 
@@ -20,7 +20,7 @@ export default () => {
   const [billNo, setBillNo] = useState(null);
   const [detailVis, setDetailVis] = useState(false);
   const [inventoryData, setInventoryData] = useState([]);
-  const [memberCode, setMemberCode] = useState("");
+  const [memberCode, setMemberCode] = useState(getMemberLogin());
   const memberCodeRef = useRef("");
 
   const back = () => {
@@ -28,10 +28,17 @@ export default () => {
   };
 
   const getData = async () => {
+    // console.log(memberCodeRef.current);
+    //本地逻辑
     const {
       status,
       data: { checkList },
-    } = await switchInventoryInfo({ memberCode: memberCodeRef.current });
+    } = getLocalStorage("checkList");
+    //在线逻辑
+    // const {
+    //   status,
+    //   data: { checkList },
+    // } = await switchInventoryInfo({ memberCode: memberCodeRef.current });
     if (status) {
       setInventoryData(checkList);
     } else {
@@ -57,27 +64,28 @@ export default () => {
     setDetailVis(false);
   }, []);
 
-  const getMemberInfo = async () => {
-    const memberLogin = getMemberLogin();
-    const {
-      status,
-      data: { memberList },
-    } = await switchMember();
-    if (status) {
-      const { memberCode } = memberList.find(
-        (item) => item.memberCode === memberLogin
-      );
-      memberCodeRef.current = memberCode;
-    } else {
-      Toast.show({
-        icon: "fail",
-        content: "获取人员信息失败",
-      });
-    }
-  };
+  // const getMemberInfo = async () => {
+    // const memberLogin = getMemberLogin();
+    // memberCodeRef.current = memberCode;
+    // const {
+    //   status,
+    //   data: { memberList },
+    // } = await switchMember();
+    // if (status) {
+    //   const { memberCode } = memberList.find(
+    //     (item) => item.memberCode === memberLogin
+    //   );
+    //   memberCodeRef.current = memberCode;
+    // } else {
+    //   Toast.show({
+    //     icon: "fail",
+    //     content: "获取人员信息失败",
+    //   });
+    // }
+  // };
 
   useEffect(() => {
-    getMemberInfo();
+    // getMemberInfo();
     getData();
   }, []);
 

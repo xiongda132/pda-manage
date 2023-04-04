@@ -14,6 +14,9 @@ import {
   getFileTable,
   getMember,
   saveLedger,
+  saveWorkFlow,
+  savaInventoryInfo,
+  savaUnbindInfo,
   switchFileTable,
   switchMember,
   switchCard,
@@ -145,7 +148,7 @@ export default () => {
 
   //下载盘点信息
   const getInventoryInfo = async () => {
-    const res = await switchInventoryInfo({ deptCode });
+    const res = await switchInventoryInfo({ memberCode: getMemberLogin() });
     // const {
     //   status,
     //   data: { checkList },
@@ -197,9 +200,69 @@ export default () => {
     }
   };
 
+  //上传整机批量流程信息
+  const workFlowUpload = async () => {
+    const workflowForm = getLocalStorage("workflowFormUpload");
+    if (workflowForm) {
+      const { status } = await saveWorkFlow({ workflowForm });
+      if (status) {
+        Toast.show({
+          icon: "success",
+          content: "上传整机批量成功",
+        });
+      } else {
+        Toast.show({
+          icon: "fail",
+          content: "上传整机批量失败",
+        });
+      }
+    }
+  };
+
+  //上传盘点信息
+  const inventoryUpload = async () => {
+    const checkList = getLocalStorage("inventoryDataUpload");
+    if (checkList) {
+      const { status } = await savaInventoryInfo({ checkList });
+      if (status) {
+        Toast.show({
+          icon: "success",
+          content: "上传盘点信息成功",
+        });
+      } else {
+        Toast.show({
+          icon: "fail",
+          content: "上传盘点信息失败",
+        });
+      }
+    }
+  };
+
+  //上传解绑信息
+  const unBindUpload = async () => {
+    const unbindList = getLocalStorage("unbindListUpload");
+    if (unbindList) {
+      const { status } = await savaUnbindInfo({ unbindList });
+      if (status) {
+        Toast.show({
+          icon: "success",
+          content: "上传解绑信息成功",
+        });
+      } else {
+        Toast.show({
+          icon: "fail",
+          content: "上传解绑信息失败",
+        });
+      }
+    }
+  };
+
   //上传所有数据
   const hanldeUpLoad = async () => {
     await zjtzDataUpload();
+    await workFlowUpload();
+    await inventoryUpload();
+    await unBindUpload();
     Toast.show({
       icon: "success",
       content: "上传已完成",

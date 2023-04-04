@@ -22,7 +22,7 @@ export const getFileTable = (params) => {
 };
 
 export const getDataInfo = (params) => {
-  return request(`/seeyon/rest/api/dataInfo/card?token=${getUserToken()}`, {
+  return request(`/seeyon/rest/api/dataInfo/card`, {
     ...params,
   });
 };
@@ -34,7 +34,7 @@ export const getWorkFlow = (params) => {
 };
 
 export const getNode = () => {
-  return request(`/seeyon/rest/api/dataInfo/node?token=${getUserToken()}`);
+  return request(`/seeyon/rest/api/dataInfo/node`);
 };
 
 export const getMember = () => {

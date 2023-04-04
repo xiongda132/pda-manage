@@ -7,6 +7,8 @@ import {
   setMemberLogin,
   getMemberLogin,
   setDeptCode,
+  setDeptName,
+  setMemberName,
 } from "utils/auth";
 
 let downloadData = [];
@@ -20,11 +22,13 @@ const getTip = async () => {
   } = await switchMember();
 
   if (status) {
-    const { deptCode } = memberList.find(
+    const { deptCode, deptName, memberName } = memberList.find(
       (item) => item.memberCode === memberLogin
     );
     if (deptCode) {
       setDeptCode(deptCode);
+      setDeptName(deptName);
+      setMemberName(memberName);
       alert(`登录id为${memberLogin}; \n部门代码为${deptCode}`);
     } else {
       alert(`部门代码为空`);

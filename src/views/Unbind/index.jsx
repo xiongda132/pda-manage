@@ -11,7 +11,7 @@ import {
 } from "antd-mobile";
 import styles from "./index.module.css";
 import { useEffect, useState, useRef, useCallback, useMemo } from "react";
-import { getMemberLogin } from "utils/auth";
+import { getMemberLogin, getLocalStorage, setLocalStorage } from "utils/auth";
 import {
   getMember,
   switchMember,
@@ -108,124 +108,169 @@ export default () => {
   const [seletedData, setSeletedData] = useState([]);
 
   const handleUnbind = async () => {
+    if (!seletedData.length) {
+      return Toast.show({
+        icon: "fail",
+        content: "请选择需要解绑的产品",
+      });
+    }
     console.log("seletedData", seletedData);
     const unbindList = seletedData?.map((item) => ({
       facilityCode: item,
     }));
-    const { status, msg } = await savaUnbindInfo({ unbindList });
-    if (status) {
+    const facilityCodeList = unbindList.map(({ facilityCode }) => facilityCode);
+
+    //本地逻辑, 获取本地数据进行更新
+    if (getLocalStorage("zjtzData")) {
+      let zjtzDataRes = { ...getLocalStorage("zjtzData") };
+      zjtzDataRes.data.zjtzData.forEach((item) => {
+        if (facilityCodeList.includes(item.facilityCode)) {
+          console.log(item.facilityCode);
+          delete item.epcData;
+        }
+      });
       Toast.show({
         icon: "success",
-        content: msg,
+        content: "解绑成功",
       });
-    } else {
-      Toast.show({
-        icon: "fail",
-        content: msg,
-      });
+      setLocalStorage("zjtzData", zjtzDataRes);
     }
+
+    //本地逻辑, 对操作数据进行存储
+    if (getLocalStorage("unbindListUpload")) {
+      const unbindListUpload = [...getLocalStorage("unbindListUpload")];
+      unbindListUpload.push(...unbindList);
+      setLocalStorage("unbindListUpload", unbindListUpload);
+    } else {
+      setLocalStorage("unbindListUpload", unbindList);
+    }
+
+    // const { status, msg } = await savaUnbindInfo({ unbindList });
+    // if (status) {
+    //   Toast.show({
+    //     icon: "success",
+    //     content: msg,
+    //   });
+    // } else {
+    //   Toast.show({
+    //     icon: "fail",
+    //     content: msg,
+    //   });
+    // }
   };
 
   const getFileTable = async () => {
-    const memberLogin = getMemberLogin();
     const {
       status,
-      data: { memberList },
-    } = await switchMember();
+      data: { zjtzData },
+    } = getLocalStorage("zjtzData");
     if (status) {
-      const { deptCode } = memberList.find(
-        (item) => item.memberCode === memberLogin
-      );
-      if (deptCode) {
-        depCodeRef.current = deptCode;
-        sessionStorage.setItem("deptCode", deptCode);
-        const {
-          status,
-          data: { zjtzData },
-        } = await switchFileTable({ deptCode });
-        if (status) {
-          zjtzDataRef.current = zjtzData; //保存接口数据
-        } else {
-          Toast.show({
-            icon: "fail",
-            content: "获取整机台账信息失败",
-          });
-        }
-      }
+      zjtzDataRef.current = zjtzData;
     } else {
       Toast.show({
         icon: "fail",
-        content: "获取部门信息失败",
+        content: "获取本地台账信息失败",
       });
     }
+    // const memberLogin = getMemberLogin();
+    // const {
+    //   status,
+    //   data: { memberList },
+    // } = await switchMember();
+    // if (status) {
+    //   const { deptCode } = memberList.find(
+    //     (item) => item.memberCode === memberLogin
+    //   );
+    //   if (deptCode) {
+    //     depCodeRef.current = deptCode;
+    //     sessionStorage.setItem("deptCode", deptCode);
+    //     const {
+    //       status,
+    //       data: { zjtzData },
+    //     } = await switchFileTable({ deptCode });
+    //     if (status) {
+    //       zjtzDataRef.current = zjtzData;
+    //     } else {
+    //       Toast.show({
+    //         icon: "fail",
+    //         content: "获取整机台账信息失败",
+    //       });
+    //     }
+    //   }
+    // } else {
+    //   Toast.show({
+    //     icon: "fail",
+    //     content: "获取部门信息失败",
+    //   });
+    // }
   };
 
-  const getFileTableEpc = async () => {
-    const memberLogin = getMemberLogin();
-    const {
-      status,
-      data: { memberList },
-    } = await switchMember();
-    if (status) {
-      const { deptCode } = memberList.find(
-        (item) => item.memberCode === memberLogin
-      );
-      if (deptCode) {
-        depCodeRef.current = deptCode;
-        sessionStorage.setItem("deptCode", deptCode);
-        const {
-          status,
-          data: { zjtzData },
-        } = await switchFileTable({ deptCode });
-        if (status) {
-          zjtzDataRef.current = zjtzData;
-          // setAccountData(zjtzData);
-          console.log("zjtzDataRef.current", zjtzDataRef.current);
-          console.log(zjtzData, epcValue);
-          const filterObj = zjtzData.find((item) => item.epcData === epcValue);
-          if (!filterObj) {
-            Toast.show({
-              icon: "fail",
-              content: "epc未绑定整机",
-            });
-          } else {
-            const {
-              facilityCode,
-              nbName,
-              gdhId,
-              projectTeam,
-              nodeName,
-              currentPlace,
-              nodeSecurity,
-              productionMember,
-            } = filterObj;
-            console.log("formRef.current", formRef.current);
-            formRef.current.setFieldsValue({
-              facilityCode,
-              nbName,
-              gdhId,
-              department: projectTeam,
-              procedureName: nodeName,
-              currentPlace: currentPlace ? currentPlace : "",
-              nodeSecurity,
-              productionMember,
-              department: projectTeam,
-            });
-          }
-        } else {
-          Toast.show({
-            icon: "fail",
-            content: "获取整机台账信息失败",
-          });
-        }
-      }
-    } else {
-      Toast.show({
-        icon: "fail",
-        content: "获取部门信息失败",
-      });
-    }
-  };
+  // const getFileTableEpc = async () => {
+  //   const memberLogin = getMemberLogin();
+  //   const {
+  //     status,
+  //     data: { memberList },
+  //   } = await switchMember();
+  //   if (status) {
+  //     const { deptCode } = memberList.find(
+  //       (item) => item.memberCode === memberLogin
+  //     );
+  //     if (deptCode) {
+  //       depCodeRef.current = deptCode;
+  //       sessionStorage.setItem("deptCode", deptCode);
+  //       const {
+  //         status,
+  //         data: { zjtzData },
+  //       } = await switchFileTable({ deptCode });
+  //       if (status) {
+  //         zjtzDataRef.current = zjtzData;
+  //         // setAccountData(zjtzData);
+  //         console.log("zjtzDataRef.current", zjtzDataRef.current);
+  //         console.log(zjtzData, epcValue);
+  //         const filterObj = zjtzData.find((item) => item.epcData === epcValue);
+  //         if (!filterObj) {
+  //           Toast.show({
+  //             icon: "fail",
+  //             content: "epc未绑定整机",
+  //           });
+  //         } else {
+  //           const {
+  //             facilityCode,
+  //             nbName,
+  //             gdhId,
+  //             projectTeam,
+  //             nodeName,
+  //             currentPlace,
+  //             nodeSecurity,
+  //             productionMember,
+  //           } = filterObj;
+  //           console.log("formRef.current", formRef.current);
+  //           formRef.current.setFieldsValue({
+  //             facilityCode,
+  //             nbName,
+  //             gdhId,
+  //             department: projectTeam,
+  //             procedureName: nodeName,
+  //             currentPlace: currentPlace ? currentPlace : "",
+  //             nodeSecurity,
+  //             productionMember,
+  //             department: projectTeam,
+  //           });
+  //         }
+  //       } else {
+  //         Toast.show({
+  //           icon: "fail",
+  //           content: "获取整机台账信息失败",
+  //         });
+  //       }
+  //     }
+  //   } else {
+  //     Toast.show({
+  //       icon: "fail",
+  //       content: "获取部门信息失败",
+  //     });
+  //   }
+  // };
 
   const handleChange = (mode) => {
     setScanMode(mode);
@@ -329,39 +374,44 @@ export default () => {
     };
   }, []);
 
-  const refreshData = useCallback(async () => {
-    if (timer.current) clearTimeout(timer.current);
-    const res = await scanQuery({
-      startTime: configTime.current,
-    });
-    console.log(res);
-    if (res.code === 1) {
-      if (res.scancode) {
-        console.log("scancode", res.scancode);
-        // if (!flag) {
-        console.log("此次扫描值为", res.scancode);
-        setScanValue((preQrcodeList) => {
-          const newQrcodeList = [...preQrcodeList];
-          if (!newQrcodeList.includes(res.scancode)) {
-            newQrcodeList.unshift(res.scancode);
-          }
-          return newQrcodeList;
-        });
-        setLoading(false);
-        // } else {
-        //   console.log("走了模式2");
-        //   setQrCodeVal(res.scancode);
-        // }
+  const refreshData = useCallback(
+    async () => {
+      if (timer.current) clearTimeout(timer.current);
+      const res = await scanQuery({
+        startTime: configTime.current,
+      });
+      console.log(res);
+      if (res.code === 1) {
+        if (res.scancode) {
+          console.log("scancode", res.scancode);
+          // if (!flag) {
+          console.log("此次扫描值为", res.scancode);
+          setScanValue((preQrcodeList) => {
+            const newQrcodeList = [...preQrcodeList];
+            if (!newQrcodeList.includes(res.scancode)) {
+              newQrcodeList.unshift(res.scancode);
+            }
+            return newQrcodeList;
+          });
+          setLoading(false);
+          // } else {
+          //   console.log("走了模式2");
+          //   setQrCodeVal(res.scancode);
+          // }
+        }
+        if (timer.current !== null) {
+          timer.current = setTimeout(refreshData, 200);
+        }
+      } else {
+        if (timer.current !== null) {
+          timer.current = setTimeout(refreshData, 200);
+        }
       }
-      if (timer.current !== null) {
-        timer.current = setTimeout(refreshData, 200);
-      }
-    } else {
-      if (timer.current !== null) {
-        timer.current = setTimeout(refreshData, 200);
-      }
-    }
-  }, [flag]);
+    },
+    [
+      /* flag */
+    ]
+  );
 
   const refreshEpcData = useCallback(async () => {
     if (timerEpc.current) clearTimeout(timerEpc.current);

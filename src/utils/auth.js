@@ -30,6 +30,22 @@ export const getDeptCode = () => {
   return sessionStorage.getItem("deptCode");
 };
 
+export const setDeptName = (deptName) => {
+  return sessionStorage.setItem("deptName", deptName);
+};
+
+export const getDeptName = () => {
+  return sessionStorage.getItem("deptName");
+};
+
+export const setMemberName = (memberName) => {
+  return sessionStorage.setItem("memberName", memberName);
+};
+
+export const getMemberName = () => {
+  return sessionStorage.getItem("memberName");
+};
+
 export const setLocalStorage = (key, value) => {
   localStorage.setItem(key, JSON.stringify(value));
 };

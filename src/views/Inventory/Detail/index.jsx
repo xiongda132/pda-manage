@@ -5,6 +5,7 @@ import { useHistory } from "react-router-dom";
 import dayjs from "dayjs";
 import { pdaConfig, pdaStart, padStop, queryPdaData } from "api/pda";
 import { savaInventoryInfo } from "api/machine";
+import { getLocalStorage, setLocalStorage } from "utils/auth";
 
 const { Item } = Grid;
 
@@ -23,24 +24,38 @@ export default ({
   );
 
   const handleSave = async () => {
-    const checkList = predata.map((item) => ({
+    const checkListMap = predata.map((item) => ({
       checkId: item.checkId,
       facilityCode: item.facilityCode,
       memberCode,
       checkResult: item.state,
     }));
-    const res = await savaInventoryInfo({ checkList });
-    if (res.status) {
-      Toast.show({
-        icon: "success",
-        content: "保存信息成功",
-      });
+
+    const checkList = checkListMap.filter(
+      (item) => item.checkResult === "已盘"
+    );
+
+    //本地逻辑, 对操作数据进行存储
+    if (getLocalStorage("inventoryDataUpload")) {
+      const inventoryDataUpload = [...getLocalStorage("inventoryDataUpload")];
+      inventoryDataUpload.push(...checkList);
+      setLocalStorage("inventoryDataUpload", inventoryDataUpload);
     } else {
-      Toast.show({
-        icon: "fail",
-        content: "保存信息失败",
-      });
+      setLocalStorage("inventoryDataUpload", checkList);
     }
+
+    // const res = await savaInventoryInfo({ checkList });
+    // if (res.status) {
+    //   Toast.show({
+    //     icon: "success",
+    //     content: "保存信息成功",
+    //   });
+    // } else {
+    //   Toast.show({
+    //     icon: "fail",
+    //     content: "保存信息失败",
+    //   });
+    // }
   };
 
   const inventoryDetail = useMemo(() => {
@@ -52,8 +67,8 @@ export default ({
     const pdaConfigRes = await pdaConfig({
       scanType: 0,
       rfidReadpower: localStorage.getItem("readPower")
-      ? localStorage.getItem("readPower")
-      : 10,
+        ? localStorage.getItem("readPower")
+        : 10,
     });
     if (pdaConfigRes.code === 1) {
       const pdaStartRes = await pdaStart({

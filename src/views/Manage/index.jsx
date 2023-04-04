@@ -14,7 +14,12 @@ import {
 import { useHistory } from "react-router-dom";
 import styles from "./index.module.css";
 import { useEffect, useState, useRef, useCallback } from "react";
-import { getMemberLogin } from "utils/auth";
+import {
+  getMemberLogin,
+  getDeptName,
+  getLocalStorage,
+  getMemberName,
+} from "utils/auth";
 import {
   getMember,
   switchMember,
@@ -80,6 +85,7 @@ export default () => {
   const [radioValue, setRadioValue] = useState("");
   const [breakData, setBreakData] = useState([]);
   const [accountData, setAccountData] = useState([]);
+  const [deptName, setDeptName] = useState(getDeptName());
 
   // const back = () => {
   //   history.go(-1);
@@ -107,7 +113,7 @@ export default () => {
       nodeSecurity,
       currentPlace,
       department,
-      productionMember,
+      productionMember: getMemberLogin(),
       newDate: dayjs().format("YYYY-MM-DD HH:mm:ss"),
       isBreak: isBreak ? "是" : "否",
       breakMessage,
@@ -143,27 +149,59 @@ export default () => {
   };
 
   const getprojectGroup = async () => {
-    const {
-      status,
-      data: { memberList },
-    } = await switchMember();
-    if (status) {
-      const deptList = memberList.map((item) => ({
-        label: item.deptName,
-        value: item.deptName,
-        // value: item.deptCode,
-      }));
-      deptList.unshift({ label: "请选择项目组", value: "" });
-      setProjectGroup(deptList);
-    } else {
-      Toast.show({
-        icon: "fail",
-        content: "获取节点信息失败",
-      });
-    }
+    formRef.current.setFieldsValue({
+      projectGroup: deptName,
+    });
+    // const memberLogin = getMemberLogin();
+    // const {
+    //   status,
+    //   data: { memberList },
+    // } = await switchMember();
+    // if (status) {
+    //   const projectGroup = memberList.find(
+    //     (item) => item.memberCode === memberLogin
+    //   );
+    //   if (projectGroup) {
+    //     formRef.current.setFieldsValue({
+    //       projectGroup: projectGroup.deptName,
+    //     });
+    //   } else {
+    //     Toast.show({
+    //       icon: "fail",
+    //       content: "未匹配到项目组信息",
+    //     });
+    //   }
+    // const deptList = memberList.map((item) => ({
+    //   label: item.deptName,
+    //   value: item.deptName,
+    //   value: item.deptCode,
+    // }));
+    // deptList.unshift({ label: "请选择项目组", value: "" });
+    // setProjectGroup(deptList);
+    // } else {
+    //   Toast.show({
+    //     icon: "fail",
+    //     content: "获取节点信息失败",
+    //   });
+    // }
   };
 
   const getProcedureData = async () => {
+    // const {
+    //   status,
+    //   data: { flowNodeForm },
+    // } = getLocalStorage("flowNodeForm");
+    // if (status) {
+    //   const filterNodeForm = flowNodeForm.filter(
+    //     (item) => item.nbName === nbName
+    //   );
+    //   const procedureData = filterNodeForm.map((item) => ({
+    //     label: item.flowNodeName,
+    //     value: item.nodeSort,
+    //   }));
+    //   procedureData.unshift({ label: "请选择工序", value: "" });
+    //   setProcedureData(procedureData);
+    // }
     const {
       status,
       data: { flowNodeForm },
@@ -206,24 +244,27 @@ export default () => {
   };
 
   const getDefaultFields = async () => {
-    const memberLogin = getMemberLogin();
-    const {
-      status,
-      data: { memberList },
-    } = await switchMember();
-    if (status) {
-      const { memberName } = memberList.find(
-        (item) => item.memberCode === memberLogin
-      );
-      formRef.current.setFieldsValue({
-        productionMember: memberName,
-      });
-    } else {
-      Toast.show({
-        icon: "fail",
-        content: "获取操作人失败",
-      });
-    }
+    formRef.current.setFieldsValue({
+      productionMember: getMemberName(),
+    });
+    // const memberLogin = getMemberLogin();
+    // const {
+    //   status,
+    //   data: { memberList },
+    // } = await switchMember();
+    // if (status) {
+    //   const { memberName } = memberList.find(
+    //     (item) => item.memberCode === memberLogin
+    //   );
+    //   formRef.current.setFieldsValue({
+    //     productionMember: memberName,
+    //   });
+    // } else {
+    //   Toast.show({
+    //     icon: "fail",
+    //     content: "获取操作人失败",
+    //   });
+    // }
   };
 
   const getFlowInfo = async () => {
@@ -309,12 +350,11 @@ export default () => {
             facilityCode,
             nbName,
             gdhId,
-            department: projectTeam,
+            department: deptName || projectTeam, //待确认
             procedureName: nodeName,
             currentPlace: currentPlace ? currentPlace : "",
             nodeSecurity,
             productionMember,
-            department: projectTeam,
           });
         } else {
           Toast.show({
@@ -813,7 +853,9 @@ export default () => {
                 </Form.Item>
                 <Checkbox onChange={handleInput}>手动输入</Checkbox>
                 <Form.Item label="项目组" name="department">
-                  <select className={styles.select}>
+                  <Input readOnly />
+
+                  {/* <select className={styles.select}>
                     {projectGroup.map((item) => {
                       return (
                         <option key={item.label} value={item.value}>
@@ -821,7 +863,7 @@ export default () => {
                         </option>
                       );
                     })}
-                  </select>
+                  </select> */}
                 </Form.Item>
                 <Form.Item label="流程节点" name="procedureName">
                   <select className={styles.select}>
