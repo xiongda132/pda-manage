@@ -251,6 +251,24 @@ export default () => {
     }
   };
 
+  const workFlowManage = async () => {
+    const workflowForm = getLocalStorage("workFlowUpload");
+    if (workflowForm) {
+      const { status } = await saveWorkFlow({ workflowForm });
+      if (status) {
+        Toast.show({
+          icon: "success",
+          content: "上传工序信息成功",
+        });
+      } else {
+        Toast.show({
+          icon: "fail",
+          content: "上传工序信息失败",
+        });
+      }
+    }
+  };
+
   //上传盘点信息
   const inventoryUpload = async () => {
     const checkList = getLocalStorage("inventoryDataUpload");
@@ -293,7 +311,8 @@ export default () => {
   const hanldeUpLoad = async () => {
     await zjtzDataUpload();
     await cardMessageFormUpload();
-    await workFlowUpload();
+    await workFlowUpload(); //整机
+    await workFlowManage(); //工序
     await inventoryUpload();
     await unBindUpload();
     Toast.show({

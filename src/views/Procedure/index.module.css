@@ -73,4 +73,5 @@
 .list {
   height: calc(100% - 335px);
   padding: 0px 10px;
+  overflow: scroll;
 }

@@ -19,6 +19,7 @@ import {
   getDeptName,
   getLocalStorage,
   getMemberName,
+  setLocalStorage
 } from "utils/auth";
 import {
   getMember,
@@ -119,18 +120,28 @@ export default () => {
       breakMessage,
     };
     workflowForm.push(formData);
-    const { status } = await saveWorkFlow({ workflowForm });
-    if (status) {
-      Toast.show({
-        icon: "success",
-        content: "提交成功",
-      });
+
+    //本地逻辑, 对操作数据进行存储
+    if (getLocalStorage("workFlowUpload")) {
+      const workFlowUpload = [...getLocalStorage("workFlowUpload")];
+      workFlowUpload.push(...workflowForm);
+      setLocalStorage("workFlowUpload", workFlowUpload);
     } else {
-      Toast.show({
-        icon: "fail",
-        content: `提交失败`,
-      });
+      setLocalStorage("workFlowUpload", workflowForm);
     }
+
+    // const { status } = await saveWorkFlow({ workflowForm });
+    // if (status) {
+    //   Toast.show({
+    //     icon: "success",
+    //     content: "提交成功",
+    //   });
+    // } else {
+    //   Toast.show({
+    //     icon: "fail",
+    //     content: `提交失败`,
+    //   });
+    // }
   };
 
   const handleSave = () => {
@@ -192,6 +203,7 @@ export default () => {
     //   data: { flowNodeForm },
     // } = getLocalStorage("flowNodeForm");
     // if (status) {
+
     //   const filterNodeForm = flowNodeForm.filter(
     //     (item) => item.nbName === nbName
     //   );
@@ -201,11 +213,17 @@ export default () => {
     //   }));
     //   procedureData.unshift({ label: "请选择工序", value: "" });
     //   setProcedureData(procedureData);
+    // } else {
+    //   Toast.show({
+    //     icon: "fail",
+    //     content: "获取节点信息失败",
+    //   });
     // }
+
     const {
       status,
       data: { flowNodeForm },
-    } = await switchNode();
+    } = getLocalStorage("flowNodeForm");
     if (status) {
       const procedureData = flowNodeForm.map((item) => ({
         label: item.flowNodeName,
@@ -227,7 +245,7 @@ export default () => {
     const {
       status,
       data: { locationList },
-    } = await switchLocation();
+    } = getLocalStorage("locationList");
     if (status) {
       const data = locationList.map((item) => ({
         label: item.field0001,
@@ -271,7 +289,7 @@ export default () => {
     const {
       status,
       data: { workflowForm },
-    } = await switchWorkFlow();
+    } = getLocalStorage("workflowForm")
     if (status) {
       let record = "";
       let facilityObj;
@@ -314,128 +332,211 @@ export default () => {
   };
 
   const getFileTable = async () => {
-    const memberLogin = getMemberLogin();
     const {
       status,
-      data: { memberList },
-    } = await switchMember();
+      data: { zjtzData },
+    } = getLocalStorage("zjtzData");
     if (status) {
-      const { deptCode } = memberList.find(
-        (item) => item.memberCode === memberLogin
+      zjtzDataRef.current = zjtzData;
+      const filterObj = zjtzData.find(
+        (item) => item.facilityCode === scanValue
       );
-      if (deptCode) {
-        depCodeRef.current = deptCode;
-        sessionStorage.setItem("deptCode", deptCode);
-        const {
-          status,
-          data: { zjtzData },
-        } = await switchFileTable({ deptCode });
-        if (status) {
-          // zjtzDataRef.current = zjtzData;
-          const filterObj = zjtzData.find(
-            (item) => item.facilityCode === scanValue
-          );
-          const {
-            facilityCode,
-            nbName,
-            gdhId,
-            projectTeam,
-            nodeName,
-            currentPlace,
-            nodeSecurity,
-            productionMember,
-          } = filterObj;
-          console.log("formRef.current", formRef.current);
-          formRef.current.setFieldsValue({
-            facilityCode,
-            nbName,
-            gdhId,
-            department: deptName || projectTeam, //待确认
-            procedureName: nodeName,
-            currentPlace: currentPlace ? currentPlace : "",
-            nodeSecurity,
-            productionMember,
-          });
-        } else {
-          Toast.show({
-            icon: "fail",
-            content: "获取整机台账信息失败",
-          });
-        }
-      }
+      const {
+        facilityCode,
+        nbName,
+        gdhId,
+        projectTeam,
+        nodeName,
+        currentPlace,
+        nodeSecurity,
+        productionMember,
+      } = filterObj;
+      console.log("formRef.current", formRef.current);
+      formRef.current.setFieldsValue({
+        facilityCode,
+        nbName,
+        gdhId,
+        department: deptName || projectTeam, //待确认
+        procedureName: nodeName,
+        currentPlace: currentPlace ? currentPlace : "",
+        nodeSecurity,
+        productionMember,
+      });
     } else {
       Toast.show({
         icon: "fail",
-        content: "获取部门信息失败",
+        content: "获取本地台账信息失败",
       });
     }
+
+    // const memberLogin = getMemberLogin();
+    // const {
+    //   status,
+    //   data: { memberList },
+    // } = await switchMember();
+    // if (status) {
+    //   const { deptCode } = memberList.find(
+    //     (item) => item.memberCode === memberLogin
+    //   );
+    //   if (deptCode) {
+    //     depCodeRef.current = deptCode;
+    //     sessionStorage.setItem("deptCode", deptCode);
+    //     const {
+    //       status,
+    //       data: { zjtzData },
+    //     } = await switchFileTable({ deptCode });
+    //     if (status) {
+    //       // zjtzDataRef.current = zjtzData;
+    //       const filterObj = zjtzData.find(
+    //         (item) => item.facilityCode === scanValue
+    //       );
+    //       const {
+    //         facilityCode,
+    //         nbName,
+    //         gdhId,
+    //         projectTeam,
+    //         nodeName,
+    //         currentPlace,
+    //         nodeSecurity,
+    //         productionMember,
+    //       } = filterObj;
+    //       console.log("formRef.current", formRef.current);
+    //       formRef.current.setFieldsValue({
+    //         facilityCode,
+    //         nbName,
+    //         gdhId,
+    //         department: deptName || projectTeam, //待确认
+    //         procedureName: nodeName,
+    //         currentPlace: currentPlace ? currentPlace : "",
+    //         nodeSecurity,
+    //         productionMember,
+    //       });
+    //     } else {
+    //       Toast.show({
+    //         icon: "fail",
+    //         content: "获取整机台账信息失败",
+    //       });
+    //     }
+    //   }
+    // } else {
+    //   Toast.show({
+    //     icon: "fail",
+    //     content: "获取部门信息失败",
+    //   });
+    // }
   };
 
   const getFileTableEpc = async () => {
-    const memberLogin = getMemberLogin();
     const {
       status,
-      data: { memberList },
-    } = await switchMember();
+      data: { zjtzData },
+    } = getLocalStorage("zjtzData");
     if (status) {
-      const { deptCode } = memberList.find(
-        (item) => item.memberCode === memberLogin
-      );
-      if (deptCode) {
-        depCodeRef.current = deptCode;
-        sessionStorage.setItem("deptCode", deptCode);
+      zjtzDataRef.current = zjtzData;
+      setAccountData(zjtzData);
+      console.log("zjtzDataRef.current", zjtzDataRef.current);
+      console.log(zjtzData, epcValue);
+      const filterObj = zjtzData.find((item) => item.epcData === epcValue);
+      if (!filterObj) {
+        Toast.show({
+          icon: "fail",
+          content: "epc未绑定整机",
+        });
+      } else {
         const {
-          status,
-          data: { zjtzData },
-        } = await switchFileTable({ deptCode });
-        if (status) {
-          zjtzDataRef.current = zjtzData;
-          setAccountData(zjtzData);
-          console.log("zjtzDataRef.current", zjtzDataRef.current);
-          console.log(zjtzData, epcValue);
-          const filterObj = zjtzData.find((item) => item.epcData === epcValue);
-          if (!filterObj) {
-            Toast.show({
-              icon: "fail",
-              content: "epc未绑定整机",
-            });
-          } else {
-            const {
-              facilityCode,
-              nbName,
-              gdhId,
-              projectTeam,
-              nodeName,
-              currentPlace,
-              nodeSecurity,
-              productionMember,
-            } = filterObj;
-            console.log("formRef.current", formRef.current);
-            formRef.current.setFieldsValue({
-              facilityCode,
-              nbName,
-              gdhId,
-              department: projectTeam,
-              procedureName: nodeName,
-              currentPlace: currentPlace ? currentPlace : "",
-              nodeSecurity,
-              productionMember,
-              department: projectTeam,
-            });
-          }
-        } else {
-          Toast.show({
-            icon: "fail",
-            content: "获取整机台账信息失败",
-          });
-        }
+          facilityCode,
+          nbName,
+          gdhId,
+          projectTeam,
+          nodeName,
+          currentPlace,
+          nodeSecurity,
+          productionMember,
+        } = filterObj;
+        console.log("formRef.current", formRef.current);
+        formRef.current.setFieldsValue({
+          facilityCode,
+          nbName,
+          gdhId,
+          department: projectTeam,
+          procedureName: nodeName,
+          currentPlace: currentPlace ? currentPlace : "",
+          nodeSecurity,
+          productionMember,
+          department: projectTeam,
+        });
       }
     } else {
       Toast.show({
         icon: "fail",
-        content: "获取部门信息失败",
+        content: "获取本地台账信息失败",
       });
     }
+
+    // const memberLogin = getMemberLogin();
+    // const {
+    //   status,
+    //   data: { memberList },
+    // } = await switchMember();
+    // if (status) {
+    //   const { deptCode } = memberList.find(
+    //     (item) => item.memberCode === memberLogin
+    //   );
+    //   if (deptCode) {
+    //     depCodeRef.current = deptCode;
+    //     sessionStorage.setItem("deptCode", deptCode);
+    //     const {
+    //       status,
+    //       data: { zjtzData },
+    //     } = await switchFileTable({ deptCode });
+    //     if (status) {
+    //       zjtzDataRef.current = zjtzData;
+    //       setAccountData(zjtzData);
+    //       console.log("zjtzDataRef.current", zjtzDataRef.current);
+    //       console.log(zjtzData, epcValue);
+    //       const filterObj = zjtzData.find((item) => item.epcData === epcValue);
+    //       if (!filterObj) {
+    //         Toast.show({
+    //           icon: "fail",
+    //           content: "epc未绑定整机",
+    //         });
+    //       } else {
+    //         const {
+    //           facilityCode,
+    //           nbName,
+    //           gdhId,
+    //           projectTeam,
+    //           nodeName,
+    //           currentPlace,
+    //           nodeSecurity,
+    //           productionMember,
+    //         } = filterObj;
+    //         console.log("formRef.current", formRef.current);
+    //         formRef.current.setFieldsValue({
+    //           facilityCode,
+    //           nbName,
+    //           gdhId,
+    //           department: projectTeam,
+    //           procedureName: nodeName,
+    //           currentPlace: currentPlace ? currentPlace : "",
+    //           nodeSecurity,
+    //           productionMember,
+    //           department: projectTeam,
+    //         });
+    //       }
+    //     } else {
+    //       Toast.show({
+    //         icon: "fail",
+    //         content: "获取整机台账信息失败",
+    //       });
+    //     }
+    //   }
+    // } else {
+    //   Toast.show({
+    //     icon: "fail",
+    //     content: "获取部门信息失败",
+    //   });
+    // }
   };
 
   useEffect(() => {
@@ -448,7 +549,7 @@ export default () => {
     const func = async () => {
       if (!loading) {
         if (scanValue) {
-          getFileTable();
+          await getFileTable();
           // getFlowInfo();
         }
         if (epcValue) {
@@ -686,89 +787,154 @@ export default () => {
   }, [radioValue]);
 
   const getBreakInfo = async () => {
-    const memberLogin = getMemberLogin();
     const {
       status,
-      data: { memberList },
-    } = await switchMember();
+      data: { zjtzData },
+    } = getLocalStorage("zjtzData");
     if (status) {
-      const { deptCode } = memberList.find(
-        (item) => item.memberCode === memberLogin
+      console.log(zjtzData, scanValue);
+      const filterObj = zjtzData.find(
+        (item) => item.facilityCode === scanValue
       );
-      if (deptCode) {
-        depCodeRef.current = deptCode;
-        sessionStorage.setItem("deptCode", deptCode);
-        const {
-          status,
-          data: { zjtzData },
-        } = await switchFileTable({ deptCode });
-        if (status) {
-          console.log(zjtzData, scanValue);
-          const filterObj = zjtzData.find(
+      const {
+        status,
+        data: { cardMessageForm },
+      } = getLocalStorage("cardMessageForm");
+      if (status) {
+        cardRef.current = cardMessageForm;
+        let allObj;
+        if (scanMode === "qrcode") {
+          allObj = cardMessageForm.filter(
             (item) => item.facilityCode === scanValue
           );
-          const {
-            status,
-            data: { cardMessageForm },
-          } = await switchCard({ deptCode });
-          if (status) {
-            cardRef.current = cardMessageForm;
-            let allObj;
-            if (scanMode === "qrcode") {
-              allObj = cardMessageForm.filter(
-                (item) => item.facilityCode === scanValue
-              );
-            }
-            if (scanMode === "rfid") {
-              let facilityCode = zjtzDataRef.current.filter(
-                (item) => item.epcData === epcValue
-              )?.[0].facilityCode;
-              if (facilityCode) {
-                allObj = cardMessageForm.filter(
-                  (item) => item.facilityCode === facilityCode
-                );
-              } else {
-                Toast.show({
-                  icon: "fail",
-                  content: "此epc没有对应的板卡列表",
-                });
-              }
-            }
-            const cardList = [...new Set(allObj.map((item) => item.cardName))];
-            const breakList = [];
-            cardList.forEach((item1) => {
-              const cardObj = allObj
-                .filter((item2) => item2.cardName === item1 && item2.cardNumber)
-                .map((item) => ({
-                  label: item.cardNumber + item1,
-                  value: item.cardNumber + item1,
-                }));
-              breakList.push(...cardObj);
-            });
-            breakList.unshift(
-              { label: "请选择故障类型", value: "" },
-              { label: "整机故障", value: "整机故障" }
+        }
+        if (scanMode === "rfid") {
+          let facilityCode = zjtzDataRef.current.filter(
+            (item) => item.epcData === epcValue
+          )?.[0].facilityCode;
+          if (facilityCode) {
+            allObj = cardMessageForm.filter(
+              (item) => item.facilityCode === facilityCode
             );
-            setBreakData(breakList);
           } else {
             Toast.show({
               icon: "fail",
-              content: "获取板卡信息失败",
+              content: "此epc没有对应的板卡列表",
             });
           }
-        } else {
-          Toast.show({
-            icon: "fail",
-            content: "获取整机台账信息失败",
-          });
         }
+        const cardList = [...new Set(allObj.map((item) => item.cardName))];
+        const breakList = [];
+        cardList.forEach((item1) => {
+          const cardObj = allObj
+            .filter((item2) => item2.cardName === item1 && item2.cardNumber)
+            .map((item) => ({
+              label: item.cardNumber + item1,
+              value: item.cardNumber + item1,
+            }));
+          breakList.push(...cardObj);
+        });
+        breakList.unshift(
+          { label: "请选择故障类型", value: "" },
+          { label: "整机故障", value: "整机故障" }
+        );
+        setBreakData(breakList);
+      } else {
+        Toast.show({
+          icon: "fail",
+          content: "获取板卡信息失败",
+        });
       }
     } else {
       Toast.show({
         icon: "fail",
-        content: "获取部门信息失败",
+        content: "获取整机台账信息失败",
       });
     }
+
+    // const memberLogin = getMemberLogin();
+    // const {
+    //   status,
+    //   data: { memberList },
+    // } = await switchMember();
+    // if (status) {
+    //   const { deptCode } = memberList.find(
+    //     (item) => item.memberCode === memberLogin
+    //   );
+    //   if (deptCode) {
+    //     depCodeRef.current = deptCode;
+    //     sessionStorage.setItem("deptCode", deptCode);
+    //     const {
+    //       status,
+    //       data: { zjtzData },
+    //     } = await switchFileTable({ deptCode });
+    //     if (status) {
+    //       console.log(zjtzData, scanValue);
+    //       const filterObj = zjtzData.find(
+    //         (item) => item.facilityCode === scanValue
+    //       );
+    //       const {
+    //         status,
+    //         data: { cardMessageForm },
+    //       } = await switchCard({ deptCode });
+    //       if (status) {
+    //         cardRef.current = cardMessageForm;
+    //         let allObj;
+    //         if (scanMode === "qrcode") {
+    //           allObj = cardMessageForm.filter(
+    //             (item) => item.facilityCode === scanValue
+    //           );
+    //         }
+    //         if (scanMode === "rfid") {
+    //           let facilityCode = zjtzDataRef.current.filter(
+    //             (item) => item.epcData === epcValue
+    //           )?.[0].facilityCode;
+    //           if (facilityCode) {
+    //             allObj = cardMessageForm.filter(
+    //               (item) => item.facilityCode === facilityCode
+    //             );
+    //           } else {
+    //             Toast.show({
+    //               icon: "fail",
+    //               content: "此epc没有对应的板卡列表",
+    //             });
+    //           }
+    //         }
+    //         const cardList = [...new Set(allObj.map((item) => item.cardName))];
+    //         const breakList = [];
+    //         cardList.forEach((item1) => {
+    //           const cardObj = allObj
+    //             .filter((item2) => item2.cardName === item1 && item2.cardNumber)
+    //             .map((item) => ({
+    //               label: item.cardNumber + item1,
+    //               value: item.cardNumber + item1,
+    //             }));
+    //           breakList.push(...cardObj);
+    //         });
+    //         breakList.unshift(
+    //           { label: "请选择故障类型", value: "" },
+    //           { label: "整机故障", value: "整机故障" }
+    //         );
+    //         setBreakData(breakList);
+    //       } else {
+    //         Toast.show({
+    //           icon: "fail",
+    //           content: "获取板卡信息失败",
+    //         });
+    //       }
+    //     } else {
+    //       Toast.show({
+    //         icon: "fail",
+    //         content: "获取整机台账信息失败",
+    //       });
+    //     }
+    //   }
+    // } else {
+    //   Toast.show({
+    //     icon: "fail",
+    //     content: "获取部门信息失败",
+    //   });
+    // }
   };
   console.log("accountData", accountData);
 

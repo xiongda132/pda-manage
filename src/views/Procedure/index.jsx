@@ -64,9 +64,9 @@ export default () => {
     const {
       nbName,
       procedureName,
-      productionMember,
+      // productionMember,
       nodeSec,
-      location,
+      currentPlace,
       gdhId,
     } = Object.assign({}, formObj);
     const workflowForm = epcList.map((item) => ({
@@ -75,7 +75,7 @@ export default () => {
       nodeName: procedureName,
       productionMember: getMemberLogin(),
       nodeSec,
-      location,
+      currentPlace,
       gdhId,
     }));
 
@@ -523,7 +523,7 @@ export default () => {
                   <Form.Item label="操作人" name="productionMember">
                     <Input readOnly />
                   </Form.Item>
-                  <Form.Item label="当前位置" name="location">
+                  <Form.Item label="当前位置" name="currentPlace">
                     {!checkboxValue ? (
                       <select className={styles.select}>
                         {positionData.map((item) => {
