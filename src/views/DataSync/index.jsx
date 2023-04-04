@@ -17,6 +17,7 @@ import {
   saveWorkFlow,
   savaInventoryInfo,
   savaUnbindInfo,
+  saveCardInfo,
   switchFileTable,
   switchMember,
   switchCard,
@@ -181,7 +182,7 @@ export default () => {
     });
   };
 
-  //上传绑定数据
+  //上传绑定信息
   const zjtzDataUpload = async () => {
     const zjtzData = getLocalStorage("zjtzDataUpload");
     if (zjtzData) {
@@ -195,6 +196,37 @@ export default () => {
         Toast.show({
           icon: "fail",
           content: "上传绑定数据失败",
+        });
+      }
+    }
+  };
+
+  //上传板卡信息
+  // const { status } = await saveCardInfo({ cardMessageForm });
+  // if (status) {
+  //   Toast.show({
+  //     icon: "success",
+  //     content: "保存信息成功",
+  //   });
+  // } else {
+  //   Toast.show({
+  //     icon: "fail",
+  //     content: "保存信息失败",
+  //   });
+  // }
+  const cardMessageFormUpload = async () => {
+    const cardMessageForm = getLocalStorage("cardMessageFormUpload");
+    if (cardMessageForm) {
+      const { status } = await saveCardInfo({ cardMessageForm });
+      if (status) {
+        Toast.show({
+          icon: "success",
+          content: "上传板卡信息成功",
+        });
+      } else {
+        Toast.show({
+          icon: "fail",
+          content: "上传板卡信息失败",
         });
       }
     }
@@ -260,6 +292,7 @@ export default () => {
   //上传所有数据
   const hanldeUpLoad = async () => {
     await zjtzDataUpload();
+    await cardMessageFormUpload();
     await workFlowUpload();
     await inventoryUpload();
     await unBindUpload();

@@ -23,7 +23,7 @@ import {
   saveCardInfo,
   switchCard,
 } from "api/machine";
-import { getMemberLogin } from "utils/auth";
+import { getMemberLogin, getLocalStorage, setLocalStorage } from "utils/auth";
 import { cardData } from "./test";
 
 const { Item } = Grid;
@@ -160,157 +160,264 @@ export default () => {
   const cardRef = useRef(null);
 
   const getFileTable = async () => {
-    const memberLogin = getMemberLogin();
     const {
       status,
-      data: { memberList },
-    } = await switchMember();
+      data: { zjtzData },
+    } = getLocalStorage("zjtzData");
     if (status) {
-      const { deptCode } = memberList.find(
-        (item) => item.memberCode === memberLogin
+      const filterObj = zjtzData.find(
+        (item) => item.facilityCode === scanValue
       );
-      if (deptCode) {
-        depCodeRef.current = deptCode;
-        sessionStorage.setItem("deptCode", deptCode);
-        const {
-          status,
-          data: { zjtzData },
-        } = await switchFileTable({ deptCode });
-        if (status) {
-          console.log(zjtzData, scanValue);
-          const filterObj = zjtzData.find(
-            (item) => item.facilityCode === scanValue
-          );
-          const {
-            status,
-            data: { cardMessageForm },
-          } = await switchCard({ deptCode });
-          if (status) {
-            cardRef.current = cardMessageForm;
-            const allObj = cardMessageForm.filter(
-              (item) => item.facilityCode === scanValue
-            );
-            const cardList = [...new Set(allObj.map((item) => item.cardName))];
-            const card = [];
-            cardList.forEach((item1) => {
-              const cardObj = allObj
-                .filter((item2) => item2.cardName === item1 && item2.cardNumber)
-                .map((item) => ({
-                  id: item.cardNumber,
-                  text: item.cardNumber,
-                  className: item.isCardBreak === "是" ? styles.break : "",
-                }));
-              card.push({
-                name: item1,
-                codeList: cardObj,
-              });
-            });
-            setFlag(true);
-            setLoading(false);
-            setCard(card);
-            setMachineInfo(filterObj);
-          } else {
-            Toast.show({
-              icon: "fail",
-              content: "获取板卡信息失败",
-            });
-          }
-        } else {
-          Toast.show({
-            icon: "fail",
-            content: "获取整机台账信息失败",
+      const {
+        status,
+        data: { cardMessageForm },
+      } = getLocalStorage("cardMessageForm");
+      if (status) {
+        cardRef.current = cardMessageForm;
+        const allObj = cardMessageForm.filter(
+          (item) => item.facilityCode === scanValue
+        );
+        const cardList = [...new Set(allObj.map((item) => item.cardName))];
+        const card = [];
+        cardList.forEach((item1) => {
+          const cardObj = allObj
+            .filter((item2) => item2.cardName === item1 && item2.cardNumber)
+            .map((item) => ({
+              id: item.cardNumber,
+              text: item.cardNumber,
+              className: item.isCardBreak === "是" ? styles.break : "",
+            }));
+          card.push({
+            name: item1,
+            codeList: cardObj,
           });
-        }
+        });
+        setFlag(true);
+        setLoading(false);
+        setCard(card);
+        setMachineInfo(filterObj);
+      } else {
+        Toast.show({
+          icon: "fail",
+          content: "获取板卡信息失败",
+        });
       }
     } else {
       Toast.show({
         icon: "fail",
-        content: "获取部门信息失败",
+        content: "获取整机台账信息失败",
       });
     }
+
+    // const memberLogin = getMemberLogin();
+    // const {
+    //   status,
+    //   data: { memberList },
+    // } = await switchMember();
+    // if (status) {
+    //   const { deptCode } = memberList.find(
+    //     (item) => item.memberCode === memberLogin
+    //   );
+    //   if (deptCode) {
+    //     depCodeRef.current = deptCode;
+    //     sessionStorage.setItem("deptCode", deptCode);
+    //     const {
+    //       status,
+    //       data: { zjtzData },
+    //     } = await switchFileTable({ deptCode });
+    //     if (status) {
+    //       console.log(zjtzData, scanValue);
+    //       const filterObj = zjtzData.find(
+    //         (item) => item.facilityCode === scanValue
+    //       );
+    //       const {
+    //         status,
+    //         data: { cardMessageForm },
+    //       } = await switchCard({ deptCode });
+    //       if (status) {
+    //         cardRef.current = cardMessageForm;
+    //         const allObj = cardMessageForm.filter(
+    //           (item) => item.facilityCode === scanValue
+    //         );
+    //         const cardList = [...new Set(allObj.map((item) => item.cardName))];
+    //         const card = [];
+    //         cardList.forEach((item1) => {
+    //           const cardObj = allObj
+    //             .filter((item2) => item2.cardName === item1 && item2.cardNumber)
+    //             .map((item) => ({
+    //               id: item.cardNumber,
+    //               text: item.cardNumber,
+    //               className: item.isCardBreak === "是" ? styles.break : "",
+    //             }));
+    //           card.push({
+    //             name: item1,
+    //             codeList: cardObj,
+    //           });
+    //         });
+    //         setFlag(true);
+    //         setLoading(false);
+    //         setCard(card);
+    //         setMachineInfo(filterObj);
+    //       } else {
+    //         Toast.show({
+    //           icon: "fail",
+    //           content: "获取板卡信息失败",
+    //         });
+    //       }
+    //     } else {
+    //       Toast.show({
+    //         icon: "fail",
+    //         content: "获取整机台账信息失败",
+    //       });
+    //     }
+    //   }
+    // } else {
+    //   Toast.show({
+    //     icon: "fail",
+    //     content: "获取部门信息失败",
+    //   });
+    // }
   };
 
   const getFileTableEpc = async () => {
-    const memberLogin = getMemberLogin();
     const {
       status,
-      data: { memberList },
-    } = await switchMember();
+      data: { zjtzData },
+    } = getLocalStorage("zjtzData");
     if (status) {
-      const { deptCode } = memberList.find(
-        (item) => item.memberCode === memberLogin
-      );
-      if (deptCode) {
-        depCodeRef.current = deptCode;
-        sessionStorage.setItem("deptCode", deptCode);
+      console.log(zjtzData, epcValue);
+      const filterObj = zjtzData.find((item) => item.epcData === epcValue);
+      if (!filterObj) {
+        Toast.show({
+          icon: "fail",
+          content: "epc未绑定整机",
+        });
+      } else {
         const {
           status,
-          data: { zjtzData },
-        } = await switchFileTable({ deptCode });
+          data: { cardMessageForm },
+        } = getLocalStorage("cardMessageForm");
         if (status) {
-          console.log(zjtzData, epcValue);
-          const filterObj = zjtzData.find((item) => item.epcData === epcValue);
-          if (!filterObj) {
-            Toast.show({
-              icon: "fail",
-              content: "epc未绑定整机",
+          cardRef.current = cardMessageForm;
+          console.log(cardRef.current);
+          const allObj = cardMessageForm.filter(
+            (item) => item.facilityCode === filterObj.facilityCode
+          );
+          const cardList = [...new Set(allObj.map((item) => item.cardName))];
+          const card = [];
+          cardList.forEach((item1) => {
+            const cardObj = allObj
+              .filter((item2) => item2.cardName === item1 && item2.cardNumber)
+              .map((item) => ({
+                id: item.cardNumber,
+                text: item.cardNumber,
+                className: item.isCardBreak === "是" ? styles.break : "",
+              }));
+            card.push({
+              name: item1,
+              codeList: cardObj,
             });
-          } else {
-            const {
-              status,
-              data: { cardMessageForm },
-            } = await switchCard({ deptCode });
-            if (status) {
-              cardRef.current = cardMessageForm;
-              console.log(cardRef.current);
-              const allObj = cardMessageForm.filter(
-                (item) => item.facilityCode === filterObj.facilityCode
-              );
-              const cardList = [
-                ...new Set(allObj.map((item) => item.cardName)),
-              ];
-              const card = [];
-              cardList.forEach((item1) => {
-                const cardObj = allObj
-                  .filter(
-                    (item2) => item2.cardName === item1 && item2.cardNumber
-                  )
-                  .map((item) => ({
-                    id: item.cardNumber,
-                    text: item.cardNumber,
-                    className: item.isCardBreak === "是" ? styles.break : "",
-                  }));
-                card.push({
-                  name: item1,
-                  codeList: cardObj,
-                });
-              });
-              setPdaReadyEpc(false);
-              setScanMode("qrcode");
-              setFlag(true);
-              setLoading(false);
-              setCard(card);
-              setMachineInfo(filterObj);
-            } else {
-              Toast.show({
-                icon: "fail",
-                content: "获取板卡信息失败",
-              });
-            }
-          }
+          });
+          setPdaReadyEpc(false);
+          setScanMode("qrcode");
+          setFlag(true);
+          setLoading(false);
+          setCard(card);
+          setMachineInfo(filterObj);
         } else {
           Toast.show({
             icon: "fail",
-            content: "获取整机台账信息失败",
+            content: "获取板卡信息失败",
           });
         }
       }
     } else {
       Toast.show({
         icon: "fail",
-        content: "获取部门信息失败",
+        content: "获取整机台账信息失败",
       });
     }
+
+    // const memberLogin = getMemberLogin();
+    // const {
+    //   status,
+    //   data: { memberList },
+    // } = await switchMember();
+    // if (status) {
+    //   const { deptCode } = memberList.find(
+    //     (item) => item.memberCode === memberLogin
+    //   );
+    //   if (deptCode) {
+    //     depCodeRef.current = deptCode;
+    //     sessionStorage.setItem("deptCode", deptCode);
+    //     const {
+    //       status,
+    //       data: { zjtzData },
+    //     } = await switchFileTable({ deptCode });
+    //     if (status) {
+    //       console.log(zjtzData, epcValue);
+    //       const filterObj = zjtzData.find((item) => item.epcData === epcValue);
+    //       if (!filterObj) {
+    //         Toast.show({
+    //           icon: "fail",
+    //           content: "epc未绑定整机",
+    //         });
+    //       } else {
+    //         const {
+    //           status,
+    //           data: { cardMessageForm },
+    //         } = await switchCard({ deptCode });
+    //         if (status) {
+    //           cardRef.current = cardMessageForm;
+    //           console.log(cardRef.current);
+    //           const allObj = cardMessageForm.filter(
+    //             (item) => item.facilityCode === filterObj.facilityCode
+    //           );
+    //           const cardList = [
+    //             ...new Set(allObj.map((item) => item.cardName)),
+    //           ];
+    //           const card = [];
+    //           cardList.forEach((item1) => {
+    //             const cardObj = allObj
+    //               .filter(
+    //                 (item2) => item2.cardName === item1 && item2.cardNumber
+    //               )
+    //               .map((item) => ({
+    //                 id: item.cardNumber,
+    //                 text: item.cardNumber,
+    //                 className: item.isCardBreak === "是" ? styles.break : "",
+    //               }));
+    //             card.push({
+    //               name: item1,
+    //               codeList: cardObj,
+    //             });
+    //           });
+    //           setPdaReadyEpc(false);
+    //           setScanMode("qrcode");
+    //           setFlag(true);
+    //           setLoading(false);
+    //           setCard(card);
+    //           setMachineInfo(filterObj);
+    //         } else {
+    //           Toast.show({
+    //             icon: "fail",
+    //             content: "获取板卡信息失败",
+    //           });
+    //         }
+    //       }
+    //     } else {
+    //       Toast.show({
+    //         icon: "fail",
+    //         content: "获取整机台账信息失败",
+    //       });
+    //     }
+    //   }
+    // } else {
+    //   Toast.show({
+    //     icon: "fail",
+    //     content: "获取部门信息失败",
+    //   });
+    // }
   };
 
   useEffect(() => {
@@ -383,18 +490,29 @@ export default () => {
       }
     });
     console.log(cardMessageForm);
-    const { status } = await saveCardInfo({ cardMessageForm });
-    if (status) {
-      Toast.show({
-        icon: "success",
-        content: "保存信息成功",
-      });
+
+
+     //本地逻辑, 对操作数据进行存储
+     if (getLocalStorage("cardMessageFormUpload")) {
+      const cardMessageFormUpload = [...getLocalStorage("cardMessageFormUpload")];
+      cardMessageFormUpload.push(...cardMessageForm);
+      setLocalStorage("cardMessageFormUpload", cardMessageFormUpload);
     } else {
-      Toast.show({
-        icon: "fail",
-        content: "保存信息失败",
-      });
+      setLocalStorage("cardMessageFormUpload", cardMessageForm);
     }
+
+    // const { status } = await saveCardInfo({ cardMessageForm });
+    // if (status) {
+    //   Toast.show({
+    //     icon: "success",
+    //     content: "保存信息成功",
+    //   });
+    // } else {
+    //   Toast.show({
+    //     icon: "fail",
+    //     content: "保存信息失败",
+    //   });
+    // }
     // setCardInfo([]);
     // setIsScan(false);
   };
