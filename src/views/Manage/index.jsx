@@ -19,7 +19,7 @@ import {
   getDeptName,
   getLocalStorage,
   getMemberName,
-  setLocalStorage
+  setLocalStorage,
 } from "utils/auth";
 import {
   getMember,
@@ -196,50 +196,94 @@ export default () => {
     //   });
     // }
   };
-
-  const getProcedureData = async () => {
-    // const {
-    //   status,
-    //   data: { flowNodeForm },
-    // } = getLocalStorage("flowNodeForm");
-    // if (status) {
-
-    //   const filterNodeForm = flowNodeForm.filter(
-    //     (item) => item.nbName === nbName
-    //   );
-    //   const procedureData = filterNodeForm.map((item) => ({
-    //     label: item.flowNodeName,
-    //     value: item.nodeSort,
-    //   }));
-    //   procedureData.unshift({ label: "请选择工序", value: "" });
-    //   setProcedureData(procedureData);
-    // } else {
-    //   Toast.show({
-    //     icon: "fail",
-    //     content: "获取节点信息失败",
-    //   });
-    // }
-
+  const getProcedureData = (workFlowName) => {
     const {
       status,
       data: { flowNodeForm },
     } = getLocalStorage("flowNodeForm");
     if (status) {
-      const procedureData = flowNodeForm.map((item) => ({
-        label: item.flowNodeName,
-        value: item.flowNodeName,
-        // value: item.nodeSort,
+      const filterNodeForm = flowNodeForm.filter(
+        (item) => item.flowName === workFlowName
+      );
+      const procedureData = filterNodeForm.map((item) => ({
+        label: item.detailNodeName,
+        value: item.detailNodeName,
       }));
-      console.log(procedureData);
+      const detailNodeNameMap = [
+        ...new Set(procedureData.map((item) => item.detailNodeName)),
+      ].map((item) => ({
+        label: item,
+        value: item,
+      }));
       procedureData.unshift({ label: "请选择工序", value: "" });
-      setProcedureData(procedureData);
-    } else {
-      Toast.show({
-        icon: "fail",
-        content: "获取节点信息失败",
-      });
+      setProcedureData(detailNodeNameMap);
     }
+    // const {
+    //   status,
+    //   data: { flowNodeForm },
+    // } = getLocalStorage("flowNodeForm");
+    // if (status) {
+    //   const filterNodeForm = flowNodeForm.filter(
+    //     (item) => item.nbName === nbName
+    //   );
+    //   const procedureData = filterNodeForm.map((item) => ({
+    //     label: item.detailNodeName,
+    //     value: item.detailNodeName,
+    //   }));
+    //   const detailNodeNameMap = [
+    //     ...new Set(procedureData.map((item) => item.detailNodeName)),
+    //   ].map((item) => ({
+    //     label: item,
+    //     value: item,
+    //   }));
+    //   procedureData.unshift({ label: "请选择工序", value: "" });
+    //   setProcedureData(detailNodeNameMap);
+    // }
   };
+
+  // const getProcedureData = async () => {
+  //   // const {
+  //   //   status,
+  //   //   data: { flowNodeForm },
+  //   // } = getLocalStorage("flowNodeForm");
+  //   // if (status) {
+
+  //   //   const filterNodeForm = flowNodeForm.filter(
+  //   //     (item) => item.nbName === nbName
+  //   //   );
+  //   //   const procedureData = filterNodeForm.map((item) => ({
+  //   //     label: item.flowNodeName,
+  //   //     value: item.nodeSort,
+  //   //   }));
+  //   //   procedureData.unshift({ label: "请选择工序", value: "" });
+  //   //   setProcedureData(procedureData);
+  //   // } else {
+  //   //   Toast.show({
+  //   //     icon: "fail",
+  //   //     content: "获取节点信息失败",
+  //   //   });
+  //   // }
+
+  //   const {
+  //     status,
+  //     data: { flowNodeForm },
+  //   } = getLocalStorage("flowNodeForm");
+  //   if (status) {
+  //     const procedureData = flowNodeForm.map((item) => ({
+  //       label: item.flowNodeName,
+  //       value: item.flowNodeName,
+  //       // value: item.nodeSort,
+  //     }));
+  //     console.log(procedureData);
+  //     procedureData.unshift({ label: "请选择工序", value: "" });
+  //     setProcedureData(procedureData);
+  //   } else {
+  //     Toast.show({
+  //       icon: "fail",
+  //       content: "获取节点信息失败",
+  //     });
+  //   }
+  // };
 
   const getPositionData = async () => {
     const {
@@ -289,7 +333,7 @@ export default () => {
     const {
       status,
       data: { workflowForm },
-    } = getLocalStorage("workflowForm")
+    } = getLocalStorage("workflowForm");
     if (status) {
       let record = "";
       let facilityObj;
@@ -347,9 +391,11 @@ export default () => {
         gdhId,
         projectTeam,
         nodeName,
+        detailNodeName,
         currentPlace,
         nodeSecurity,
         productionMember,
+        workFlowName,
       } = filterObj;
       console.log("formRef.current", formRef.current);
       formRef.current.setFieldsValue({
@@ -357,11 +403,12 @@ export default () => {
         nbName,
         gdhId,
         department: deptName || projectTeam, //待确认
-        procedureName: nodeName,
+        procedureName: detailNodeName,
         currentPlace: currentPlace ? currentPlace : "",
         nodeSecurity,
         productionMember,
       });
+      getProcedureData(workFlowName);
     } else {
       Toast.show({
         icon: "fail",
@@ -449,9 +496,11 @@ export default () => {
           gdhId,
           projectTeam,
           nodeName,
+          detailNodeName,
           currentPlace,
           nodeSecurity,
           productionMember,
+          workFlowName,
         } = filterObj;
         console.log("formRef.current", formRef.current);
         formRef.current.setFieldsValue({
@@ -459,12 +508,13 @@ export default () => {
           nbName,
           gdhId,
           department: projectTeam,
-          procedureName: nodeName,
+          procedureName: detailNodeName,
           currentPlace: currentPlace ? currentPlace : "",
           nodeSecurity,
           productionMember,
           department: projectTeam,
         });
+        getProcedureData(workFlowName);
       }
     } else {
       Toast.show({
@@ -556,7 +606,7 @@ export default () => {
           await getFileTableEpc(); //getFlowInfo()函数需要访问某些状态，等待这个函数设置所有状态后，再执行后续的调用
         }
         getprojectGroup();
-        getProcedureData();
+        // getProcedureData();
         getPositionData();
         getDefaultFields();
         getFlowInfo();

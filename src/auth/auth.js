@@ -23,7 +23,7 @@ const getTip = async () => {
 
   if (status) {
     const { deptCode, deptName, memberName } = memberList.find(
-      (item) => item.memberCode === memberLogin
+      (item) => item.memberLogin === memberLogin
     );
     if (deptCode) {
       setDeptCode(deptCode);

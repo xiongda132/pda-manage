@@ -72,11 +72,12 @@ export default () => {
     const workflowForm = epcList.map((item) => ({
       facilityCode: item,
       nbName,
-      nodeName: procedureName,
+      detailedNodeName: procedureName,
       productionMember: getMemberLogin(),
       nodeSec,
-      currentPlace,
+      location: currentPlace,
       gdhId,
+      newDate: dayjs().format("YYYY-MM-DD HH:mm:ss"),
     }));
 
     //本地逻辑, 对操作数据进行存储
@@ -174,16 +175,16 @@ export default () => {
 
   useEffect(() => {
     initPda();
-    // initDevicePlus();
+    initDevicePlus();
     return () => {
       const plus = window.plus || {};
       padStop({
         endTime: configTime.current,
       });
-      // document.removeEventListener("plusReady", plusReady);
-      // plus?.key.removeEventListener("backbutton", back);
+      document.removeEventListener("plusReady", plusReady);
+      plus?.key.removeEventListener("backbutton", back);
     };
-  }, [initPda /* initDevicePlus */]);
+  }, [initPda, initDevicePlus]);
 
   const timer = useRef(null);
   const [loading, setLoading] = useState(true);
@@ -194,18 +195,22 @@ export default () => {
     const res = await queryPdaData({
       startTime: configTime.current,
     });
+    console.log(res);
     if (res.code === 1) {
       const curEpcList = res.data.map(({ epc }) => epc);
       setEpcList((preEpcList) => {
         const newEpcList = [...preEpcList];
         curEpcList.forEach((epc) => {
-          if (newEpcList.indexOf(epc) === -1) {
+          if (newEpcList.map((item) => item.epc).indexOf(epc) === -1) {
             // 根据设备编号筛选某个工单下的epc列表
             const zjtzObj = zjtzDataRef.current.find(
               (item) => item.gdhId === billRef.current && item.epcData === epc
             );
             if (zjtzObj) {
-              newEpcList.unshift(zjtzObj.facilityCode);
+              newEpcList.unshift({
+                facilityCode: zjtzObj.facilityCode,
+                epc: zjtzObj.epcData,
+              });
             } else {
               Toast.show({
                 content: "epc不属于此工单或未绑定整机",
@@ -214,6 +219,7 @@ export default () => {
             // newEpcList.unshift(epc);
           }
         });
+        // console.log("newEpcList", newEpcList);
         return newEpcList;
       });
       setLoading(false);
@@ -338,7 +344,7 @@ export default () => {
     // }
   };
 
-  const getProcedureData = (nbName) => {
+  const getProcedureData = (workFlowName) => {
     //本地逻辑
     // const {
     //   status,
@@ -363,14 +369,20 @@ export default () => {
     } = getLocalStorage("flowNodeForm");
     if (status) {
       const filterNodeForm = flowNodeForm.filter(
-        (item) => item.nbName === nbName
+        (item) => item.flowName === workFlowName
       );
       const procedureData = filterNodeForm.map((item) => ({
-        label: item.flowNodeName,
-        value: item.nodeSort,
+        label: item.detailNodeName,
+        value: item.detailNodeName,
+      }));
+      const detailNodeNameMap = [
+        ...new Set(procedureData.map((item) => item.detailNodeName)),
+      ].map((item) => ({
+        label: item,
+        value: item,
       }));
       procedureData.unshift({ label: "请选择工序", value: "" });
-      setProcedureData(procedureData);
+      setProcedureData(detailNodeNameMap);
     }
     // }
 
@@ -416,9 +428,10 @@ export default () => {
   };
 
   const getDefaultFields = async () => {
-    formRef.current.setFieldsValue({
+    const defaultnodeName = formRef.current.setFieldsValue({
       productionMember: getMemberName(),
     });
+
     // const memberLogin = getMemberLogin();
     // const {
     //   status,
@@ -456,13 +469,13 @@ export default () => {
   const handleBillChange = (e) => {
     if (e.target.value) {
       billRef.current = e.target.value;
-      const nbName = zjtzDataRef.current.find(
+      const { nbName, workFlowName } = zjtzDataRef.current.find(
         (item) => item.gdhId === e.target.value
-      ).nbName;
+      );
       formRef.current.setFieldsValue({
         nbName,
       });
-      getProcedureData(nbName);
+      getProcedureData(workFlowName);
     } else {
       formRef.current.setFieldsValue({
         nbName: "无",
@@ -579,10 +592,10 @@ export default () => {
                 <div className={styles.list}>
                   {epcList.map((item) => {
                     return (
-                      <div key={item} className={styles.listItem}>
+                      <div key={item.facilityCode} className={styles.listItem}>
                         <Grid columns={24} gap={8}>
                           <Item span={15} style={{ lineHeight: "35px" }}>
-                            设备编号: {item}
+                            设备编号: {item.facilityCode}
                           </Item>
                         </Grid>
                       </div>

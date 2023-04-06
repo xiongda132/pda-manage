@@ -32,15 +32,50 @@ import {
   setLocalStorage,
   getLocalStorage,
 } from "utils/auth";
-import { useState } from "react";
+import { useState, useCallback, useEffect } from "react";
 import styles from "./index.module.css";
 
 export default () => {
   const history = useHistory();
+  const location = useLocation()
   const [deptCode, setDeptCode] = useState(getDeptCode());
-  const handleBackMainPage = () => {
+  // const handleBackMainPage = () => {
+  //   history.push("/");
+  // };
+  const back = useCallback(() => {
+    const plus = window.plus || {};
+    // console.log("退出登录");
+    console.log(location, "location");
     history.push("/");
-  };
+    plus?.key.removeEventListener("backbutton", back);
+  }, [location]);
+
+  const plusReady = useCallback(() => {
+    const plus = window.plus || {};
+    function back() {
+      // console.log("退出登录");
+      history.push("/");
+      plus?.key.removeEventListener("backbutton", back);
+    }
+    plus?.key.addEventListener("backbutton", back);
+  }, [history, location]);
+
+  const initDevicePlus = useCallback(() => {
+    if (window.plus) {
+      plusReady();
+    } else {
+      document.addEventListener("plusready", plusReady, false);
+    }
+  }, [plusReady]);
+
+  useEffect(() => {
+    initDevicePlus();
+    return () => {
+      const plus = window.plus || {};
+      document.removeEventListener("plusReady", plusReady);
+      plus?.key.removeEventListener("backbutton", back);
+    };
+  }, [initDevicePlus]);
 
   //下载整机台账主表信息
   const getFileTable = async () => {
@@ -176,6 +211,7 @@ export default () => {
     await getWorkFlow();
     await getNode();
     await getInventoryInfo();
+
     Toast.show({
       icon: "success",
       content: "下载已完成",
@@ -324,7 +360,7 @@ export default () => {
   return (
     <>
       <div style={{ height: "100vh" }}>
-        <NavBar back="返回" onBack={handleBackMainPage}>
+        <NavBar back="返回" onBack={back}>
           数据同步
         </NavBar>
         <div className={styles.content}>

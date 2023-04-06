@@ -221,6 +221,19 @@ export default () => {
       setLocalStorage("zjtzDataUpload", zjtzData);
     }
 
+    // 删除本地缓存的解绑数据
+    if (getLocalStorage("unbindListUpload")) {
+      const unbindListUpload = [...getLocalStorage("unbindListUpload")];
+      if (unbindListUpload.length > 0) {
+        unbindListUpload.forEach((item, index, arr) => {
+          if (item.facilityCode === qrCodeVal) {
+            arr.splice(index, 1);
+          }
+        });
+      }
+      setLocalStorage("unbindListUpload", unbindListUpload);
+    }
+
     //在线逻辑
     // const { status } = await saveLedger({ zjtzData });
     // if (status) {
@@ -518,6 +531,10 @@ export default () => {
     }
   }, [scanMode]);
 
+  const bindAmount = useMemo(() => {
+    return machineList.filter((item) => item.epcData)?.length;
+  }, [machineList]);
+
   return (
     <>
       <div style={{ height: "100vh" }}>
@@ -548,7 +565,7 @@ export default () => {
               <Input
                 ref={(r) => (qrRef.current = r)}
                 placeholder="请扫描二维码..."
-                style={{ display: "inline-block", width: "43%" }}
+                style={{ display: "inline-block", width: "80%" }}
                 value={qrCodeVal}
               />
             </div>
@@ -557,7 +574,7 @@ export default () => {
               <Input
                 ref={(r) => (epcRef.current = r)}
                 placeholder="请扫描epc..."
-                style={{ display: "inline-block", width: "49%" }}
+                style={{ display: "inline-block", width: "80%" }}
                 value={epcCodeVal}
               />
               {/* <Button style={{ width: "30%" }} onClick={handleScan}>
@@ -581,9 +598,12 @@ export default () => {
             <div className={styles.bottom}>
               <div className={styles.listAndAmount}>
                 <span className={styles.machineList}>整机列表</span>
-                <span className={styles.amount}>
-                  数量: {machineList?.length}
-                </span>
+                <div>
+                  <span className={styles.amount}>
+                    总数量: {machineList?.length}
+                  </span>
+                  <span className={styles.amount}>绑定数量: {bindAmount}</span>
+                </div>
               </div>
               <div className={styles.listContent}>
                 {machineList.map((item, index) => {

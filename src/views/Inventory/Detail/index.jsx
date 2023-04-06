@@ -132,16 +132,16 @@ export default ({
 
   useEffect(() => {
     initPda();
-    // initDevicePlus();
+    initDevicePlus();
     return () => {
       const plus = window.plus || {};
       padStop({
         endTime: configTime.current,
       });
-      // document.removeEventListener("plusReady", plusReady);
-      // plus?.key.removeEventListener("backbutton", back);
+      document.removeEventListener("plusReady", plusReady);
+      plus?.key.removeEventListener("backbutton", back);
     };
-  }, [initPda /* initDevicePlus */]);
+  }, [initPda, initDevicePlus]);
 
   const timer = useRef(null);
   // const [loading, setLoading] = useState(true);

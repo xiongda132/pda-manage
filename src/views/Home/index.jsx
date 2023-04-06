@@ -42,11 +42,11 @@ const CLogin = (props) => {
   }, [plusReady]);
 
   useEffect(() => {
-    // initDevicePlus();
+    initDevicePlus();
     return () => {
       const plus = window.plus || {};
-      // document.removeEventListener("plusReady", plusReady);
-      // plus?.key.removeEventListener("backbutton", back);
+      document.removeEventListener("plusReady", plusReady);
+      plus?.key.removeEventListener("backbutton", back);
     };
   }, [initDevicePlus]);
 
