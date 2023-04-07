@@ -37,7 +37,7 @@ import styles from "./index.module.css";
 
 export default () => {
   const history = useHistory();
-  const location = useLocation()
+  const location = useLocation();
   const [deptCode, setDeptCode] = useState(getDeptCode());
   // const handleBackMainPage = () => {
   //   history.push("/");
@@ -228,6 +228,7 @@ export default () => {
           icon: "success",
           content: "上传绑定数据成功",
         });
+        localStorage.removeItem("zjtzDataUpload");
       } else {
         Toast.show({
           icon: "fail",
@@ -238,18 +239,6 @@ export default () => {
   };
 
   //上传板卡信息
-  // const { status } = await saveCardInfo({ cardMessageForm });
-  // if (status) {
-  //   Toast.show({
-  //     icon: "success",
-  //     content: "保存信息成功",
-  //   });
-  // } else {
-  //   Toast.show({
-  //     icon: "fail",
-  //     content: "保存信息失败",
-  //   });
-  // }
   const cardMessageFormUpload = async () => {
     const cardMessageForm = getLocalStorage("cardMessageFormUpload");
     if (cardMessageForm) {
@@ -259,6 +248,7 @@ export default () => {
           icon: "success",
           content: "上传板卡信息成功",
         });
+        localStorage.removeItem("cardMessageFormUpload");
       } else {
         Toast.show({
           icon: "fail",
@@ -268,7 +258,7 @@ export default () => {
     }
   };
 
-  //上传整机批量流程信息
+  //上传整机批量流程信息(整机批量和路程管理公用一个接口)
   const workFlowUpload = async () => {
     const workflowForm = getLocalStorage("workflowFormUpload");
     if (workflowForm) {
@@ -278,6 +268,7 @@ export default () => {
           icon: "success",
           content: "上传整机批量成功",
         });
+        localStorage.removeItem("workflowFormUpload");
       } else {
         Toast.show({
           icon: "fail",
@@ -287,23 +278,25 @@ export default () => {
     }
   };
 
-  const workFlowManage = async () => {
-    const workflowForm = getLocalStorage("workFlowUpload");
-    if (workflowForm) {
-      const { status } = await saveWorkFlow({ workflowForm });
-      if (status) {
-        Toast.show({
-          icon: "success",
-          content: "上传工序信息成功",
-        });
-      } else {
-        Toast.show({
-          icon: "fail",
-          content: "上传工序信息失败",
-        });
-      }
-    }
-  };
+  //废弃
+  // const workFlowManage = async () => {
+  //   const workflowForm = getLocalStorage("workFlowUpload");
+  //   if (workflowForm) {
+  //     const { status } = await saveWorkFlow({ workflowForm });
+  //     if (status) {
+  //       Toast.show({
+  //         icon: "success",
+  //         content: "上传工序信息成功",
+  //       });
+  //       // localStorage.removeItem("workflowFormUpload")
+  //     } else {
+  //       Toast.show({
+  //         icon: "fail",
+  //         content: "上传工序信息失败",
+  //       });
+  //     }
+  //   }
+  // };
 
   //上传盘点信息
   const inventoryUpload = async () => {
@@ -315,6 +308,7 @@ export default () => {
           icon: "success",
           content: "上传盘点信息成功",
         });
+        localStorage.removeItem("inventoryDataUpload");
       } else {
         Toast.show({
           icon: "fail",
@@ -334,6 +328,7 @@ export default () => {
           icon: "success",
           content: "上传解绑信息成功",
         });
+        localStorage.removeItem("unbindListUpload");
       } else {
         Toast.show({
           icon: "fail",
@@ -348,7 +343,7 @@ export default () => {
     await zjtzDataUpload();
     await cardMessageFormUpload();
     await workFlowUpload(); //整机
-    await workFlowManage(); //工序
+    // await workFlowManage(); //工序
     await inventoryUpload();
     await unBindUpload();
     Toast.show({

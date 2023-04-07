@@ -158,6 +158,7 @@ export default () => {
   const [epcValue, setEpcValue] = useState("");
   const [flag, setFlag] = useState(false);
   const cardRef = useRef(null);
+  const zjtzDataRef = useRef(null);
 
   const getFileTable = async () => {
     const {
@@ -180,6 +181,7 @@ export default () => {
         const cardList = [...new Set(allObj.map((item) => item.cardName))];
         const card = [];
         cardList.forEach((item1) => {
+          //cardNumber为空返回空数组
           const cardObj = allObj
             .filter((item2) => item2.cardName === item1 && item2.cardNumber)
             .map((item) => ({
@@ -208,75 +210,6 @@ export default () => {
         content: "获取整机台账信息失败",
       });
     }
-
-    // const memberLogin = getMemberLogin();
-    // const {
-    //   status,
-    //   data: { memberList },
-    // } = await switchMember();
-    // if (status) {
-    //   const { deptCode } = memberList.find(
-    //     (item) => item.memberCode === memberLogin
-    //   );
-    //   if (deptCode) {
-    //     depCodeRef.current = deptCode;
-    //     sessionStorage.setItem("deptCode", deptCode);
-    //     const {
-    //       status,
-    //       data: { zjtzData },
-    //     } = await switchFileTable({ deptCode });
-    //     if (status) {
-    //       console.log(zjtzData, scanValue);
-    //       const filterObj = zjtzData.find(
-    //         (item) => item.facilityCode === scanValue
-    //       );
-    //       const {
-    //         status,
-    //         data: { cardMessageForm },
-    //       } = await switchCard({ deptCode });
-    //       if (status) {
-    //         cardRef.current = cardMessageForm;
-    //         const allObj = cardMessageForm.filter(
-    //           (item) => item.facilityCode === scanValue
-    //         );
-    //         const cardList = [...new Set(allObj.map((item) => item.cardName))];
-    //         const card = [];
-    //         cardList.forEach((item1) => {
-    //           const cardObj = allObj
-    //             .filter((item2) => item2.cardName === item1 && item2.cardNumber)
-    //             .map((item) => ({
-    //               id: item.cardNumber,
-    //               text: item.cardNumber,
-    //               className: item.isCardBreak === "是" ? styles.break : "",
-    //             }));
-    //           card.push({
-    //             name: item1,
-    //             codeList: cardObj,
-    //           });
-    //         });
-    //         setFlag(true);
-    //         setLoading(false);
-    //         setCard(card);
-    //         setMachineInfo(filterObj);
-    //       } else {
-    //         Toast.show({
-    //           icon: "fail",
-    //           content: "获取板卡信息失败",
-    //         });
-    //       }
-    //     } else {
-    //       Toast.show({
-    //         icon: "fail",
-    //         content: "获取整机台账信息失败",
-    //       });
-    //     }
-    //   }
-    // } else {
-    //   Toast.show({
-    //     icon: "fail",
-    //     content: "获取部门信息失败",
-    //   });
-    // }
   };
 
   const getFileTableEpc = async () => {
@@ -286,6 +219,7 @@ export default () => {
     } = getLocalStorage("zjtzData");
     if (status) {
       console.log(zjtzData, epcValue);
+      zjtzDataRef.current = zjtzData;
       const filterObj = zjtzData.find((item) => item.epcData === epcValue);
       if (!filterObj) {
         Toast.show({
@@ -337,87 +271,6 @@ export default () => {
         content: "获取整机台账信息失败",
       });
     }
-
-    // const memberLogin = getMemberLogin();
-    // const {
-    //   status,
-    //   data: { memberList },
-    // } = await switchMember();
-    // if (status) {
-    //   const { deptCode } = memberList.find(
-    //     (item) => item.memberCode === memberLogin
-    //   );
-    //   if (deptCode) {
-    //     depCodeRef.current = deptCode;
-    //     sessionStorage.setItem("deptCode", deptCode);
-    //     const {
-    //       status,
-    //       data: { zjtzData },
-    //     } = await switchFileTable({ deptCode });
-    //     if (status) {
-    //       console.log(zjtzData, epcValue);
-    //       const filterObj = zjtzData.find((item) => item.epcData === epcValue);
-    //       if (!filterObj) {
-    //         Toast.show({
-    //           icon: "fail",
-    //           content: "epc未绑定整机",
-    //         });
-    //       } else {
-    //         const {
-    //           status,
-    //           data: { cardMessageForm },
-    //         } = await switchCard({ deptCode });
-    //         if (status) {
-    //           cardRef.current = cardMessageForm;
-    //           console.log(cardRef.current);
-    //           const allObj = cardMessageForm.filter(
-    //             (item) => item.facilityCode === filterObj.facilityCode
-    //           );
-    //           const cardList = [
-    //             ...new Set(allObj.map((item) => item.cardName)),
-    //           ];
-    //           const card = [];
-    //           cardList.forEach((item1) => {
-    //             const cardObj = allObj
-    //               .filter(
-    //                 (item2) => item2.cardName === item1 && item2.cardNumber
-    //               )
-    //               .map((item) => ({
-    //                 id: item.cardNumber,
-    //                 text: item.cardNumber,
-    //                 className: item.isCardBreak === "是" ? styles.break : "",
-    //               }));
-    //             card.push({
-    //               name: item1,
-    //               codeList: cardObj,
-    //             });
-    //           });
-    //           setPdaReadyEpc(false);
-    //           setScanMode("qrcode");
-    //           setFlag(true);
-    //           setLoading(false);
-    //           setCard(card);
-    //           setMachineInfo(filterObj);
-    //         } else {
-    //           Toast.show({
-    //             icon: "fail",
-    //             content: "获取板卡信息失败",
-    //           });
-    //         }
-    //       }
-    //     } else {
-    //       Toast.show({
-    //         icon: "fail",
-    //         content: "获取整机台账信息失败",
-    //       });
-    //     }
-    //   }
-    // } else {
-    //   Toast.show({
-    //     icon: "fail",
-    //     content: "获取部门信息失败",
-    //   });
-    // }
   };
 
   useEffect(() => {
@@ -443,6 +296,9 @@ export default () => {
         item1.codeList.forEach((item2) => {
           console.log(item2.text);
           cardMessageForm.push({
+            dataId: cardRef.current.find(
+              (item) => item.cardNumber === item2.text
+            ).dataId,
             cardName: item1.name,
             cardNumber: item2.text,
             nbName: cardRef.current.find((item) => item.cardName === item1.name)
@@ -474,6 +330,7 @@ export default () => {
         });
       } else {
         cardMessageForm.push({
+          dataId: "",
           cardName: item1.name,
           cardNumber: "",
           nbName: cardRef.current.find((item) => item.cardName === item1.name)
@@ -491,14 +348,40 @@ export default () => {
     });
     console.log(cardMessageForm);
 
-
-     //本地逻辑, 对操作数据进行存储
-     if (getLocalStorage("cardMessageFormUpload")) {
-      const cardMessageFormUpload = [...getLocalStorage("cardMessageFormUpload")];
+    //本地逻辑, 对操作数据进行存储
+    if (getLocalStorage("cardMessageFormUpload")) {
+      const cardMessageFormUpload = [
+        ...getLocalStorage("cardMessageFormUpload"),
+      ];
       cardMessageFormUpload.push(...cardMessageForm);
       setLocalStorage("cardMessageFormUpload", cardMessageFormUpload);
     } else {
       setLocalStorage("cardMessageFormUpload", cardMessageForm);
+    }
+
+    //本地逻辑，对本地接口数据进行修改
+    if (getLocalStorage("cardMessageForm")) {
+      let cardMessageFormRes = { ...getLocalStorage("cardMessageForm") };
+      if (scanValue) {
+        cardMessageFormRes.data.cardMessageForm.forEach((item, index, arr) => {
+          if (item.facilityCode === scanValue) {
+            arr.splice(index, 1);
+          }
+        });
+        cardMessageFormRes.data.cardMessageForm.unshift(...cardMessageForm);
+
+      } else if (epcValue) {
+        const { facilityCode } = zjtzDataRef.current.find(
+          (item) => item.epcData === epcValue
+        );
+        cardMessageFormRes.data.cardMessageForm.forEach((item, index, arr) => {
+          if (item.facilityCode === facilityCode) {
+            arr.splice(index, 1);
+          }
+        });
+        cardMessageFormRes.data.cardMessageForm.unshift(...cardMessageForm);
+      }
+      setLocalStorage("cardMessageForm", cardMessageFormRes);
     }
 
     // const { status } = await saveCardInfo({ cardMessageForm });

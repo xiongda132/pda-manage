@@ -345,24 +345,6 @@ export default () => {
   };
 
   const getProcedureData = (workFlowName) => {
-    //本地逻辑
-    // const {
-    //   status,
-    //   data: { flowNodeForm },
-    // } = getLocalStorage("flowNodeForm");
-    //在线逻辑
-    // const {
-    //   status,
-    //   data: { flowNodeForm },
-    // } = await switchNode();
-    // const {
-    //   status,
-    //   data: { zjtzData },
-    // } = getLocalStorage("zjtzData");
-    // if (status) {
-    // const { nbName } = zjtzData.find(
-    //   (item) => item.gdhId === billRef.current
-    // );
     const {
       status,
       data: { flowNodeForm },
@@ -376,28 +358,14 @@ export default () => {
         value: item.detailNodeName,
       }));
       const detailNodeNameMap = [
-        ...new Set(procedureData.map((item) => item.detailNodeName)),
+        ...new Set(procedureData.map((item) => item.label)),
       ].map((item) => ({
         label: item,
         value: item,
-      }));
+      })); //容错去重
       procedureData.unshift({ label: "请选择工序", value: "" });
       setProcedureData(detailNodeNameMap);
     }
-    // }
-
-    //   const procedureData = flowNodeForm.map((item) => ({
-    //     label: item.flowNodeName,
-    //     value: item.nodeSort,
-    //   }));
-    //   procedureData.unshift({ label: "请选择工序", value: "" });
-    //   setProcedureData(procedureData);
-    // } else {
-    //   Toast.show({
-    //     icon: "fail",
-    //     content: "获取节点信息失败",
-    //   });
-    // }
   };
 
   const getPositionData = async () => {
@@ -480,6 +448,29 @@ export default () => {
       formRef.current.setFieldsValue({
         nbName: "无",
       });
+    }
+  };
+
+  const handledetailNodeChange = (e) => {
+    if (e.target.value) {
+      const {
+        status,
+        data: { flowNodeForm },
+      } = getLocalStorage("flowNodeForm");
+      if (status) {
+        const { nodeSecurity } = flowNodeForm.find(
+          (item) => item.detailNodeName === e.target.value
+        );
+        if (nodeSecurity) {
+          formRef.current.setFieldsValue({
+            nodeSec: nodeSecurity,
+          });
+        } else { 
+          formRef.current.setFieldsValue({
+            nodeSec: "",
+          });
+        }
+      }
     }
   };
 
@@ -569,7 +560,10 @@ export default () => {
                     </select>
                   </Form.Item>
                   <Form.Item label="流程节点" name="procedureName">
-                    <select className={styles.select}>
+                    <select
+                      className={styles.select}
+                      onChange={handledetailNodeChange}
+                    >
                       {procedureData.map((item) => {
                         return (
                           <option key={item.label} value={item.value}>

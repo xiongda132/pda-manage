@@ -46,7 +46,6 @@ import { cardData } from "../CardManage/test";
 
 const { Item } = Grid;
 const { Group } = Radio;
-
 const rankData = [
   { label: "请选择密级", value: "" },
   { label: "非密", value: "非密" },
@@ -101,7 +100,7 @@ export default () => {
       productionMember,
       procedureName,
       nodeSecurity,
-      currentPlace,
+      location,
       department,
       isBreak,
       breakMessage,
@@ -112,7 +111,7 @@ export default () => {
       nbName,
       nodeName: procedureName,
       nodeSecurity,
-      currentPlace,
+      location,
       department,
       productionMember: getMemberLogin(),
       newDate: dayjs().format("YYYY-MM-DD HH:mm:ss"),
@@ -122,12 +121,12 @@ export default () => {
     workflowForm.push(formData);
 
     //本地逻辑, 对操作数据进行存储
-    if (getLocalStorage("workFlowUpload")) {
-      const workFlowUpload = [...getLocalStorage("workFlowUpload")];
-      workFlowUpload.push(...workflowForm);
-      setLocalStorage("workFlowUpload", workFlowUpload);
+    if (getLocalStorage("workflowFormUpload")) {
+      const workflowFormUpload = [...getLocalStorage("workflowFormUpload")];
+      workflowFormUpload.push(...workflowForm);
+      setLocalStorage("workflowFormUpload", workflowFormUpload);
     } else {
-      setLocalStorage("workFlowUpload", workflowForm);
+      setLocalStorage("workflowFormUpload", workflowForm);
     }
 
     // const { status } = await saveWorkFlow({ workflowForm });
@@ -210,11 +209,11 @@ export default () => {
         value: item.detailNodeName,
       }));
       const detailNodeNameMap = [
-        ...new Set(procedureData.map((item) => item.detailNodeName)),
+        ...new Set(procedureData.map((item) => item.label)),
       ].map((item) => ({
         label: item,
         value: item,
-      }));
+      })); //容错
       procedureData.unshift({ label: "请选择工序", value: "" });
       setProcedureData(detailNodeNameMap);
     }
@@ -392,7 +391,7 @@ export default () => {
         projectTeam,
         nodeName,
         detailNodeName,
-        currentPlace,
+        location,
         nodeSecurity,
         productionMember,
         workFlowName,
@@ -404,7 +403,7 @@ export default () => {
         gdhId,
         department: deptName || projectTeam, //待确认
         procedureName: detailNodeName,
-        currentPlace: currentPlace ? currentPlace : "",
+        location: location ? location : "",
         nodeSecurity,
         productionMember,
       });
@@ -443,7 +442,7 @@ export default () => {
     //         gdhId,
     //         projectTeam,
     //         nodeName,
-    //         currentPlace,
+    //         location,
     //         nodeSecurity,
     //         productionMember,
     //       } = filterObj;
@@ -454,7 +453,7 @@ export default () => {
     //         gdhId,
     //         department: deptName || projectTeam, //待确认
     //         procedureName: nodeName,
-    //         currentPlace: currentPlace ? currentPlace : "",
+    //         location: location ? location : "",
     //         nodeSecurity,
     //         productionMember,
     //       });
@@ -497,7 +496,7 @@ export default () => {
           projectTeam,
           nodeName,
           detailNodeName,
-          currentPlace,
+          location,
           nodeSecurity,
           productionMember,
           workFlowName,
@@ -509,7 +508,7 @@ export default () => {
           gdhId,
           department: projectTeam,
           procedureName: detailNodeName,
-          currentPlace: currentPlace ? currentPlace : "",
+          location: location ? location : "",
           nodeSecurity,
           productionMember,
           department: projectTeam,
@@ -557,7 +556,7 @@ export default () => {
     //           gdhId,
     //           projectTeam,
     //           nodeName,
-    //           currentPlace,
+    //           location,
     //           nodeSecurity,
     //           productionMember,
     //         } = filterObj;
@@ -568,7 +567,7 @@ export default () => {
     //           gdhId,
     //           department: projectTeam,
     //           procedureName: nodeName,
-    //           currentPlace: currentPlace ? currentPlace : "",
+    //           location: location ? location : "",
     //           nodeSecurity,
     //           productionMember,
     //           department: projectTeam,
@@ -885,7 +884,7 @@ export default () => {
           breakList.push(...cardObj);
         });
         breakList.unshift(
-          { label: "请选择故障类型", value: "" },
+          // { label: "请选择故障类型", value: "" },
           { label: "整机故障", value: "整机故障" }
         );
         setBreakData(breakList);
@@ -1046,7 +1045,7 @@ export default () => {
                 </Form.Item>
                 <Form.Item
                   label="位置"
-                  name="currentPlace"
+                  name="location"
                   style={{ display: "inline-block", minHeight: "50px" }}
                 >
                   {!checkboxValue ? (
@@ -1101,7 +1100,7 @@ export default () => {
                     <Radio value={false}>否</Radio>
                   </Radio.Group>
                 </Form.Item>
-                {radioValue ? (
+                {/* {radioValue ? (
                   <Form.Item label="故障选择" name="breakChoose">
                     <select className={styles.select}>
                       {breakData.map((item) => {
@@ -1112,6 +1111,15 @@ export default () => {
                         );
                       })}
                     </select>
+                  </Form.Item>
+                ) : null} */}
+                {radioValue ? (
+                  <Form.Item label="故障选择" name="breakChoose">
+                    {breakData.map((item) => (
+                      <Checkbox key={item.value} value={item.value}>
+                        {item.label}
+                      </Checkbox>
+                    ))}
                   </Form.Item>
                 ) : null}
                 <Form.Item label="故障描述" name="breakMessage">

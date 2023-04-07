@@ -29,11 +29,16 @@ export default ({
       facilityCode: item.facilityCode,
       memberCode,
       checkResult: item.state,
+      // flag: item.flag ? true : false
     }));
 
+    //扫前和扫后相加的已盘数据
     const checkList = checkListMap.filter(
-      (item) => item.checkResult === "已盘"
+      (item) => item.checkResult === "已盘" /* && item.flag */
     );
+
+    //后续对匹配的设备编码进行修改
+    const facilityCodeList = checkListMap.map((item) => item.facilityCode);
 
     //本地逻辑, 对操作数据进行存储
     if (getLocalStorage("inventoryDataUpload")) {
@@ -42,6 +47,19 @@ export default ({
       setLocalStorage("inventoryDataUpload", inventoryDataUpload);
     } else {
       setLocalStorage("inventoryDataUpload", checkList);
+    }
+
+    //本地逻辑，对已保存的接口数据修改状态
+    if (getLocalStorage("checkList")) {
+      let checkListRes = { ...getLocalStorage("checkList") };
+      checkListRes.data.checkList.forEach((item) => {
+        facilityCodeList.forEach((item2) => {
+          if (item.facilityCode === item2) {
+            item.state = "已盘";
+          }
+        });
+      });
+      setLocalStorage("checkList", checkListRes);
     }
 
     // const res = await savaInventoryInfo({ checkList });
@@ -200,6 +218,7 @@ export default ({
           cur.forEach((item2) => {
             if (item1 === item2.RFID && item2.state === "未盘") {
               item2.state = "已盘";
+              // item2.flag = true;
             }
           });
         });
