@@ -160,6 +160,7 @@ export default () => {
   const cardRef = useRef(null);
   const zjtzDataRef = useRef(null);
   const dataIdMapRef = useRef(null);
+  const epcFacilityCode = useRef(null);
 
   const getFileTable = async () => {
     const {
@@ -240,6 +241,7 @@ export default () => {
           data: { cardMessageForm },
         } = getLocalStorage("cardMessageForm");
         if (status) {
+          epcFacilityCode.current = filterObj.facilityCode;
           cardRef.current = cardMessageForm;
           console.log(cardRef.current);
           const allObj = cardMessageForm.filter(
@@ -324,9 +326,17 @@ export default () => {
               nbName: cardRef.current.find(
                 (item) => item.cardName === item1.name
               ).nbName,
-              facilityCode: cardRef.current.find(
-                (item) => item.cardName === item1.name
-              ).facilityCode,
+              // facilityCode: cardRef.current.find(
+              //   (item) => item.cardName === item1.name
+              // ).facilityCode,
+              facilityCode:
+                cardRef.current.find(
+                  (item) =>
+                    item.cardName === item1.name &&
+                    item.facilityCode ===
+                      (scanValue ? scanValue : epcFacilityCode.current)
+                )?.facilityCode ||
+                (scanValue ? scanValue : epcFacilityCode.current),
               cardBreakMessage: "",
               errorDate: "",
               isCardBreak: "",
@@ -342,9 +352,17 @@ export default () => {
               nbName: cardRef.current.find(
                 (item) => item.cardName === item1.name
               ).nbName,
-              facilityCode: cardRef.current.find(
-                (item) => item.cardName === item1.name
-              ).facilityCode,
+              // facilityCode: cardRef.current.find(
+              //   (item) => item.cardName === item1.name
+              // ).facilityCode,
+              facilityCode:
+                cardRef.current.find(
+                  (item) =>
+                    item.cardName === item1.name &&
+                    item.facilityCode ===
+                      (scanValue ? scanValue : epcFacilityCode.current)
+                )?.facilityCode ||
+                (scanValue ? scanValue : epcFacilityCode.current),
               cardBreakMessage: cardRef.current.find(
                 (item) => item.cardNumber === item2.text
               )
@@ -407,15 +425,28 @@ export default () => {
         });
       } else {
         cardMessageForm.push({
-          dataId: cardRef.current.find((item) => item.cardName === item1.name)
-            ?.dataId,
+          dataId:
+            cardRef.current.find(
+              (item) =>
+                item.cardName === item1.name &&
+                item.facilityCode ===
+                  (scanValue ? scanValue : epcFacilityCode.current)
+            )?.dataId || "",
           cardName: item1.name,
           cardNumber: "",
           nbName: cardRef.current.find((item) => item.cardName === item1.name)
             .nbName,
-          facilityCode: cardRef.current.find(
-            (item) => item.cardName === item1.name
-          ).facilityCode,
+          // facilityCode: cardRef.current.find(
+          //   (item) => item.cardName === item1.name
+          // ).facilityCode,
+          facilityCode:
+            cardRef.current.find(
+              (item) =>
+                item.cardName === item1.name &&
+                item.facilityCode ===
+                  (scanValue ? scanValue : epcFacilityCode.current)
+            )?.facilityCode ||
+            (scanValue ? scanValue : epcFacilityCode.current),
           cardBreakMessage: "",
           errorDate: "",
           isCardBreak: "",
@@ -467,8 +498,9 @@ export default () => {
         },
       });
       Toast.show({
-        icon: "保存成功"
-      })
+        icon: "success",
+        content: "保存成功",
+      });
     }
 
     // const { status } = await saveCardInfo({ cardMessageForm });

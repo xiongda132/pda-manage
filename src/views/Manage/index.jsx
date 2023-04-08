@@ -102,7 +102,7 @@ export default () => {
       productionMember,
       procedureName,
       nodeSecurity,
-      location,
+      currentPlace,
       department,
       isBreak,
       breakMessage,
@@ -115,7 +115,7 @@ export default () => {
       nodeName: flowNodeNameRef.current,
       detailNodeName: procedureName,
       nodeSecurity,
-      location,
+      location: currentPlace,
       department,
       productionMember: getMemberLogin(),
       newDate: dayjs().format("YYYY-MM-DD HH:mm:ss"),
@@ -154,7 +154,7 @@ export default () => {
         facilityCode,
         gdhId,
         isBreak: isBreak ? "是" : "否",
-        location,
+        location: currentPlace,
         nbName,
         // nodeSec: nodeSecurity,
         nodeSecurity, //统一修改密级字段
@@ -469,7 +469,7 @@ export default () => {
         projectTeam,
         nodeName,
         detailNodeName,
-        location,
+        currentPlace,
         nodeSecurity,
         productionMember,
         workFlowName,
@@ -482,7 +482,7 @@ export default () => {
         gdhId,
         department: deptName || projectTeam, //待确认
         procedureName: detailNodeName,
-        location: location ? location : "",
+        currentPlace: currentPlace ? currentPlace : "",
         // nodeSecurity,
         productionMember,
       });
@@ -521,7 +521,7 @@ export default () => {
     //         gdhId,
     //         projectTeam,
     //         nodeName,
-    //         location,
+    //         currentPlace,
     //         nodeSecurity,
     //         productionMember,
     //       } = filterObj;
@@ -532,7 +532,7 @@ export default () => {
     //         gdhId,
     //         department: deptName || projectTeam, //待确认
     //         procedureName: nodeName,
-    //         location: location ? location : "",
+    //         currentPlace: currentPlace ? currentPlace : "",
     //         nodeSecurity,
     //         productionMember,
     //       });
@@ -575,7 +575,7 @@ export default () => {
           projectTeam,
           nodeName,
           detailNodeName,
-          location,
+          currentPlace,
           nodeSecurity,
           productionMember,
           workFlowName,
@@ -587,7 +587,7 @@ export default () => {
           gdhId,
           department: projectTeam,
           procedureName: detailNodeName,
-          location: location ? location : "",
+          currentPlace: currentPlace ? currentPlace : "",
           // nodeSecurity,
           productionMember,
           department: projectTeam,
@@ -635,7 +635,7 @@ export default () => {
     //           gdhId,
     //           projectTeam,
     //           nodeName,
-    //           location,
+    //           currentPlace,
     //           nodeSecurity,
     //           productionMember,
     //         } = filterObj;
@@ -646,7 +646,7 @@ export default () => {
     //           gdhId,
     //           department: projectTeam,
     //           procedureName: nodeName,
-    //           location: location ? location : "",
+    //           currentPlace: currentPlace ? currentPlace : "",
     //           nodeSecurity,
     //           productionMember,
     //           department: projectTeam,
@@ -1151,7 +1151,7 @@ export default () => {
                 </Form.Item>
                 <Form.Item
                   label="位置"
-                  name="location"
+                  name="currentPlace"
                   style={{ display: "inline-block", minHeight: "50px" }}
                 >
                   {!checkboxValue ? (
