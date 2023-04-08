@@ -50,6 +50,9 @@ const ListItemWithCheckbox = ({ obj, setSeletedData }) => {
     productionMember,
   } = obj;
   const checkboxRef = useRef(null);
+  useEffect(() => {
+    checkboxRef.current.check();
+  }, []);
   return (
     <List.Item
       prefix={

@@ -159,6 +159,7 @@ export default () => {
   const [flag, setFlag] = useState(false);
   const cardRef = useRef(null);
   const zjtzDataRef = useRef(null);
+  const dataIdMapRef = useRef(null);
 
   const getFileTable = async () => {
     const {
@@ -179,9 +180,16 @@ export default () => {
           (item) => item.facilityCode === scanValue
         );
         const cardList = [...new Set(allObj.map((item) => item.cardName))];
+        const dataIdMap = allObj.map((item) => ({
+          dataId: item.dataId,
+          cardName: item.cardName,
+        }));
+        dataIdMapRef.current = dataIdMap;
+        console.log("allObj", allObj);
+        console.log("dataIdMap", dataIdMap);
         const card = [];
         cardList.forEach((item1) => {
-          //cardNumber为空返回空数组
+          //
           const cardObj = allObj
             .filter((item2) => item2.cardName === item1 && item2.cardNumber)
             .map((item) => ({
@@ -238,6 +246,12 @@ export default () => {
             (item) => item.facilityCode === filterObj.facilityCode
           );
           const cardList = [...new Set(allObj.map((item) => item.cardName))];
+          const dataIdMap = allObj.map((item) => ({
+            dataId: item.dataId,
+            cardName: item.cardName,
+          }));
+          console.log("allObj", allObj);
+          console.log("dataIdMap", dataIdMap);
           const card = [];
           cardList.forEach((item1) => {
             const cardObj = allObj
@@ -291,46 +305,110 @@ export default () => {
     const cardMap = [...card];
     const cardMessageForm = [];
     console.log(cardRef.current);
+    console.log(dataIdMapRef.current);
     cardMap.forEach((item1) => {
       if (item1.codeList.length) {
-        item1.codeList.forEach((item2) => {
-          console.log(item2.text);
-          cardMessageForm.push({
-            dataId: cardRef.current.find(
-              (item) => item.cardNumber === item2.text
-            ).dataId,
-            cardName: item1.name,
-            cardNumber: item2.text,
-            nbName: cardRef.current.find((item) => item.cardName === item1.name)
-              .nbName,
-            facilityCode: cardRef.current.find(
-              (item) => item.cardName === item1.name
-            ).facilityCode,
-            cardBreakMessage: cardRef.current.find(
-              (item) => item.cardNumber === item2.text
-            )
-              ? cardRef.current.find((item) => item.cardNumber === item2.text)
-                  .cardBreakMessage
-              : "",
-            errorDate: cardRef.current.find(
-              (item) => item.cardNumber === item2.text
-            )
-              ? cardRef.current.find((item) => item.cardNumber === item2.text)
-                  .errorDate
-              : "",
-            isCardBreak: cardRef.current.find(
-              (item) => item.cardNumber === item2.text
-            )
-              ? cardRef.current.find((item) => item.cardNumber === item2.text)
-                  .isCardBreak
-              : "否",
-            gdhId: cardRef.current.find((item) => item.cardName === item1.name)
-              .gdhId,
-          });
+        item1.codeList.forEach((item2, index) => {
+          // const dataId = cardRef.current.find(
+          //   (item) =>
+          //     item.cardName ===
+          //     item1.name && !item.cardNumber
+          // ).dataId ?
+          if (!index) {
+            cardMessageForm.push({
+              dataId: dataIdMapRef.current.find(
+                (item) => item.cardName === item1.name
+              )?.dataId,
+              cardName: item1.name,
+              cardNumber: item2.text,
+              nbName: cardRef.current.find(
+                (item) => item.cardName === item1.name
+              ).nbName,
+              facilityCode: cardRef.current.find(
+                (item) => item.cardName === item1.name
+              ).facilityCode,
+              cardBreakMessage: "",
+              errorDate: "",
+              isCardBreak: "",
+              gdhId: cardRef.current.find(
+                (item) => item.cardName === item1.name
+              ).gdhId,
+            });
+          } else {
+            cardMessageForm.push({
+              dataId: "",
+              cardName: item1.name,
+              cardNumber: item2.text,
+              nbName: cardRef.current.find(
+                (item) => item.cardName === item1.name
+              ).nbName,
+              facilityCode: cardRef.current.find(
+                (item) => item.cardName === item1.name
+              ).facilityCode,
+              cardBreakMessage: cardRef.current.find(
+                (item) => item.cardNumber === item2.text
+              )
+                ? cardRef.current.find((item) => item.cardNumber === item2.text)
+                    .cardBreakMessage
+                : "",
+              errorDate: cardRef.current.find(
+                (item) => item.cardNumber === item2.text
+              )
+                ? cardRef.current.find((item) => item.cardNumber === item2.text)
+                    .errorDate
+                : "",
+              isCardBreak: cardRef.current.find(
+                (item) => item.cardNumber === item2.text
+              )
+                ? cardRef.current.find((item) => item.cardNumber === item2.text)
+                    .isCardBreak
+                : "",
+              gdhId: cardRef.current.find(
+                (item) => item.cardName === item1.name
+              ).gdhId,
+            });
+          }
+          // cardMessageForm.push({
+          //   dataId:
+          //     cardRef.current.find((item) => item.cardNumber === item2.text)
+          //       ?.dataId ||
+          //     (!index
+          //       ? cardRef.current.find((item) => item.cardName === item1.name)
+          //           .dataId
+          //       : ""),
+          //   cardName: item1.name,
+          //   cardNumber: item2.text,
+          //   nbName: cardRef.current.find((item) => item.cardName === item1.name)
+          //     .nbName,
+          //   facilityCode: cardRef.current.find(
+          //     (item) => item.cardName === item1.name
+          //   ).facilityCode,
+          //   cardBreakMessage: cardRef.current.find(
+          //     (item) => item.cardNumber === item2.text
+          //   )
+          //     ? cardRef.current.find((item) => item.cardNumber === item2.text)
+          //         .cardBreakMessage
+          //     : "",
+          //   errorDate: cardRef.current.find(
+          //     (item) => item.cardNumber === item2.text
+          //   )
+          //     ? cardRef.current.find((item) => item.cardNumber === item2.text)
+          //         .errorDate
+          //     : "",
+          //   isCardBreak: cardRef.current.find(
+          //     (item) => item.cardNumber === item2.text
+          //   )
+          //     ? cardRef.current.find((item) => item.cardNumber === item2.text)
+          //         .isCardBreak
+          //     : "否",
+          //   gdhId: cardRef.current.find((item) => item.cardName === item1.name)
+          //     .gdhId,
+          // });
         });
       } else {
         cardMessageForm.push({
-          dataId: "",
+          dataId: cardRef.current.find((item) => item.cardName === item1.name)
+            ?.dataId,
           cardName: item1.name,
           cardNumber: "",
           nbName: cardRef.current.find((item) => item.cardName === item1.name)
@@ -346,7 +424,7 @@ export default () => {
         });
       }
     });
-    console.log(cardMessageForm);
+    console.log("保存时的数据", cardMessageForm);
 
     //本地逻辑, 对操作数据进行存储
     if (getLocalStorage("cardMessageFormUpload")) {
@@ -359,29 +437,38 @@ export default () => {
       setLocalStorage("cardMessageFormUpload", cardMessageForm);
     }
 
+    console.log("scanValue", scanValue, "epcValue", epcValue);
     //本地逻辑，对本地接口数据进行修改
     if (getLocalStorage("cardMessageForm")) {
-      let cardMessageFormRes = { ...getLocalStorage("cardMessageForm") };
+      const cardMessageFormArr = [
+        ...getLocalStorage("cardMessageForm").data.cardMessageForm,
+      ];
+      let otherList;
       if (scanValue) {
-        cardMessageFormRes.data.cardMessageForm.forEach((item, index, arr) => {
-          if (item.facilityCode === scanValue) {
-            arr.splice(index, 1);
-          }
-        });
-        cardMessageFormRes.data.cardMessageForm.unshift(...cardMessageForm);
-
+        otherList = cardMessageFormArr.filter(
+          (item) => item.facilityCode !== scanValue
+        );
+        console.log("过滤出的数据", otherList);
+        otherList.push(...cardMessageForm);
       } else if (epcValue) {
         const { facilityCode } = zjtzDataRef.current.find(
           (item) => item.epcData === epcValue
         );
-        cardMessageFormRes.data.cardMessageForm.forEach((item, index, arr) => {
-          if (item.facilityCode === facilityCode) {
-            arr.splice(index, 1);
-          }
-        });
-        cardMessageFormRes.data.cardMessageForm.unshift(...cardMessageForm);
+        otherList = cardMessageFormArr.filter(
+          (item) => item.facilityCode !== facilityCode
+        );
+        console.log("过滤出的数据", otherList);
+        otherList.push(...cardMessageForm);
       }
-      setLocalStorage("cardMessageForm", cardMessageFormRes);
+      setLocalStorage("cardMessageForm", {
+        status: getLocalStorage("cardMessageForm").status,
+        data: {
+          cardMessageForm: otherList,
+        },
+      });
+      Toast.show({
+        icon: "保存成功"
+      })
     }
 
     // const { status } = await saveCardInfo({ cardMessageForm });
@@ -689,8 +776,8 @@ export default () => {
                         }}
                       >
                         <Grid columns={24} gap={8}>
-                          <Item span={24}>板卡名称: {item?.name}</Item>
-                          <Item span={24}>
+                          <Item span={12}>板卡名称: {item?.name}</Item>
+                          <Item span={12}>
                             板卡编号个数: {item?.codeList.length}
                           </Item>
                           <Item span={24}>

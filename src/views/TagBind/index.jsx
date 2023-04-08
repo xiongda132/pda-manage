@@ -166,6 +166,16 @@ export default () => {
         content: "整机不属于此工单",
       });
     }
+
+    const filterObj = machineList.find(
+      (item) => item.facilityCode === qrCodeVal && item.epcData
+    );
+    if (filterObj) {
+      return Toast.show({
+        content: "不能重复绑定epc",
+      });
+    }
+
     const dataMap = [...machineList];
     dataMap.forEach((item, index, arr) => {
       if (item.facilityCode === qrCodeVal) {

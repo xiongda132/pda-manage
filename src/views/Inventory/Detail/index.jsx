@@ -29,6 +29,7 @@ export default ({
       facilityCode: item.facilityCode,
       memberCode,
       checkResult: item.state,
+      newDate: dayjs().format("YYYY-MM-DD HH:mm:ss"),
       // flag: item.flag ? true : false
     }));
 

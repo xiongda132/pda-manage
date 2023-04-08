@@ -86,6 +86,8 @@ export default () => {
   const [breakData, setBreakData] = useState([]);
   const [accountData, setAccountData] = useState([]);
   const [deptName, setDeptName] = useState(getDeptName());
+  const flowNodeNameRef = useRef(null);
+  const breakDataRef = useRef(null);
 
   // const back = () => {
   //   history.go(-1);
@@ -105,11 +107,13 @@ export default () => {
       isBreak,
       breakMessage,
     } = Object.assign({}, formObj);
+    console.log("productionMember", productionMember);
     const formData = {
       gdhId,
       facilityCode,
       nbName,
-      nodeName: procedureName,
+      nodeName: flowNodeNameRef.current,
+      detailNodeName: procedureName,
       nodeSecurity,
       location,
       department,
@@ -120,6 +124,18 @@ export default () => {
     };
     workflowForm.push(formData);
 
+    //保存后显示流程信息
+    let getCurNodeInfo = formRef.current.getFieldValue("record");
+    getCurNodeInfo +=
+      dayjs().format("YYYY-MM-DD HH:mm:ss") +
+      " " +
+      procedureName +
+      " " +
+      productionMember + "\n";
+    formRef.current.setFieldsValue({
+      record: getCurNodeInfo,
+    });
+
     //本地逻辑, 对操作数据进行存储
     if (getLocalStorage("workflowFormUpload")) {
       const workflowFormUpload = [...getLocalStorage("workflowFormUpload")];
@@ -128,6 +144,62 @@ export default () => {
     } else {
       setLocalStorage("workflowFormUpload", workflowForm);
     }
+
+    //本地逻辑， 对接口数据进行修改
+    if (getLocalStorage("workflowForm")) {
+      let workflowFormRes = { ...getLocalStorage("workflowForm") };
+      workflowFormRes.data.workflowForm.push({
+        detailNodeName: procedureName,
+        errorDes: breakMessage,
+        facilityCode,
+        gdhId,
+        isBreak: isBreak ? "是" : "否",
+        location,
+        nbName,
+        // nodeSec: nodeSecurity,
+        nodeSecurity, //统一修改密级字段
+        productionMember,
+        newDate: dayjs().format("YYYY-MM-DD HH:mm:ss"),
+      });
+      setLocalStorage("workflowForm", workflowFormRes);
+    } else {
+      setLocalStorage("workflowForm", workflowForm);
+    }
+
+    //对生成流程推进表进行修改
+    // if (breakDataRef.current.includes("整机故障")) {
+
+    // } else {
+    if (getLocalStorage("cardMessageForm")) {
+      const cardMessageFormArr = [
+        ...getLocalStorage("cardMessageForm").data.cardMessageForm,
+      ];
+      const breakDataMap = breakDataRef.current?.map((item) => ({
+        cardName: item.split(" ")?.[1],
+        cardNumber: item.split(" ")[0],
+      }));
+      if (breakDataMap.length) {
+        cardMessageFormArr.forEach((item) => {
+          breakDataMap.forEach((item2) => {
+            if (
+              item2.cardName === item.cardName &&
+              item2.cardNumber === item.cardNumber
+            ) {
+              console.log(`改变了${item.cardName}的${item.cardNumber}`);
+              item.isCardBreak = "是";
+              item.errorDate = dayjs().format("YYYY-MM-DD HH:mm:ss");
+            }
+          });
+        });
+        setLocalStorage("cardMessageForm", {
+          status: getLocalStorage("cardMessageForm").status,
+          data: {
+            cardMessageForm: cardMessageFormArr,
+          },
+        });
+      }
+    }
+    // }
 
     // const { status } = await saveWorkFlow({ workflowForm });
     // if (status) {
@@ -214,6 +286,11 @@ export default () => {
         label: item,
         value: item,
       })); //容错
+
+      //节点名称， 上传时使用
+      flowNodeNameRef.current = [
+        ...new Set(filterNodeForm.map((item) => item.flowNodeName)),
+      ]?.[0];
       procedureData.unshift({ label: "请选择工序", value: "" });
       setProcedureData(detailNodeNameMap);
     }
@@ -360,13 +437,14 @@ export default () => {
       }
       facilityObj
         .map((item) => ({
-          testDate: item.testDate,
-          nodeName: item.nodeName,
+          newDate: item.newDate,
+          detailNodeName: item.detailNodeName,
           productionMember: item.productionMember,
         }))
         .forEach((item) => {
-          const { testDate, nodeName, productionMember } = item;
-          record += testDate + " " + nodeName + " " + productionMember + "\n";
+          const { newDate, detailNodeName, productionMember } = item;
+          record +=
+            newDate + " " + detailNodeName + " " + productionMember + "\n";
         });
       formRef.current.setFieldsValue({
         record,
@@ -396,6 +474,7 @@ export default () => {
         productionMember,
         workFlowName,
       } = filterObj;
+
       console.log("formRef.current", formRef.current);
       formRef.current.setFieldsValue({
         facilityCode,
@@ -404,7 +483,7 @@ export default () => {
         department: deptName || projectTeam, //待确认
         procedureName: detailNodeName,
         location: location ? location : "",
-        nodeSecurity,
+        // nodeSecurity,
         productionMember,
       });
       getProcedureData(workFlowName);
@@ -509,7 +588,7 @@ export default () => {
           department: projectTeam,
           procedureName: detailNodeName,
           location: location ? location : "",
-          nodeSecurity,
+          // nodeSecurity,
           productionMember,
           department: projectTeam,
         });
@@ -878,8 +957,8 @@ export default () => {
           const cardObj = allObj
             .filter((item2) => item2.cardName === item1 && item2.cardNumber)
             .map((item) => ({
-              label: item.cardNumber + item1,
-              value: item.cardNumber + item1,
+              label: item.cardNumber + " " + item1,
+              value: item.cardNumber + " " + item1,
             }));
           breakList.push(...cardObj);
         });
@@ -987,6 +1066,33 @@ export default () => {
   };
   console.log("accountData", accountData);
 
+  const handledetailNodeChange = (e) => {
+    if (e.target.value) {
+      const {
+        status,
+        data: { flowNodeForm },
+      } = getLocalStorage("flowNodeForm");
+      if (status) {
+        const { nodeSecurity } = flowNodeForm.find(
+          (item) => item.detailNodeName === e.target.value
+        );
+        if (nodeSecurity) {
+          formRef.current.setFieldsValue({
+            nodeSecurity,
+          });
+        } else {
+          formRef.current.setFieldsValue({
+            nodeSecurity: "",
+          });
+        }
+      }
+    }
+  };
+
+  const handleBreakChoose = (list) => {
+    breakDataRef.current = [...list];
+  };
+
   return (
     <>
       <div className={styles.procedureContainer}>
@@ -1081,7 +1187,10 @@ export default () => {
                   </select> */}
                 </Form.Item>
                 <Form.Item label="流程节点" name="procedureName">
-                  <select className={styles.select}>
+                  <select
+                    className={styles.select}
+                    onChange={handledetailNodeChange}
+                  >
                     {procedureData.map((item) => {
                       return (
                         <option key={item.label} value={item.value}>
@@ -1091,7 +1200,7 @@ export default () => {
                     })}
                   </select>
                 </Form.Item>
-                <Form.Item label="负责人" name="productionMember">
+                <Form.Item label="操作人" name="productionMember">
                   <Input readOnly />
                 </Form.Item>
                 <Form.Item label="是否故障" name="isBreak">
@@ -1115,19 +1224,23 @@ export default () => {
                 ) : null} */}
                 {radioValue ? (
                   <Form.Item label="故障选择" name="breakChoose">
-                    {breakData.map((item) => (
-                      <Checkbox key={item.value} value={item.value}>
-                        {item.label}
-                      </Checkbox>
-                    ))}
+                    <Checkbox.Group onChange={handleBreakChoose}>
+                      {breakData.map((item) => (
+                        <Checkbox key={item.value} value={item.value}>
+                          {item.label}
+                        </Checkbox>
+                      ))}
+                    </Checkbox.Group>
                   </Form.Item>
                 ) : null}
                 <Form.Item label="故障描述" name="breakMessage">
                   <TextArea placeholder="请输入描述..."></TextArea>
                 </Form.Item>
-                <Form.Item label="流程记录" name="record">
-                  <TextArea placeholder="流程记录..." rows={3}></TextArea>
-                </Form.Item>
+                <div id="record">
+                  <Form.Item label="流程记录" name="record">
+                    <TextArea placeholder="流程记录..." rows={3}></TextArea>
+                  </Form.Item>
+                </div>
               </Form>
             </div>
           )}

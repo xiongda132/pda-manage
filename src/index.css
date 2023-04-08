@@ -33,3 +33,7 @@
 #procedure .adm-form .adm-form-footer {
   padding: 0px 12px !important;
 }
+
+#record .adm-list-item-content {
+  flex-direction: column;
+}

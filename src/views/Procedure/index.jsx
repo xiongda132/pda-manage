@@ -58,6 +58,7 @@ export default () => {
   const depCodeRef = useRef(null);
   const zjtzDataRef = useRef(null);
   const billRef = useRef(null);
+  const flowNodeNameRef = useRef(null);
   // const [deptName, setDeptName] = useState(getDeptName());
 
   const onFinish = async (formObj) => {
@@ -65,19 +66,20 @@ export default () => {
       nbName,
       procedureName,
       // productionMember,
-      nodeSec,
+      nodeSecurity,
       currentPlace,
       gdhId,
     } = Object.assign({}, formObj);
     const workflowForm = epcList.map((item) => ({
-      facilityCode: item,
+      facilityCode: item.facilityCode,
       nbName,
-      detailedNodeName: procedureName,
-      productionMember: getMemberLogin(),
-      nodeSec,
+      detailNodeName: procedureName,
+      productionMember: getMemberLogin(), //使用登录账号
+      nodeSecurity,
       location: currentPlace,
       gdhId,
       newDate: dayjs().format("YYYY-MM-DD HH:mm:ss"),
+      nodeName: flowNodeNameRef.current,
     }));
 
     //本地逻辑, 对操作数据进行存储
@@ -87,6 +89,15 @@ export default () => {
       setLocalStorage("workflowFormUpload", workflowUpload);
     } else {
       setLocalStorage("workflowFormUpload", workflowForm);
+    }
+
+    //本地逻辑， 对接口数据进行修改
+    if (getLocalStorage("workflowForm")) {
+      let workflowFormRes = { ...getLocalStorage("workflowForm") };
+      workflowFormRes.data.workflowForm.push(...workflowForm);
+      setLocalStorage("workflowForm", workflowFormRes);
+    } else {
+      setLocalStorage("workflowForm", workflowForm);
     }
 
     // const { status } = await saveWorkFlow({ workflowForm });
@@ -353,6 +364,7 @@ export default () => {
       const filterNodeForm = flowNodeForm.filter(
         (item) => item.flowName === workFlowName
       );
+
       const procedureData = filterNodeForm.map((item) => ({
         label: item.detailNodeName,
         value: item.detailNodeName,
@@ -363,6 +375,11 @@ export default () => {
         label: item,
         value: item,
       })); //容错去重
+
+      //节点名称， 上传时使用
+      flowNodeNameRef.current = [
+        ...new Set(filterNodeForm.map((item) => item.flowNodeName)),
+      ]?.[0];
       procedureData.unshift({ label: "请选择工序", value: "" });
       setProcedureData(detailNodeNameMap);
     }
@@ -396,7 +413,7 @@ export default () => {
   };
 
   const getDefaultFields = async () => {
-    const defaultnodeName = formRef.current.setFieldsValue({
+    /* const defaultnodeName =  */ formRef.current.setFieldsValue({
       productionMember: getMemberName(),
     });
 
@@ -463,11 +480,11 @@ export default () => {
         );
         if (nodeSecurity) {
           formRef.current.setFieldsValue({
-            nodeSec: nodeSecurity,
+            nodeSecurity: nodeSecurity,
           });
-        } else { 
+        } else {
           formRef.current.setFieldsValue({
-            nodeSec: "",
+            nodeSecurity: "",
           });
         }
       }
@@ -548,7 +565,7 @@ export default () => {
                   </Form.Item>
                   <Checkbox onChange={handleChange}>手动输入</Checkbox>
 
-                  <Form.Item label="涉密等级" name="nodeSec">
+                  <Form.Item label="涉密等级" name="nodeSecurity">
                     <select className={styles.select}>
                       {rankData.map((item) => {
                         return (
