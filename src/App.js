@@ -24,6 +24,9 @@ import Manage from "./views/Manage";
 import Unbind from "./views/Unbind";
 import Inventory from "./views/Inventory";
 import DataSync from "./views/DataSync";
+//工装部分
+import BatchManage from "./views/BatchManage";
+import InventoryManage from "./views/InventoryManage";
 
 function App() {
   return (
@@ -54,6 +57,12 @@ function App() {
             </Route>
             <Route path="/inventory">
               <Inventory />
+            </Route>
+            <Route path="/batchManage">
+              <BatchManage />
+            </Route>
+            <Route path="/inventoryManage">
+              <InventoryManage />
             </Route>
             <PrivateRoute path="/">
               <Home />

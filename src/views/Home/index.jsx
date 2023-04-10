@@ -119,6 +119,14 @@ const CLogin = (props) => {
   //   history.push("/specialDevice");
   // };
 
+  const batchManage = () => {
+    history.push("/batchManage");
+  };
+
+  const inventoryManage = () => {
+    history.push("/inventoryManage");
+  };
+
   useEffect(() => {
     reduceMotion();
   }, []);
@@ -170,14 +178,14 @@ const CLogin = (props) => {
             <div className={styles.tool}>工装管理</div>
             <div className={styles.toolContent}>
               <div>
-                <div onClick={handleReturnToWarehouse}>借用归还</div>
+                <div /* onClick={handleReturnToWarehouse} */>借用归还</div>
               </div>
               <div>
-                <div onClick={handleLend}>盘点管理</div>
+                <div /* onClick={batchManage} */>批量管理</div>
               </div>
-              {/* <div>
-                <div onClick={handleInventory}>盘点管理</div>
-              </div> */}
+              <div>
+                <div /* onClick={inventoryManage} */>盘点管理</div>
+              </div>
             </div>
           </div>
         </div>

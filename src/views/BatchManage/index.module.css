@@ -1,0 +1,77 @@
+.procedureContainer {
+  height: 100vh;
+}
+
+.procedureWrapper {
+  height: calc(100% - 45px);
+  align-items: center;
+  background: #ebf8fe;
+}
+
+.procedureContent {
+  background: #ebf8fe;
+  overflow: hidden;
+  height: 100%;
+}
+
+.center {
+  width: 100%;
+  height: 100%;
+}
+
+.troubleDes {
+  width: 90%;
+  background: white;
+}
+
+.completedPro {
+  background: white;
+  margin-bottom: 10px;
+}
+
+.ButtonStyle {
+  margin-top: 10%;
+  text-align: center;
+}
+
+.save,
+.cancel {
+  width: 30%;
+}
+
+.listAndAmount {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.machineList {
+  font-size: 17px;
+  font-weight: 600;
+  padding: 5px 10px;
+}
+
+.amount {
+  margin-bottom: 8px;
+  margin-right: 10px;
+}
+
+.listItem {
+  border: 1px solid rgb(208, 203, 203);
+  padding: 12px 6px;
+  border-radius: 3px;
+  background: rgb(239, 242, 246);
+  margin-bottom: 15px;
+}
+
+.waitScan {
+  margin-top: 40%;
+  text-align: center;
+  font-size: 20px;
+}
+
+.list {
+  height: calc(100% - 335px);
+  padding: 0px 10px;
+  overflow: scroll;
+}

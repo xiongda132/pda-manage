@@ -499,7 +499,7 @@ export default () => {
       });
       Toast.show({
         icon: "success",
-        content: "保存成功",
+        content: "保存完成",
       });
     }
 
@@ -522,8 +522,22 @@ export default () => {
   const addTag = (tag, index) => {
     console.log(tag, index);
     const cardList = [...card];
-    cardList[index].codeList.push(tag);
-    setCard([...cardList]);
+    // cardList[index].codeList.push(tag);
+    // setCard([...cardList]);
+
+    //编号重复提示
+    const filterText = cardList[index].codeList.find(
+      (item) => item.text === tag.text
+    );
+    if (filterText) {
+      Toast.show({
+        icon: "fail",
+        content: "编号重复",
+      });
+    } else { 
+      cardList[index].codeList.push(tag);
+      setCard([...cardList]);
+    }
   };
 
   const deleteTag = (itemIndex, index) => {

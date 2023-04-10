@@ -31,18 +31,19 @@ import {
   getDeptName,
   getMemberName,
 } from "utils/auth";
-import { nodeObj } from "./test";
+// import { nodeObj } from "./test";
+import { DatePicker } from "antd";
 
 const { Item } = Grid;
 
-const rankData = [
-  { label: "请选择密级", value: "" },
-  { label: "非密", value: "非密" },
-  { label: "内部", value: "内部" },
-  { label: "秘密", value: "秘密" },
-  { label: "机密", value: "机密" },
-  { label: "绝密", value: "绝密" },
-];
+// const rankData = [
+//   { label: "请选择密级", value: "" },
+//   { label: "非密", value: "非密" },
+//   { label: "内部", value: "内部" },
+//   { label: "秘密", value: "秘密" },
+//   { label: "机密", value: "机密" },
+//   { label: "绝密", value: "绝密" },
+// ];
 
 export default () => {
   const configTime = useRef(dayjs().format("YYYY-MM-DD HH:mm:ss"));
@@ -117,12 +118,6 @@ export default () => {
     // }
   };
 
-  const handleSave = () => {
-    Toast.show({
-      icon: "success",
-      content: "保存成功",
-    });
-  };
   const [pdaReady, setPdaReady] = useState(false);
   const initPda = useCallback(async () => {
     const pdaConfigRes = await pdaConfig({
@@ -460,7 +455,7 @@ export default () => {
   const handleChange = (value) => {
     setCheckboxValue(value);
   };
-  const handleBillChange = (e) => {
+  const handlePositionChange = (e) => {
     if (e.target.value) {
       billRef.current = e.target.value;
       const { nbName, workFlowName } = zjtzDataRef.current.find(
@@ -500,6 +495,14 @@ export default () => {
     }
   };
 
+  const handleStateChange = (e) => {
+    console.log(e);
+  };
+
+  const handleDatePicker = (e) => {
+    console.log(e);
+  };
+
   return (
     <>
       <div className={styles.procedureContainer}>
@@ -521,10 +524,10 @@ export default () => {
                   onFinish={onFinish}
                   mode="card"
                 >
-                  <Form.Item label="工单号" name="gdhId">
+                  <Form.Item label="位置信息" name="currentPosition">
                     <select
                       className={styles.select}
-                      onChange={handleBillChange}
+                      onChange={handlePositionChange}
                     >
                       {billNo.map((item) => {
                         return (
@@ -535,62 +538,12 @@ export default () => {
                       })}
                     </select>
                   </Form.Item>
-                  <Form.Item label="内部名称" name="nbName">
-                    <Input readOnly />
-                  </Form.Item>
-                  <Form.Item label="项目组" name="projectGroup">
-                    <Input readOnly />
-                    {/* <select className={styles.select}>
-                      {projectGroup.map((item) => {
-                        return (
-                          <option key={item.label} value={item.value}>
-                            {item.label}
-                          </option>
-                        );
-                      })}
-                    </select> */}
-                  </Form.Item>
-                  <Form.Item label="操作人" name="productionMember">
-                    <Input readOnly />
-                  </Form.Item>
-                  <Form.Item label="当前位置" name="currentPlace">
-                    {!checkboxValue ? (
-                      <select className={styles.select}>
-                        {positionData.map((item) => {
-                          return (
-                            <option key={item.label} value={item.value}>
-                              {item.label}
-                            </option>
-                          );
-                        })}
-                      </select>
-                    ) : (
-                      <Input
-                        placeholder="请输入位置..."
-                        onChange={inputChange}
-                        style={{ width: "103px", height: "20.67px" }}
-                      />
-                    )}
-                  </Form.Item>
-                  <Checkbox onChange={handleChange}>手动输入</Checkbox>
-
-                  <Form.Item label="涉密等级" name="nodeSecurity">
-                    <select className={styles.select}>
-                      {rankData.map((item) => {
-                        return (
-                          <option key={item.label} value={item.value}>
-                            {item.label}
-                          </option>
-                        );
-                      })}
-                    </select>
-                  </Form.Item>
-                  <Form.Item label="流程节点" name="procedureName">
+                  <Form.Item label="状态信息" name="gzState">
                     <select
                       className={styles.select}
-                      onChange={handledetailNodeChange}
+                      onChange={handleStateChange}
                     >
-                      {procedureData.map((item) => {
+                      {billNo.map((item) => {
                         return (
                           <option key={item.label} value={item.value}>
                             {item.label}
@@ -598,12 +551,21 @@ export default () => {
                         );
                       })}
                     </select>
+                  </Form.Item>
+                  <Form.Item label="软件版本" name="version">
+                    <Input
+                      placeholder="请输入版本..."
+                      onChange={inputChange}
+                    />
+                  </Form.Item>
+                  <Form.Item label="有效期" name="usefulLife">
+                    <DatePicker onChange={handleDatePicker} />
                   </Form.Item>
                 </Form>
               </div>
 
               <div className={styles.listAndAmount}>
-                <span className={styles.machineList}>整机列表</span>
+                <span className={styles.machineList}>工装列表</span>
                 <span className={styles.amount}>数量: {epcList?.length}</span>
               </div>
               {loading ? (

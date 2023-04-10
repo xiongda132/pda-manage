@@ -483,7 +483,7 @@ export default () => {
         department: deptName || projectTeam, //待确认
         procedureName: detailNodeName,
         currentPlace: currentPlace ? currentPlace : "",
-        // nodeSecurity,
+        nodeSecurity, //初始节点密级
         productionMember,
       });
       getProcedureData(workFlowName);
@@ -588,7 +588,7 @@ export default () => {
           department: projectTeam,
           procedureName: detailNodeName,
           currentPlace: currentPlace ? currentPlace : "",
-          // nodeSecurity,
+          nodeSecurity, //同上
           productionMember,
           department: projectTeam,
         });

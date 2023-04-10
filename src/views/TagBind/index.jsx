@@ -167,13 +167,20 @@ export default () => {
       });
     }
 
-    const filterObj = machineList.find(
-      (item) => item.facilityCode === qrCodeVal && item.epcData
-    );
+    const filterObj = machineList.find((item) => item.epcData === epcCodeVal);
     if (filterObj) {
-      return Toast.show({
-        content: "不能重复绑定epc",
+      Toast.show({
+        content: "标签已经绑定过",
       });
+      setEpcCodeVal("");
+      setQrCodeVal("");
+      setPdaReadyEpc(false); //关闭epc轮询
+      setPdaReady(true); //开启qrcode轮询
+      setScanMode("qrcode");
+      setTimeout(() => {
+        qrRef.current.focus();
+      }, 0);
+      return;
     }
 
     const dataMap = [...machineList];
