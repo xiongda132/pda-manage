@@ -255,103 +255,103 @@ export default () => {
     };
   }, [pdaReady, refreshData]);
 
-  const getBillNo = async () => {
-    //本地逻辑
-    const {
-      status,
-      data: { zjtzData },
-    } = getLocalStorage("zjtzData");
-    if (status) {
-      zjtzDataRef.current = zjtzData;
-      const gdhList = [...new Set(zjtzData.map((item) => item.gdhId))].map(
-        (item) => ({ label: item, value: item })
-      );
-      const data = [...gdhList];
-      data.unshift({ label: "请选择工单", value: "" });
-      setBillNo(data);
-    } else {
-      Toast.show({
-        icon: "fail",
-        content: "获取整机台账信息失败",
-      });
-    }
+  // const getBillNo = async () => {
+  //   //本地逻辑
+  //   const {
+  //     status,
+  //     data: { zjtzData },
+  //   } = getLocalStorage("zjtzData");
+  //   if (status) {
+  //     zjtzDataRef.current = zjtzData;
+  //     const gdhList = [...new Set(zjtzData.map((item) => item.gdhId))].map(
+  //       (item) => ({ label: item, value: item })
+  //     );
+  //     const data = [...gdhList];
+  //     data.unshift({ label: "请选择工单", value: "" });
+  //     setBillNo(data);
+  //   } else {
+  //     Toast.show({
+  //       icon: "fail",
+  //       content: "获取整机台账信息失败",
+  //     });
+  //   }
 
-    //在线逻辑
-    // const memberLogin = getMemberLogin();
-    // const {
-    //   status,
-    //   data: { memberList },
-    // } = await switchMember();
-    // if (status) {
-    //   const { deptCode } = memberList.find(
-    //     (item) => item.memberCode === memberLogin
-    //   );
-    //   if (deptCode) {
-    //     depCodeRef.current = deptCode;
-    //     sessionStorage.setItem("deptCode", deptCode);
-    //     const {
-    //       status,
-    //       data: { zjtzData },
-    //     } = await switchFileTable({ deptCode });
-    //     if (status) {
-    //       zjtzDataRef.current = zjtzData;
-    //       const gdhList = [...new Set(zjtzData.map((item) => item.gdhId))].map(
-    //         (item) => ({ label: item, value: item })
-    //       );
-    //       const data = [...gdhList];
-    //       data.unshift({ label: "请选择工单", value: "" });
-    //       setBillNo(data);
-    //     } else {
-    //       Toast.show({
-    //         icon: "fail",
-    //         content: "获取整机台账信息失败",
-    //       });
-    //     }
-    //   }
-    // } else {
-    //   Toast.show({
-    //     icon: "fail",
-    //     content: "获取部门信息失败",
-    //   });
-    // }
-  };
+  //   //在线逻辑
+  //   // const memberLogin = getMemberLogin();
+  //   // const {
+  //   //   status,
+  //   //   data: { memberList },
+  //   // } = await switchMember();
+  //   // if (status) {
+  //   //   const { deptCode } = memberList.find(
+  //   //     (item) => item.memberCode === memberLogin
+  //   //   );
+  //   //   if (deptCode) {
+  //   //     depCodeRef.current = deptCode;
+  //   //     sessionStorage.setItem("deptCode", deptCode);
+  //   //     const {
+  //   //       status,
+  //   //       data: { zjtzData },
+  //   //     } = await switchFileTable({ deptCode });
+  //   //     if (status) {
+  //   //       zjtzDataRef.current = zjtzData;
+  //   //       const gdhList = [...new Set(zjtzData.map((item) => item.gdhId))].map(
+  //   //         (item) => ({ label: item, value: item })
+  //   //       );
+  //   //       const data = [...gdhList];
+  //   //       data.unshift({ label: "请选择工单", value: "" });
+  //   //       setBillNo(data);
+  //   //     } else {
+  //   //       Toast.show({
+  //   //         icon: "fail",
+  //   //         content: "获取整机台账信息失败",
+  //   //       });
+  //   //     }
+  //   //   }
+  //   // } else {
+  //   //   Toast.show({
+  //   //     icon: "fail",
+  //   //     content: "获取部门信息失败",
+  //   //   });
+  //   // }
+  // };
 
-  const getprojectGroup = () => {
-    formRef.current.setFieldsValue({
-      projectGroup: getDeptName(),
-    });
-    // const memberLogin = getMemberLogin();
-    // const {
-    //   status,
-    //   data: { memberList },
-    // } = await switchMember();
-    // if (status) {
-    //   const projectGroup = memberList.find(
-    //     (item) => item.memberCode === memberLogin
-    //   );
-    //   if (projectGroup) {
-    //     formRef.current.setFieldsValue({
-    //       projectGroup: projectGroup.deptName,
-    //     });
-    //   } else {
-    //     Toast.show({
-    //       icon: "fail",
-    //       content: "未匹配到项目组信息",
-    //     });
-    //   }
-    //   const deptList = memberList.map((item) => ({
-    //     label: item.deptName,
-    //     value: item.deptCode,
-    //   }));
-    //   deptList.unshift({ label: "请选择项目组", value: "" });
-    //   setProjectGroup(deptList);
-    // } else {
-    //   Toast.show({
-    //     icon: "fail",
-    //     content: "获取节点信息失败",
-    //   });
-    // }
-  };
+  // const getprojectGroup = () => {
+  //   formRef.current.setFieldsValue({
+  //     projectGroup: getDeptName(),
+  //   });
+  //   // const memberLogin = getMemberLogin();
+  //   // const {
+  //   //   status,
+  //   //   data: { memberList },
+  //   // } = await switchMember();
+  //   // if (status) {
+  //   //   const projectGroup = memberList.find(
+  //   //     (item) => item.memberCode === memberLogin
+  //   //   );
+  //   //   if (projectGroup) {
+  //   //     formRef.current.setFieldsValue({
+  //   //       projectGroup: projectGroup.deptName,
+  //   //     });
+  //   //   } else {
+  //   //     Toast.show({
+  //   //       icon: "fail",
+  //   //       content: "未匹配到项目组信息",
+  //   //     });
+  //   //   }
+  //   //   const deptList = memberList.map((item) => ({
+  //   //     label: item.deptName,
+  //   //     value: item.deptCode,
+  //   //   }));
+  //   //   deptList.unshift({ label: "请选择项目组", value: "" });
+  //   //   setProjectGroup(deptList);
+  //   // } else {
+  //   //   Toast.show({
+  //   //     icon: "fail",
+  //   //     content: "获取节点信息失败",
+  //   //   });
+  //   // }
+  // };
 
   const getProcedureData = (workFlowName) => {
     const {
@@ -389,64 +389,64 @@ export default () => {
     }
   };
 
-  const getPositionData = async () => {
-    //本地逻辑
-    const {
-      status,
-      data: { locationList },
-    } = getLocalStorage("locationList");
+  // const getPositionData = async () => {
+  //   //本地逻辑
+  //   const {
+  //     status,
+  //     data: { locationList },
+  //   } = getLocalStorage("locationList");
 
-    //在线逻辑
-    // const {
-    //   status,
-    //   data: { locationList },
-    // } = await switchLocation();
-    if (status) {
-      const data = locationList.map((item) => ({
-        label: item.field0001,
-        value: item.field0001,
-      }));
-      data.unshift({ label: "请选择位置", value: "" });
-      setPositionData(data);
-    } else {
-      Toast.show({
-        icon: "fail",
-        content: "获取位置列表失败",
-      });
-    }
-  };
+  //   //在线逻辑
+  //   // const {
+  //   //   status,
+  //   //   data: { locationList },
+  //   // } = await switchLocation();
+  //   if (status) {
+  //     const data = locationList.map((item) => ({
+  //       label: item.field0001,
+  //       value: item.field0001,
+  //     }));
+  //     data.unshift({ label: "请选择位置", value: "" });
+  //     setPositionData(data);
+  //   } else {
+  //     Toast.show({
+  //       icon: "fail",
+  //       content: "获取位置列表失败",
+  //     });
+  //   }
+  // };
 
-  const getDefaultFields = async () => {
-    /* const defaultnodeName =  */ formRef.current.setFieldsValue({
-      productionMember: getMemberName(),
-    });
+  // const getDefaultFields = async () => {
+  //   /* const defaultnodeName =  */ formRef.current.setFieldsValue({
+  //     productionMember: getMemberName(),
+  //   });
 
-    // const memberLogin = getMemberLogin();
-    // const {
-    //   status,
-    //   data: { memberList },
-    // } = await switchMember();
-    // if (status) {
-    //   const { memberName } = memberList.find(
-    //     (item) => item.memberCode === memberLogin
-    //   );
-    //   formRef.current.setFieldsValue({
-    //     productionMember: memberName,
-    //   });
-    // } else {
-    //   Toast.show({
-    //     icon: "fail",
-    //     content: "获取操作人失败",
-    //   });
-    // }
-  };
+  //   // const memberLogin = getMemberLogin();
+  //   // const {
+  //   //   status,
+  //   //   data: { memberList },
+  //   // } = await switchMember();
+  //   // if (status) {
+  //   //   const { memberName } = memberList.find(
+  //   //     (item) => item.memberCode === memberLogin
+  //   //   );
+  //   //   formRef.current.setFieldsValue({
+  //   //     productionMember: memberName,
+  //   //   });
+  //   // } else {
+  //   //   Toast.show({
+  //   //     icon: "fail",
+  //   //     content: "获取操作人失败",
+  //   //   });
+  //   // }
+  // };
 
   useEffect(() => {
-    getBillNo();
-    getprojectGroup();
+    // getBillNo();
+    // getprojectGroup();
     // getProcedureData();
-    getPositionData();
-    getDefaultFields();
+    // getPositionData();
+    // getDefaultFields();
   }, []);
 
   const inputChange = (e) => {

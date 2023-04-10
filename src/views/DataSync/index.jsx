@@ -25,6 +25,10 @@ import {
   switchWorkFlow,
   switchNode,
   switchInventoryInfo,
+  getAccount,
+  getGzCheck,
+  saveGzCheck,
+  saveAccountData
 } from "api/machine";
 import {
   getMemberLogin,
@@ -203,6 +207,40 @@ export default () => {
     }
   };
 
+  //下载工装批量管理信息
+  const getBatchManage = async () => {
+    const res = await getAccount();
+    if (res.status) {
+      Toast.show({
+        icon: "success",
+        content: "获取工装批量管理信息成功",
+      });
+      setLocalStorage("batchManage", res);
+    } else {
+      Toast.show({
+        icon: "fail",
+        content: "获取工装批量管理信息失败",
+      });
+    }
+  };
+
+  //下载工装盘点管理信息
+  const getInventoryManage = async () => {
+    const res = await getGzCheck();
+    if (res.status) {
+      Toast.show({
+        icon: "success",
+        content: "获取工装盘点管理信息成功",
+      });
+      setLocalStorage("inventoryManage", res);
+    } else {
+      Toast.show({
+        icon: "fail",
+        content: "获取工装盘点管理信息失败",
+      });
+    }
+  };
+
   //下载所有数据
   const hanldeDownLoad = async () => {
     await getFileTable();
@@ -211,6 +249,8 @@ export default () => {
     await getWorkFlow();
     await getNode();
     await getInventoryInfo();
+    await getBatchManage();
+    await getInventoryManage();
 
     Toast.show({
       icon: "success",
@@ -338,6 +378,46 @@ export default () => {
     }
   };
 
+  //上传批量管理信息
+  const batchMangeUpload = async () => {
+    const data = getLocalStorage("batchMangeUpload");
+    if (data) {
+      const { status } = await saveAccountData({ data });
+      if (status) {
+        Toast.show({
+          icon: "success",
+          content: "上传批量管理信息成功",
+        });
+        localStorage.removeItem("unbindListUpload");
+      } else {
+        Toast.show({
+          icon: "fail",
+          content: "上传批量管理信息失败",
+        });
+      }
+    }
+  };
+
+  //上传盘点管理信息
+  const inventoryManage = async () => { 
+    const data = getLocalStorage("inventoryManageUpload");
+    if (data) {
+      const { status } = await saveGzCheck({ data });
+      if (status) {
+        Toast.show({
+          icon: "success",
+          content: "上传盘点管理信息成功",
+        });
+        localStorage.removeItem("unbindListUpload");
+      } else {
+        Toast.show({
+          icon: "fail",
+          content: "上传盘点管理信息失败",
+        });
+      }
+    }
+  }
+
   //上传所有数据
   const hanldeUpLoad = async () => {
     await zjtzDataUpload();
@@ -346,6 +426,9 @@ export default () => {
     // await workFlowManage(); //工序
     await inventoryUpload();
     await unBindUpload();
+    await batchMangeUpload();
+    await inventoryManage()
+
     Toast.show({
       icon: "success",
       content: "上传已完成",

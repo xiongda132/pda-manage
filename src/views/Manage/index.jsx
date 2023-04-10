@@ -201,6 +201,32 @@ export default () => {
     }
     // }
 
+    //对本地板卡上传进行修改
+    if (getLocalStorage("cardMessageFormUpload")) {
+      const cardMessageFormArr = [
+        ...getLocalStorage("cardMessageFormUpload")
+      ];
+      const breakDataMap = breakDataRef.current?.map((item) => ({
+        cardName: item.split(" ")?.[1],
+        cardNumber: item.split(" ")[0],
+      }));
+      if (breakDataMap.length) {
+        cardMessageFormArr.forEach((item) => {
+          breakDataMap.forEach((item2) => {
+            if (
+              item2.cardName === item.cardName &&
+              item2.cardNumber === item.cardNumber
+            ) {
+              console.log(`改变了${item.cardName}的${item.cardNumber}`);
+              item.isCardBreak = "是";
+              item.errorDate = dayjs().format("YYYY-MM-DD HH:mm:ss");
+            }
+          });
+        });
+        setLocalStorage("cardMessageFormUpload", cardMessageFormArr);
+      }
+    }
+
     // const { status } = await saveWorkFlow({ workflowForm });
     // if (status) {
     //   Toast.show({

@@ -338,8 +338,20 @@ export default () => {
                 )?.facilityCode ||
                 (scanValue ? scanValue : epcFacilityCode.current),
               cardBreakMessage: "",
-              errorDate: "",
-              isCardBreak: "",
+              // errorDate: "",
+              // isCardBreak: "",
+              errorDate: cardRef.current.find(
+                (item) => item.cardNumber === item2.text
+              )
+                ? cardRef.current.find((item) => item.cardNumber === item2.text)
+                    .errorDate
+                : "",
+              isCardBreak: cardRef.current.find(
+                (item) => item.cardNumber === item2.text
+              )
+                ? cardRef.current.find((item) => item.cardNumber === item2.text)
+                    .isCardBreak
+                : "",
               gdhId: cardRef.current.find(
                 (item) => item.cardName === item1.name
               ).gdhId,
