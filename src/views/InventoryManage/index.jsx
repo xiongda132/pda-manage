@@ -10,6 +10,7 @@ import {
   switchMember,
 } from "api/machine";
 import { getLocalStorage, getMemberLogin } from "utils/auth";
+import { logDOM } from "@testing-library/react";
 
 const { Item } = Grid;
 
@@ -20,34 +21,26 @@ export default () => {
   const [billNo, setBillNo] = useState(null);
   const [detailVis, setDetailVis] = useState(false);
   const [inventoryData, setInventoryData] = useState([]);
+  console.log(inventoryData);
   const [memberCode, setMemberCode] = useState(getMemberLogin());
   const memberCodeRef = useRef("");
+  const [positionData, setPositionData] = useState([]);
 
   const back = () => {
     history.go(-1);
   };
 
   const getData = async () => {
-    // console.log(memberCodeRef.current);
-    //本地逻辑
-    const {
-      status,
-      data: { checkList },
-    } = getLocalStorage("checkList");
-    //在线逻辑
-    // const {
-    //   status,
-    //   data: { checkList },
-    // } = await switchInventoryInfo({ memberCode: memberCodeRef.current });
+    const { status, data } = getLocalStorage("inventoryManage");
     if (status) {
-      setInventoryData(checkList);
+      setInventoryData(data);
     } else {
       Toast.show({
         icon: "fail",
         content: "获取盘点信息失败",
       });
     }
-    const checkArr = [...new Set(checkList.map((item) => item.checkId))].map(
+    const checkArr = [...new Set(data.map((item) => item.checkId))].map(
       (item) => ({ id: item })
     );
     setInventoryList(checkArr);
@@ -64,29 +57,29 @@ export default () => {
     setDetailVis(false);
   }, []);
 
-  // const getMemberInfo = async () => {
-    // const memberLogin = getMemberLogin();
-    // memberCodeRef.current = memberCode;
-    // const {
-    //   status,
-    //   data: { memberList },
-    // } = await switchMember();
-    // if (status) {
-    //   const { memberCode } = memberList.find(
-    //     (item) => item.memberCode === memberLogin
-    //   );
-    //   memberCodeRef.current = memberCode;
-    // } else {
-    //   Toast.show({
-    //     icon: "fail",
-    //     content: "获取人员信息失败",
-    //   });
-    // }
-  // };
+  const getPositionData = () => {
+    const {
+      status,
+      data: { locationList },
+    } = getLocalStorage("locationList");
+    if (status) {
+      const data = locationList.map((item) => ({
+        label: item.field0001,
+        value: item.field0001,
+      }));
+      data.unshift({ label: "请选择位置", value: "" });
+      setPositionData(data);
+    } else {
+      Toast.show({
+        icon: "fail",
+        content: "获取位置列表失败",
+      });
+    }
+  };
 
   useEffect(() => {
-    // getMemberInfo();
     getData();
+    getPositionData();
   }, []);
 
   return (
@@ -135,6 +128,7 @@ export default () => {
               detailVis={detailVis}
               setDetailVis={setDetailVis}
               memberCode={memberCode}
+              positionData={positionData}
             />
           )}
         </div>

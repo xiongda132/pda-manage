@@ -10,112 +10,159 @@ import {
   Form,
   Input,
   Radio,
+  List,
 } from "antd-mobile";
 import { useHistory } from "react-router-dom";
 import styles from "./index.module.css";
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import { pdaConfig, pdaStart, padStop, queryPdaData } from "api/pda";
 import dayjs from "dayjs";
-import {
-  getMember,
-  switchMember,
-  switchFileTable,
-  switchLocation,
-  saveWorkFlow,
-  switchNode,
-} from "api/machine";
-import {
-  getMemberLogin,
-  getLocalStorage,
-  setLocalStorage,
-  getDeptName,
-  getMemberName,
-} from "utils/auth";
+import { saveAccountData } from "api/machine";
+import { getLocalStorage, setLocalStorage } from "utils/auth";
 // import { nodeObj } from "./test";
 import { DatePicker } from "antd";
 
 const { Item } = Grid;
 
-// const rankData = [
-//   { label: "请选择密级", value: "" },
-//   { label: "非密", value: "非密" },
-//   { label: "内部", value: "内部" },
-//   { label: "秘密", value: "秘密" },
-//   { label: "机密", value: "机密" },
-//   { label: "绝密", value: "绝密" },
-// ];
+const ListItemWithCheckbox = ({ obj, setSeletedData }) => {
+  const { gzName, currentPosition, gzState, gzCode, version, usefulLife } = obj;
+  const checkboxRef = useRef(null);
+  useEffect(() => {
+    checkboxRef.current.check();
+  }, []);
+  return (
+    <List.Item
+      prefix={
+        <div onClick={(e) => e.stopPropagation()}>
+          <Checkbox
+            // value={gzCode}
+            ref={checkboxRef}
+            onChange={(e) => {
+              setSeletedData((prev) => {
+                let cur = [...prev];
+                if (e) {
+                  cur.push(gzCode);
+                } else {
+                  cur = cur.filter((item) => gzCode !== item);
+                }
+                return cur;
+              });
+            }}
+          ></Checkbox>
+        </div>
+      }
+      onClick={() => {
+        checkboxRef.current.toggle();
+      }}
+      arrow={false}
+    >
+      <div className={styles.singleWrapper}>
+        <Grid columns={24} gap={8}>
+          <Item span={12}>工装编码: {gzCode}</Item>
+          <Item span={12}>工装名称: {gzName}</Item>
+          <Item span={12}>软件版本: {version}</Item>
+          <Item span={12}>当前位置: {currentPosition}</Item>
+          <Item span={12}>工装状态: {gzState}</Item>
+          <Item span={12}>有效期: {usefulLife}</Item>
+        </Grid>
+      </div>
+    </List.Item>
+  );
+};
 
 export default () => {
   const configTime = useRef(dayjs().format("YYYY-MM-DD HH:mm:ss"));
   const history = useHistory();
   const formRef = useRef(null);
   const [detailVis, setDetailVis] = useState(false);
-  const [deptCode, setDeptCode] = useState("");
-  const [checkboxValue, setCheckboxValue] = useState(false);
-  const [procedureData, setProcedureData] = useState([]);
   const [positionData, setPositionData] = useState([]);
-  const [billNo, setBillNo] = useState([]);
-  const [projectGroup, setProjectGroup] = useState([]);
-  const depCodeRef = useRef(null);
-  const zjtzDataRef = useRef(null);
-  const billRef = useRef(null);
-  const flowNodeNameRef = useRef(null);
-  // const [deptName, setDeptName] = useState(getDeptName());
+  const [statusList, setStatusList] = useState([]);
+  const gzDataRef = useRef([]);
+  const [seletedData, setSeletedData] = useState([]);
 
-  const onFinish = async (formObj) => {
-    const {
-      nbName,
-      procedureName,
-      // productionMember,
-      nodeSecurity,
-      currentPlace,
-      gdhId,
-    } = Object.assign({}, formObj);
-    const workflowForm = epcList.map((item) => ({
-      facilityCode: item.facilityCode,
-      nbName,
-      detailNodeName: procedureName,
-      productionMember: getMemberLogin(), //使用登录账号
-      nodeSecurity,
-      location: currentPlace,
-      gdhId,
-      newDate: dayjs().format("YYYY-MM-DD HH:mm:ss"),
-      nodeName: flowNodeNameRef.current,
+  const onFinish = (formObj) => {
+    if (!gzList.length) {
+      return Toast.show({
+        icon: "fail",
+        content: "请扫描工装",
+      });
+    }
+    if (!seletedData.length) {
+      return Toast.show({
+        icon: "fail",
+        content: "请选择工装",
+      });
+    }
+    const { currentPosition, gzState, version, usefulLife } = Object.assign(
+      {},
+      formObj
+    );
+    const gzData = gzList.map((item) => ({
+      gzName: item.gzName,
+      currentPosition,
+      gzState,
+      gzCode: item.gzCode,
+      version,
+      usefulLife: usefulLife.format("YYYY-MM-DD"),
     }));
 
-    //本地逻辑, 对操作数据进行存储
-    if (getLocalStorage("workflowFormUpload")) {
-      const workflowUpload = [...getLocalStorage("workflowFormUpload")];
-      workflowUpload.push(...workflowForm);
-      setLocalStorage("workflowFormUpload", workflowUpload);
+    //修改本地批量管理数据
+    if (getLocalStorage("batchManage")) {
+      const batchManageRes = { ...getLocalStorage("batchManage") };
+      batchManageRes.data.forEach((item) => {
+        gzData.forEach((item2) => {
+          if (item.gzCode === item2.gzCode) {
+            item.currentPosition = item2.currentPosition;
+            item.gzState = item2.gzState;
+            item.version = item2.version;
+            item.usefulLife = item2.usefulLife;
+          }
+        });
+      });
+      setLocalStorage("batchManage", batchManageRes);
     } else {
-      setLocalStorage("workflowFormUpload", workflowForm);
+      Toast.show({
+        icon: "fail",
+        content: "请下载工装信息",
+      });
     }
 
-    //本地逻辑， 对接口数据进行修改
-    if (getLocalStorage("workflowForm")) {
-      let workflowFormRes = { ...getLocalStorage("workflowForm") };
-      workflowFormRes.data.workflowForm.push(...workflowForm);
-      setLocalStorage("workflowForm", workflowFormRes);
+    //增加本地批量管理上传数据
+    if (getLocalStorage("batchManageUpload")) {
+      const batchManageUpload = [...getLocalStorage("batchManageUpload")];
+      batchManageUpload.push(...gzData);
     } else {
-      setLocalStorage("workflowForm", workflowForm);
+      setLocalStorage("batchManageUpload", gzData);
     }
+
     Toast.show({
       icon: "success",
       content: "保存完成",
     });
-    // const { status } = await saveWorkFlow({ workflowForm });
-    // if (status) {
-    //   Toast.show({
-    //     icon: "success",
-    //     content: "提交成功",
-    //   });
-    // } else {
-    //   Toast.show({
-    //     icon: "fail",
-    //     content: `提交失败`,
-    //   });
-    // }
+  };
+
+  const uploadData = async () => {
+    if (getLocalStorage("batchManageUpload")) {
+      const data = getLocalStorage("batchManageUpload");
+      const res = await saveAccountData({ data });
+      if (res.status) {
+        Toast.show({
+          icon: "success",
+          content: "上传工装信息成功",
+        });
+        localStorage.removeItem("batchManageUpload"); //避免多次上传
+      } else {
+        Toast.show({
+          icon: "fail",
+          content: "上传工装信息失败",
+        });
+      }
+    } else {
+      Toast.show({
+        icon: "fail",
+        content: "没有可上传的信息",
+      });
+    }
   };
 
   const [pdaReady, setPdaReady] = useState(false);
@@ -198,7 +245,7 @@ export default () => {
   const timer = useRef(null);
   const [loading, setLoading] = useState(true);
   const [epcList, setEpcList] = useState([]);
-  console.log(epcList);
+
   const refreshData = useCallback(async () => {
     if (timer.current) clearTimeout(timer.current);
     const res = await queryPdaData({
@@ -210,25 +257,10 @@ export default () => {
       setEpcList((preEpcList) => {
         const newEpcList = [...preEpcList];
         curEpcList.forEach((epc) => {
-          if (newEpcList.map((item) => item.epc).indexOf(epc) === -1) {
-            // 根据设备编号筛选某个工单下的epc列表
-            const zjtzObj = zjtzDataRef.current.find(
-              (item) => item.gdhId === billRef.current && item.epcData === epc
-            );
-            if (zjtzObj) {
-              newEpcList.unshift({
-                facilityCode: zjtzObj.facilityCode,
-                epc: zjtzObj.epcData,
-              });
-            } else {
-              Toast.show({
-                content: "epc不属于此工单或未绑定整机",
-              });
-            }
-            // newEpcList.unshift(epc);
+          if (newEpcList.indexOf(epc) === -1) {
+            newEpcList.unshift(epc);
           }
         });
-        // console.log("newEpcList", newEpcList);
         return newEpcList;
       });
       setLoading(false);
@@ -241,6 +273,10 @@ export default () => {
       }
     }
   }, []);
+
+  const gzList = useMemo(() => {
+    return gzDataRef.current.filter(({ epc }) => epcList.includes(epc));
+  }, [epcList]);
 
   useEffect(() => {
     if (pdaReady) {
@@ -255,271 +291,82 @@ export default () => {
     };
   }, [pdaReady, refreshData]);
 
-  // const getBillNo = async () => {
-  //   //本地逻辑
-  //   const {
-  //     status,
-  //     data: { zjtzData },
-  //   } = getLocalStorage("zjtzData");
-  //   if (status) {
-  //     zjtzDataRef.current = zjtzData;
-  //     const gdhList = [...new Set(zjtzData.map((item) => item.gdhId))].map(
-  //       (item) => ({ label: item, value: item })
-  //     );
-  //     const data = [...gdhList];
-  //     data.unshift({ label: "请选择工单", value: "" });
-  //     setBillNo(data);
-  //   } else {
-  //     Toast.show({
-  //       icon: "fail",
-  //       content: "获取整机台账信息失败",
-  //     });
-  //   }
+  const getGzData = () => {
+    const { status, data } = getLocalStorage("batchManage");
+    if (status) {
+      gzDataRef.current = data;
+    }
+  };
 
-  //   //在线逻辑
-  //   // const memberLogin = getMemberLogin();
-  //   // const {
-  //   //   status,
-  //   //   data: { memberList },
-  //   // } = await switchMember();
-  //   // if (status) {
-  //   //   const { deptCode } = memberList.find(
-  //   //     (item) => item.memberCode === memberLogin
-  //   //   );
-  //   //   if (deptCode) {
-  //   //     depCodeRef.current = deptCode;
-  //   //     sessionStorage.setItem("deptCode", deptCode);
-  //   //     const {
-  //   //       status,
-  //   //       data: { zjtzData },
-  //   //     } = await switchFileTable({ deptCode });
-  //   //     if (status) {
-  //   //       zjtzDataRef.current = zjtzData;
-  //   //       const gdhList = [...new Set(zjtzData.map((item) => item.gdhId))].map(
-  //   //         (item) => ({ label: item, value: item })
-  //   //       );
-  //   //       const data = [...gdhList];
-  //   //       data.unshift({ label: "请选择工单", value: "" });
-  //   //       setBillNo(data);
-  //   //     } else {
-  //   //       Toast.show({
-  //   //         icon: "fail",
-  //   //         content: "获取整机台账信息失败",
-  //   //       });
-  //   //     }
-  //   //   }
-  //   // } else {
-  //   //   Toast.show({
-  //   //     icon: "fail",
-  //   //     content: "获取部门信息失败",
-  //   //   });
-  //   // }
-  // };
-
-  // const getprojectGroup = () => {
-  //   formRef.current.setFieldsValue({
-  //     projectGroup: getDeptName(),
-  //   });
-  //   // const memberLogin = getMemberLogin();
-  //   // const {
-  //   //   status,
-  //   //   data: { memberList },
-  //   // } = await switchMember();
-  //   // if (status) {
-  //   //   const projectGroup = memberList.find(
-  //   //     (item) => item.memberCode === memberLogin
-  //   //   );
-  //   //   if (projectGroup) {
-  //   //     formRef.current.setFieldsValue({
-  //   //       projectGroup: projectGroup.deptName,
-  //   //     });
-  //   //   } else {
-  //   //     Toast.show({
-  //   //       icon: "fail",
-  //   //       content: "未匹配到项目组信息",
-  //   //     });
-  //   //   }
-  //   //   const deptList = memberList.map((item) => ({
-  //   //     label: item.deptName,
-  //   //     value: item.deptCode,
-  //   //   }));
-  //   //   deptList.unshift({ label: "请选择项目组", value: "" });
-  //   //   setProjectGroup(deptList);
-  //   // } else {
-  //   //   Toast.show({
-  //   //     icon: "fail",
-  //   //     content: "获取节点信息失败",
-  //   //   });
-  //   // }
-  // };
-
-  const getProcedureData = (workFlowName) => {
+  const getPositionData = () => {
     const {
       status,
-      data: { flowNodeForm },
-    } = getLocalStorage("flowNodeForm");
+      data: { locationList },
+    } = getLocalStorage("locationList");
     if (status) {
-      const filterNodeForm = flowNodeForm.filter(
-        (item) => item.flowName === workFlowName
-      );
-
-      //获取默认密级
-      const getDefaultSecurity = filterNodeForm?.[0].nodeSecurity;
-      formRef.current.setFieldsValue({
-        nodeSecurity: getDefaultSecurity,
-      });
-
-      const procedureData = filterNodeForm.map((item) => ({
-        label: item.detailNodeName,
-        value: item.detailNodeName,
+      const data = locationList.map((item) => ({
+        label: item.field0001,
+        value: item.field0001,
       }));
-      const detailNodeNameMap = [
-        ...new Set(procedureData.map((item) => item.label)),
-      ].map((item) => ({
-        label: item,
-        value: item,
-      })); //容错去重
-
-      //节点名称， 上传时使用
-      flowNodeNameRef.current = [
-        ...new Set(filterNodeForm.map((item) => item.flowNodeName)),
-      ]?.[0];
-      procedureData.unshift({ label: "请选择工序", value: "" });
-      setProcedureData(detailNodeNameMap);
+      data.unshift({ label: "请选择位置", value: "" });
+      setPositionData(data);
+    } else {
+      Toast.show({
+        icon: "fail",
+        content: "获取位置列表失败",
+      });
     }
   };
 
-  // const getPositionData = async () => {
-  //   //本地逻辑
-  //   const {
-  //     status,
-  //     data: { locationList },
-  //   } = getLocalStorage("locationList");
-
-  //   //在线逻辑
-  //   // const {
-  //   //   status,
-  //   //   data: { locationList },
-  //   // } = await switchLocation();
-  //   if (status) {
-  //     const data = locationList.map((item) => ({
-  //       label: item.field0001,
-  //       value: item.field0001,
-  //     }));
-  //     data.unshift({ label: "请选择位置", value: "" });
-  //     setPositionData(data);
-  //   } else {
-  //     Toast.show({
-  //       icon: "fail",
-  //       content: "获取位置列表失败",
-  //     });
-  //   }
-  // };
-
-  // const getDefaultFields = async () => {
-  //   /* const defaultnodeName =  */ formRef.current.setFieldsValue({
-  //     productionMember: getMemberName(),
-  //   });
-
-  //   // const memberLogin = getMemberLogin();
-  //   // const {
-  //   //   status,
-  //   //   data: { memberList },
-  //   // } = await switchMember();
-  //   // if (status) {
-  //   //   const { memberName } = memberList.find(
-  //   //     (item) => item.memberCode === memberLogin
-  //   //   );
-  //   //   formRef.current.setFieldsValue({
-  //   //     productionMember: memberName,
-  //   //   });
-  //   // } else {
-  //   //   Toast.show({
-  //   //     icon: "fail",
-  //   //     content: "获取操作人失败",
-  //   //   });
-  //   // }
-  // };
+  const getStatusInfo = () => {
+    const statusList = [];
+    setStatusList(statusList);
+  };
 
   useEffect(() => {
-    // getBillNo();
-    // getprojectGroup();
-    // getProcedureData();
-    // getPositionData();
-    // getDefaultFields();
+    getGzData();
+    getPositionData();
+    getStatusInfo();
   }, []);
-
-  const inputChange = (e) => {
-    console.log(e);
-  };
-  const handleChange = (value) => {
-    setCheckboxValue(value);
-  };
-  const handlePositionChange = (e) => {
-    if (e.target.value) {
-      billRef.current = e.target.value;
-      const { nbName, workFlowName } = zjtzDataRef.current.find(
-        (item) => item.gdhId === e.target.value
-      );
-      formRef.current.setFieldsValue({
-        nbName,
-      });
-      getProcedureData(workFlowName);
-    } else {
-      formRef.current.setFieldsValue({
-        nbName: "无",
-      });
-    }
-  };
-
-  const handledetailNodeChange = (e) => {
-    if (e.target.value) {
-      const {
-        status,
-        data: { flowNodeForm },
-      } = getLocalStorage("flowNodeForm");
-      if (status) {
-        const { nodeSecurity } = flowNodeForm.find(
-          (item) => item.detailNodeName === e.target.value
-        );
-        if (nodeSecurity) {
-          formRef.current.setFieldsValue({
-            nodeSecurity: nodeSecurity,
-          });
-        } else {
-          formRef.current.setFieldsValue({
-            nodeSecurity: "",
-          });
-        }
-      }
-    }
-  };
-
-  const handleStateChange = (e) => {
-    console.log(e);
-  };
-
-  const handleDatePicker = (e) => {
-    console.log(e);
-  };
 
   return (
     <>
-      <div className={styles.procedureContainer}>
+      <div className={styles.gzContainer}>
         <NavBar back="返回" onBack={back}>
-          整机批量流程管理
+          工装批量管理
         </NavBar>
-        <div className={styles.procedureWrapper}>
+        <div className={styles.gzWrapper}>
           <div className={styles.center}>
-            <div className={styles.procedureContent}>
+            <div className={styles.gzContent}>
               <div id="procedure">
+                {/* id用于保持样式 */}
                 <Form
                   ref={(r) => (formRef.current = r)}
                   layout="horizontal"
                   footer={
-                    <Button type="submit" color="primary" size="large" block>
-                      提交
-                    </Button>
+                    <div>
+                      <Button
+                        color="success"
+                        size="large"
+                        width="50%"
+                        style={{ display: "inline-block", width: "49%" }}
+                        onClick={uploadData}
+                      >
+                        上传
+                      </Button>
+                      <Button
+                        type="submit"
+                        color="primary"
+                        size="large"
+                        style={{
+                          display: "inline-block",
+                          width: "49%",
+                          marginLeft: "2%",
+                        }}
+                      >
+                        保存
+                      </Button>
+                    </div>
                   }
                   onFinish={onFinish}
                   mode="card"
@@ -527,9 +374,9 @@ export default () => {
                   <Form.Item label="位置信息" name="currentPosition">
                     <select
                       className={styles.select}
-                      onChange={handlePositionChange}
+                      // onChange={handlePositionChange}
                     >
-                      {billNo.map((item) => {
+                      {positionData.map((item) => {
                         return (
                           <option key={item.label} value={item.value}>
                             {item.label}
@@ -539,11 +386,8 @@ export default () => {
                     </select>
                   </Form.Item>
                   <Form.Item label="状态信息" name="gzState">
-                    <select
-                      className={styles.select}
-                      onChange={handleStateChange}
-                    >
-                      {billNo.map((item) => {
+                    <select className={styles.select}>
+                      {statusList.map((item) => {
                         return (
                           <option key={item.label} value={item.value}>
                             {item.label}
@@ -553,36 +397,32 @@ export default () => {
                     </select>
                   </Form.Item>
                   <Form.Item label="软件版本" name="version">
-                    <Input
-                      placeholder="请输入版本..."
-                      onChange={inputChange}
-                    />
+                    <Input placeholder="请输入版本..." />
                   </Form.Item>
                   <Form.Item label="有效期" name="usefulLife">
-                    <DatePicker onChange={handleDatePicker} />
+                    <DatePicker />
                   </Form.Item>
                 </Form>
               </div>
-
               <div className={styles.listAndAmount}>
-                <span className={styles.machineList}>工装列表</span>
-                <span className={styles.amount}>数量: {epcList?.length}</span>
+                <span className={styles.gzList}>工装列表</span>
+                <span className={styles.amount}>数量: {gzList?.length}</span>
               </div>
               {loading ? (
                 <p className={styles.waitScan}>等待扫描...</p>
               ) : (
                 <div className={styles.list}>
-                  {epcList.map((item) => {
-                    return (
-                      <div key={item.facilityCode} className={styles.listItem}>
-                        <Grid columns={24} gap={8}>
-                          <Item span={15} style={{ lineHeight: "35px" }}>
-                            设备编号: {item.facilityCode}
-                          </Item>
-                        </Grid>
-                      </div>
-                    );
-                  })}
+                  <Checkbox.Group>
+                    <List>
+                      {gzList.map((item) => (
+                        <ListItemWithCheckbox
+                          key={item.gzCode}
+                          obj={item}
+                          setSeletedData={setSeletedData}
+                        />
+                      ))}
+                    </List>
+                  </Checkbox.Group>
                 </div>
               )}
             </div>

@@ -1,13 +1,133 @@
 import styles from "./index.module.css";
 import { useEffect, useState, useRef, useMemo, useCallback } from "react";
-import { NavBar, Grid, Button, Toast } from "antd-mobile";
+import { NavBar, Grid, Button, Toast, Input, Form } from "antd-mobile";
 import { useHistory } from "react-router-dom";
 import dayjs from "dayjs";
 import { pdaConfig, pdaStart, padStop, queryPdaData } from "api/pda";
-import { savaInventoryInfo } from "api/machine";
+import { saveGzCheck } from "api/machine";
 import { getLocalStorage, setLocalStorage } from "utils/auth";
 
 const { Item } = Grid;
+
+const InventoryItem = ({ item, positionData, setPreData }) => {
+  const {
+    gzCode,
+    gzName,
+    gzState,
+    checkState,
+    version,
+    usefulLife,
+    currentPosition,
+  } = item;
+  const formRef = useRef(null);
+  const setDefaultValue = () => {
+    formRef.current.setFieldsValue({
+      gzCode,
+      gzName,
+      gzState,
+      usefulLife,
+      version,
+      currentPosition,
+    });
+  };
+
+  const handleInput = () => {
+    setPreData((prev) => {
+      const cur = [...prev];
+      cur.forEach((item) => {
+        if (item.gzCode === gzCode) {
+          item.version = formRef.current.getFieldValue("version");
+        }
+      });
+      return cur;
+    });
+  };
+
+  const handlePosition = (e) => {
+    setPreData((prev) => {
+      const cur = [...prev];
+      cur.forEach((item) => {
+        if (item.gzCode === gzCode) {
+          item.currentPosition = e.target.value;
+        }
+      });
+      return cur;
+    });
+  };
+  useEffect(() => {
+    setDefaultValue();
+  }, []);
+  return (
+    <div
+      key={gzCode}
+      className={styles.inventoryInfo}
+      style={{
+        background:
+          checkState === "已盘"
+            ? "rgba(0, 191, 191, .76)"
+            : "rgba(242, 242, 242, .87)",
+        position: "relative",
+      }}
+    >
+      <div id="inventoryManage" style={{ overflow: "hidden" }}>
+        {/* 形成bfc，解决上下外边距重叠现象 */}
+        {/* id用于保持个性样式, 不影响其他界面 */}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            marginTop: "5px",
+          }}
+        >
+          <Button
+            style={{
+              background:
+                checkState === "已盘"
+                  ? "rgba(0, 191, 191, .76)"
+                  : "rgba(170, 170, 170, .87)",
+              color: "#ffffff",
+              borderColor: "#ffffff",
+            }}
+          >
+            {checkState}
+          </Button>
+        </div>
+        <Form
+          ref={(r) => (formRef.current = r)}
+          layout="horizontal"
+          mode="card"
+        >
+          <Form.Item label="工装编码" name="gzCode">
+            <Input readOnly />
+          </Form.Item>
+          <Form.Item label="工装名称" name="gzState">
+            <Input readOnly />
+          </Form.Item>
+          <Form.Item label="软件版本" name="version">
+            <Input placeholder="请输入版本..." onChange={handleInput} />
+          </Form.Item>
+          <Form.Item label="当前位置" name="currentPosition">
+            <select onChange={handlePosition}>
+              {positionData.map((item) => {
+                return (
+                  <option key={item.label} value={item.value}>
+                    {item.label}
+                  </option>
+                );
+              })}
+            </select>
+          </Form.Item>
+          <Form.Item label="工装状态" name="gzState">
+            <Input readOnly />
+          </Form.Item>
+          <Form.Item label="有效期" name="usefulLife">
+            <Input readOnly />
+          </Form.Item>
+        </Form>
+      </div>
+    </div>
+  );
+};
 
 export default ({
   id,
@@ -15,73 +135,68 @@ export default ({
   detailVis,
   setDetailVis,
   inventoryList,
-  memberCode,
+  positionData,
 }) => {
   const configTime = useRef(dayjs().format("YYYY-MM-DD HH:mm:ss"));
   const history = useHistory();
   const [predata, setPreData] = useState(() =>
     inventoryData.filter((item) => item.checkId === id)
   );
-  console.log("predata", predata);
 
   const handleSave = async () => {
-    const checkListMap = predata.map((item) => ({
-      checkId: item.checkId,
-      facilityCode: item.facilityCode,
-      memberCode,
-      checkResult: item.state,
-      newDate: dayjs().format("YYYY-MM-DD HH:mm:ss"),
-      // flag: item.flag ? true : false
-    }));
-
-    //扫前和扫后相加的已盘数据
-    const checkList = checkListMap.filter(
-      (item) => item.checkResult === "已盘" /* && item.flag */
+    const checkListMap = predata.map(
+      ({
+        gzName,
+        currentPosition,
+        gzState,
+        gzCode,
+        version,
+        checkId,
+        usefulLife,
+        checkState,
+      }) => ({
+        gzName,
+        currentPosition,
+        gzState,
+        gzCode,
+        version,
+        checkId,
+        usefulLife,
+        checkState,
+      })
     );
 
-    console.log("checkList", checkList);
-
-    //后续对匹配的设备编码进行修改
-    const facilityCodeList = checkList.map((item) => item.facilityCode);
-
     //本地逻辑, 对操作数据进行存储
-    if (getLocalStorage("inventoryDataUpload")) {
-      const inventoryDataUpload = [...getLocalStorage("inventoryDataUpload")];
-      inventoryDataUpload.push(...checkList);
-      setLocalStorage("inventoryDataUpload", inventoryDataUpload);
+    if (getLocalStorage("inventoryManageUpload")) {
+      const inventoryManageUpload = [
+        ...getLocalStorage("inventoryManageUpload"),
+      ];
+      inventoryManageUpload.push(...checkListMap);
+      setLocalStorage("inventoryManageUpload", inventoryManageUpload);
     } else {
-      setLocalStorage("inventoryDataUpload", checkList);
+      setLocalStorage("inventoryManageUpload", checkListMap);
     }
 
+    console.log(predata);
     //本地逻辑，对已保存的接口数据修改状态
-    if (getLocalStorage("checkList")) {
-      let checkListRes = { ...getLocalStorage("checkList") };
-      checkListRes.data.checkList.forEach((item) => {
-        facilityCodeList.forEach((item2) => {
-          if (item.facilityCode === item2) {
-            item.state = "已盘";
+    if (getLocalStorage("inventoryManage")) {
+      let checkListRes = { ...getLocalStorage("inventoryManage") };
+      checkListRes.data.forEach((item) => {
+        predata.forEach((item2) => {
+          if (item.gzCode === item2.gzCode) {
+            item.version = item2.version;
+            item.currentPosition = item2.currentPosition;
+            item.checkState = item2.checkState;
           }
         });
       });
-      setLocalStorage("checkList", checkListRes);
+      setLocalStorage("inventoryManage", checkListRes);
     }
 
     Toast.show({
       icon: "success",
       content: "盘点完成",
     });
-    // const res = await savaInventoryInfo({ checkList });
-    // if (res.status) {
-    //   Toast.show({
-    //     icon: "success",
-    //     content: "保存信息成功",
-    //   });
-    // } else {
-    //   Toast.show({
-    //     icon: "fail",
-    //     content: "保存信息失败",
-    //   });
-    // }
   };
 
   const inventoryDetail = useMemo(() => {
@@ -213,36 +328,16 @@ export default ({
     };
   }, [pdaReady, refreshData]);
 
-  // const scanList = useMemo(() => {
-  //   return inventoryData.filter((item) => epcList.indexOf(item.RFID) !== -1);
-  // }, [epcList]);
-  // 非必要，若是盘点数据之外的epc，在遍历中不不会被筛选，不修改任何状态
-
   useEffect(() => {
     if (epcList.length) {
       setPreData((pre) => {
         let cur = [...pre];
         epcList.forEach((item1) => {
           cur.forEach((item2, _, arr) => {
-            if (item1 === item2.RFID && item2.state === "未盘") {
-              item2.state = "已盘";
-              // item2.flag = true;
+            if (item1 === item2.epc && item2.checkState === "未盘") {
+              //根据epc字段， 其他处可能不同
+              item2.checkState = "已盘";
             }
-            //"epc对应的设备编码不在盘点单中"的逻辑处理
-            // const rfidList = arr.map(({ RFID }) => RFID);
-            // if (!rfidList.includes(item1)) {
-            //   const epcObj = notBelongToBill(item1);
-            //   if (epcObj) {
-            //     arr.push(epcObj);
-            //     Toast.show({
-            //       content: `${epcObj.facilityCode}不在盘点单中`,
-            //     });
-            //   } else {
-            //     Toast.show({
-            //       content: `epc未绑定主机`,
-            //     });
-            //   }
-            // }
           });
         });
         return cur;
@@ -250,18 +345,35 @@ export default ({
     }
   }, [epcList]);
 
-  
-  // const notBelongToBill = (epc) => {
-  //   const zjtzDataRes = getLocalStorage("zjtzData");
-  //   const epcObj = zjtzDataRes.data.zjtzData.find(
-  //     (item) => item.epcData === epc
-  //   );
-  //   return epcObj;
-  // };
-
   const inventoryAmount = useMemo(() => {
-    return predata.filter((item) => item.state === "已盘").length;
+    return predata.filter((item) => item.checkState === "已盘").length;
   }, [predata]);
+
+  console.log("predata", predata);
+
+  const handleUpload = async () => {
+    if (getLocalStorage("inventoryManageUpload")) {
+      const data = getLocalStorage("inventoryManageUpload");
+      const res = await saveGzCheck({ data });
+      if (res.status) {
+        Toast.show({
+          icon: "success",
+          content: "上传盘点管理信息成功",
+        });
+        localStorage.removeItem("inventoryManageUpload");
+      } else {
+        Toast.show({
+          icon: "fail",
+          content: "上传盘点管理信息失败",
+        });
+      }
+    } else {
+      Toast.show({
+        icon: "fail",
+        content: "没有可上传的数据",
+      });
+    }
+  };
 
   return (
     <>
@@ -276,8 +388,13 @@ export default ({
               <Grid columns={24} gap={8}>
                 <Item span={24}>盘点单号: {inventoryDetail?.id}</Item>
                 <Item span={24}>盘点时间: {configTime.current}</Item>
-                <Item span={17}>
+                <Item span={10}>
                   盘点数据: {inventoryAmount} / {predata.length}
+                </Item>
+                <Item span={7}>
+                  <Button color="success" onClick={handleUpload}>
+                    盘点上传
+                  </Button>
                 </Item>
                 <Item span={7}>
                   <Button color="primary" onClick={handleSave}>
@@ -288,55 +405,13 @@ export default ({
             </div>
           </div>
           <div className={styles.listContent}>
-            {predata?.map((item) => {
-              const {
-                facilityCode,
-                gdhId,
-                place,
-                plateNumber,
-                ReqName,
-                productionMember,
-                security,
-                state,
-                detailNodeName,
-              } = item;
-              return (
-                <div
-                  key={item.facilityCode}
-                  className={styles.inventoryInfo}
-                  style={{
-                    background:
-                      state === "已盘"
-                        ? "rgba(0, 191, 191, .76)"
-                        : "rgba(242, 242, 242, .87)",
-                  }}
-                >
-                  <Grid columns={24} gap={10} style={{ position: "relative" }}>
-                    <Item span={12}>工单号: {gdhId}</Item>
-                    <Item span={12}>设备编号: {facilityCode}</Item>
-                    <Item span={12}>铭牌编号: {plateNumber}</Item>
-                    <Item span={12}>需求名称: {ReqName}</Item>
-                    <Item span={12}>保密等级: {security}</Item>
-                    <Item span={12}>位置: {place}</Item>
-                    <Item span={12}>细化流程节点: {detailNodeName}</Item>
-                    <Item span={12}>生产人员: {productionMember}</Item>
-                    <Button
-                      className={styles.statusButton}
-                      style={{
-                        background:
-                          state === "已盘"
-                            ? "rgba(0, 191, 191, .76)"
-                            : "rgba(170, 170, 170, .87)",
-                        color: "#ffffff",
-                        borderColor: "#ffffff",
-                      }}
-                    >
-                      {state}
-                    </Button>
-                  </Grid>
-                </div>
-              );
-            })}
+            {predata.map((item) => (
+              <InventoryItem
+                item={item}
+                positionData={positionData}
+                setPreData={setPreData}
+              />
+            ))}
           </div>
         </div>
       </div>

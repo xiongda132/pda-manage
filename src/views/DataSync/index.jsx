@@ -28,7 +28,7 @@ import {
   getAccount,
   getGzCheck,
   saveGzCheck,
-  saveAccountData
+  saveAccountData,
 } from "api/machine";
 import {
   getMemberLogin,
@@ -249,8 +249,6 @@ export default () => {
     await getWorkFlow();
     await getNode();
     await getInventoryInfo();
-    await getBatchManage();
-    await getInventoryManage();
 
     Toast.show({
       icon: "success",
@@ -399,7 +397,7 @@ export default () => {
   };
 
   //上传盘点管理信息
-  const inventoryManage = async () => { 
+  const inventoryManage = async () => {
     const data = getLocalStorage("inventoryManageUpload");
     if (data) {
       const { status } = await saveGzCheck({ data });
@@ -416,7 +414,7 @@ export default () => {
         });
       }
     }
-  }
+  };
 
   //上传所有数据
   const hanldeUpLoad = async () => {
@@ -426,12 +424,21 @@ export default () => {
     // await workFlowManage(); //工序
     await inventoryUpload();
     await unBindUpload();
-    await batchMangeUpload();
-    await inventoryManage()
+    // await batchMangeUpload(); //移至界面上传
+    // await inventoryManage();
 
     Toast.show({
       icon: "success",
       content: "上传已完成",
+    });
+  };
+
+  const handleGzDownLoad = async () => {
+    await getBatchManage();
+    await getInventoryManage();
+    Toast.show({
+      icon: "success",
+      content: "下载工装信息成功",
     });
   };
 
@@ -443,11 +450,20 @@ export default () => {
         </NavBar>
         <div className={styles.content}>
           <div className={styles.operate}>
-            <div className={styles.downLoad} onClick={hanldeDownLoad}>
-              数据一键下载
+            <div className={styles.machine}>
+              <div className={styles.machineManage}>整机管理</div>
+              <div className={styles.downLoad} onClick={hanldeDownLoad}>
+                数据一键下载
+              </div>
+              <div className={styles.upLoad} onClick={hanldeUpLoad}>
+                数据一键上传
+              </div>
             </div>
-            <div className={styles.upLoad} onClick={hanldeUpLoad}>
-              数据一键上传
+            <div className={styles.gz}>
+              <div className={styles.gzManage}>工装管理</div>
+              <div className={styles.gzDownload} onClick={handleGzDownLoad}>
+                数据一键下载
+              </div>
             </div>
           </div>
         </div>

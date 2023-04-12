@@ -37,3 +37,27 @@
 #record .adm-list-item-content {
   flex-direction: column;
 }
+
+#inventoryManage .adm-form .adm-list.adm-list {
+  margin: 5px;
+}
+
+#inventoryManage .adm-list-body-inner {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+#inventoryManage .adm-form-item.adm-form-item-horizontal.adm-list-item {
+  width: 50%;
+  padding-left: 5px;
+}
+
+#inventoryManage
+  .adm-form-item.adm-form-item-horizontal
+  .adm-list-item-content-prefix {
+  width: 45%;
+  padding-right: 0px;
+}
+#inventoryManage .adm-form .adm-form-footer {
+  padding: 0px 12px !important;
+}

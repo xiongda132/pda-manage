@@ -15,11 +15,24 @@
 }
 
 .downLoad,
-.upLoad {
+.upLoad,
+.gzDownload {
   height: 50px;
   background: #2eb1fc;
   text-align: center;
   line-height: 50px;
   border-radius: 5px;
   margin-bottom: 20px;
+}
+
+.machineManage,
+.gzManage {
+  text-align: center;
+  font-size: 25px;
+  margin-bottom: 10px;
+}
+
+.machine,
+.gz {
+  background: #ebf8fe;
 }

@@ -45,7 +45,6 @@ export const getLocation = () => {
   return getRequest(`/seeyon/rest/api/synlocation?token=${getUserToken()}`);
 };
 
-
 /* 台账相关获取接口 */
 export const getGzCheck = () => {
   return getRequest(`/seeyon/rest/api/gzCheck?token=${getUserToken()}`);
@@ -94,6 +93,12 @@ export const saveNode = (params) => {
 
 export const saveLedger = (params) => {
   return request("/seeyon/rest/api/saveLedger", {
+    ...params,
+  });
+};
+
+export const saveReturnTable = (params) => {
+  return request("/seeyon/rest/api/saveReturnTable", {
     ...params,
   });
 };

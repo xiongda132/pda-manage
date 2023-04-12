@@ -19,12 +19,15 @@ export function request(api, params) {
       }
     )
       .then((res) => {
+        // alert(JSON.stringify(res), "成功回调");
+        // console.log(JSON.stringify(res));
         let resObj = res.json();
 
         // alert(JSON.stringify(resObj));
         resolve(resObj);
       })
       .catch((err) => {
+        // alert(err, "内层错误回调");
         let err_ = {
           ...err,
           url: `http://${localStorage.getItem("serverPort")}` + api,
@@ -33,6 +36,7 @@ export function request(api, params) {
         reject(err_);
       });
   }).catch((error) => {
+    // alert(error, "外层错误回调");
     let err = {
       code: -1,
       message: error.message,
@@ -53,12 +57,16 @@ export function getRequest(api) {
       },
     })
       .then((res) => {
+        // alert("成功" + res);
+        // console.log(res.body);
+        // let resa = "{"a":"123"}";
         let resObj = res.json();
 
         // alert(JSON.stringify(resObj));
         resolve(resObj);
       })
       .catch((err) => {
+        // alert(err, "内层错误回调");
         let err_ = {
           ...err,
           url: `http://${localStorage.getItem("serverPort")}` + api,
@@ -67,6 +75,7 @@ export function getRequest(api) {
         reject(err_);
       });
   }).catch((error) => {
+    // alert(error, "外层错误回调");
     let err = {
       code: -1,
       message: error.message,

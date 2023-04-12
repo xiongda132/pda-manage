@@ -119,6 +119,10 @@ const CLogin = (props) => {
   //   history.push("/specialDevice");
   // };
 
+  const borrowAndReturn = () => {
+    history.push("/borrowAndReturn");
+  };
+
   const batchManage = () => {
     history.push("/batchManage");
   };
@@ -178,13 +182,13 @@ const CLogin = (props) => {
             <div className={styles.tool}>工装管理</div>
             <div className={styles.toolContent}>
               <div>
-                <div /* onClick={handleReturnToWarehouse} */>借用归还</div>
+                <div onClick={borrowAndReturn}>借用归还</div>
               </div>
               <div>
-                <div /* onClick={batchManage} */>批量管理</div>
+                <div onClick={batchManage}>批量管理</div>
               </div>
               <div>
-                <div /* onClick={inventoryManage} */>盘点管理</div>
+                <div onClick={inventoryManage}>盘点管理</div>
               </div>
             </div>
           </div>

@@ -27,6 +27,7 @@ import DataSync from "./views/DataSync";
 //工装部分
 import BatchManage from "./views/BatchManage";
 import InventoryManage from "./views/InventoryManage";
+import BorrowAndReturn from "./views/BorrowAndReturn"
 
 function App() {
   return (
@@ -57,6 +58,9 @@ function App() {
             </Route>
             <Route path="/inventory">
               <Inventory />
+            </Route>
+            <Route path="/borrowAndReturn">
+              <BorrowAndReturn />
             </Route>
             <Route path="/batchManage">
               <BatchManage />
