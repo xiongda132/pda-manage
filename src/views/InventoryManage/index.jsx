@@ -127,7 +127,6 @@ export default () => {
               inventoryData={inventoryData}
               detailVis={detailVis}
               setDetailVis={setDetailVis}
-              memberCode={memberCode}
               positionData={positionData}
             />
           )}

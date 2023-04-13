@@ -334,7 +334,7 @@ export default ({
         let cur = [...pre];
         epcList.forEach((item1) => {
           cur.forEach((item2, _, arr) => {
-            if (item1 === item2.epc && item2.checkState === "未盘") {
+            if (item1 === item2.epcData && item2.checkState === "未盘") {
               //根据epc字段， 其他处可能不同
               item2.checkState = "已盘";
             }

@@ -14,7 +14,14 @@ import {
 import { useHistory } from "react-router-dom";
 import styles from "./index.module.css";
 import { useEffect, useState, useRef, useCallback } from "react";
-import { pdaConfig, pdaStart, padStop, queryPdaData } from "api/pda";
+import {
+  pdaConfig,
+  pdaStart,
+  padStop,
+  queryPdaData,
+  scanStart,
+  scanQuery,
+} from "api/pda";
 import dayjs from "dayjs";
 import {
   getMember,
@@ -34,6 +41,7 @@ import {
 import { nodeObj } from "./test";
 
 const { Item } = Grid;
+const { Group } = Radio;
 
 const rankData = [
   { label: "请选择密级", value: "" },
@@ -59,6 +67,8 @@ export default () => {
   const zjtzDataRef = useRef(null);
   const billRef = useRef(null);
   const flowNodeNameRef = useRef(null);
+  const [scanMode, setScanMode] = useState("");
+
   // const [deptName, setDeptName] = useState(getDeptName());
 
   const onFinish = async (formObj) => {
@@ -123,6 +133,43 @@ export default () => {
       content: "保存成功",
     });
   };
+
+  const handleModeChange = (mode) => {
+    setScanMode(mode);
+    setPdaReady(false);
+    setPdaReadyQr(false);
+  };
+
+  const [pdaReadyQr, setPdaReadyQr] = useState(false);
+  const initQrcode = useCallback(async () => {
+    const pdaConfigRes = await pdaConfig({
+      scanType: 1,
+      scanOpen: 1,
+      scanOutputMode: 2,
+      scanEndEvent: 3,
+    });
+    if (pdaConfigRes.code === 1) {
+      const pdaStartRes = await scanStart({
+        startTime: configTime.current,
+      });
+      console.log(pdaStartRes);
+      if (pdaStartRes.code === 1) {
+        console.log("初始化二维码扫描成功");
+        setPdaReadyQr(true);
+      } else {
+        Toast.show({
+          icon: "fail",
+          content: "启动失败, " + pdaStartRes.msg,
+        });
+      }
+    } else {
+      Toast.show({
+        icon: "fail",
+        content: "参数配置失败, " + pdaConfigRes.msg,
+      });
+    }
+  }, []);
+
   const [pdaReady, setPdaReady] = useState(false);
   const initPda = useCallback(async () => {
     const pdaConfigRes = await pdaConfig({
@@ -188,7 +235,7 @@ export default () => {
   }, [plusReady]);
 
   useEffect(() => {
-    initPda();
+    // initPda();
     initDevicePlus();
     return () => {
       const plus = window.plus || {};
@@ -247,6 +294,65 @@ export default () => {
     }
   }, []);
 
+  const refreshQrData = useCallback(async () => {
+    if (timerQr.current) clearTimeout(timerQr.current);
+    const res = await scanQuery({
+      startTime: configTime.current,
+    });
+    console.log(res);
+    if (res.code === 1) {
+      // const epcData = res.data.map(({ epc }) => epc);
+      console.log("scancode", res.scancode);
+      setEpcList((pre) => {
+        const cur = [...pre];
+        if (cur.map((item) => item.facilityCode).indexOf(res.scancode) === -1) {
+          const zjtzObj = zjtzDataRef.current.find(
+            (item) =>
+              item.gdhId === billRef.current &&
+              item.facilityCode === res.scancode
+          );
+          if (zjtzObj) {
+            cur.unshift({
+              facilityCode: zjtzObj.facilityCode,
+              epc: zjtzObj.epcData,
+            });
+          } else {
+            Toast.show({
+              content: "设备编码不属于此工单",
+            });
+          }
+        } else {
+          Toast.show({
+            content: "已重复",
+          });
+        }
+        return cur;
+      });
+      setLoading(false);
+      // if (epcData.length > 1) {
+      //   Toast.show({
+      //     icon: "fail",
+      //     content: "扫描到了多个epc",
+      //   });
+      // } else {
+      //   if (epcData.length === 1) {
+      //     Toast.show({
+      //       icon: "fail",
+      //       content: "扫描到了1个epc",
+      //     });
+      //     setEpcValue(epcData[0]);
+      //   }
+      // }
+      if (timerQr.current !== null) {
+        timerQr.current = setTimeout(refreshQrData, 200);
+      }
+    } else {
+      if (timerQr.current !== null) {
+        timerQr.current = setTimeout(refreshQrData, 200);
+      }
+    }
+  }, []);
+
   useEffect(() => {
     if (pdaReady) {
       timer.current = 0;
@@ -259,6 +365,29 @@ export default () => {
       }
     };
   }, [pdaReady, refreshData]);
+
+  // const [pdaReadyEpc, setPdaReadyEpc] = useState(false);
+  const timerQr = useRef(null);
+  useEffect(() => {
+    if (pdaReadyQr) {
+      timerQr.current = 0;
+      refreshQrData();
+    }
+    return () => {
+      if (timerQr.current) {
+        clearTimeout(timerQr.current);
+        timerQr.current = null;
+      }
+    };
+  }, [pdaReadyQr]);
+
+  useEffect(() => {
+    if (scanMode === "qrcode") {
+      initQrcode();
+    } else if (scanMode === "rfid") {
+      initPda();
+    }
+  }, [scanMode]);
 
   const getBillNo = async () => {
     //本地逻辑
@@ -606,7 +735,37 @@ export default () => {
                 <span className={styles.machineList}>整机列表</span>
                 <span className={styles.amount}>数量: {epcList?.length}</span>
               </div>
+
               {loading ? (
+                /* 支持两种扫描方式 */
+                <div className={styles.scanQrcode}>
+                  请选择扫描模式, 进行扫描...
+                  <Group onChange={handleModeChange}>
+                    <Space>
+                      <Radio value="qrcode">二维码</Radio>
+                      <Radio value="rfid">RFID</Radio>
+                    </Space>
+                  </Group>
+                </div>
+              ) : (
+                // <p className={styles.waitScan}>等待扫描...</p>
+                <div className={styles.list}>
+                  {epcList.map((item) => {
+                    return (
+                      <div key={item.facilityCode} className={styles.listItem}>
+                        <Grid columns={24} gap={8}>
+                          <Item span={15} style={{ lineHeight: "35px" }}>
+                            设备编号: {item.facilityCode}
+                          </Item>
+                        </Grid>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/*  仅epc扫描 */}
+              {/* {loading ? (
                 <p className={styles.waitScan}>等待扫描...</p>
               ) : (
                 <div className={styles.list}>
@@ -622,7 +781,7 @@ export default () => {
                     );
                   })}
                 </div>
-              )}
+              )} */}
             </div>
           </div>
         </div>

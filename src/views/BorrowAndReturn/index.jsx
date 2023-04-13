@@ -285,7 +285,7 @@ export default () => {
   };
 
   const gzList = useMemo(() => {
-    return gzDataRef.current.filter(({ epc }) => epcList.includes(epc));
+    return gzDataRef.current.filter(({ epcData }) => epcList.includes(epcData));
   }, [epcList]);
 
   return (

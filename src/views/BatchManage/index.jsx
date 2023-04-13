@@ -275,7 +275,7 @@ export default () => {
   }, []);
 
   const gzList = useMemo(() => {
-    return gzDataRef.current.filter(({ epc }) => epcList.includes(epc));
+    return gzDataRef.current.filter(({ epcData }) => epcList.includes(epcData));
   }, [epcList]);
 
   useEffect(() => {
@@ -319,7 +319,25 @@ export default () => {
   };
 
   const getStatusInfo = () => {
-    const statusList = [];
+    const statusList = [
+      {
+        label: "正常",
+        value: "正常",
+      },
+      {
+        label: "维修中",
+        value: "维修中",
+      },
+      {
+        label: "待报废",
+        value: "待报废",
+      },
+      {
+        label: "报废",
+        value: "报废",
+      },
+    ];
+    statusList.unshift({ label: "请选择状态", value: "" });
     setStatusList(statusList);
   };
 
