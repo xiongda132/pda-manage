@@ -436,6 +436,7 @@ export default () => {
   const handleGzDownLoad = async () => {
     await getBatchManage();
     await getInventoryManage();
+    await getLocation();
     Toast.show({
       icon: "success",
       content: "下载工装信息成功",
