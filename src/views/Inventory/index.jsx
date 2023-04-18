@@ -23,7 +23,7 @@ export default () => {
   const [memberCode, setMemberCode] = useState(getMemberLogin());
   const memberCodeRef = useRef("");
 
-  const back = () => {
+  const handleBack = () => {
     history.go(-1);
   };
 
@@ -65,23 +65,23 @@ export default () => {
   }, []);
 
   // const getMemberInfo = async () => {
-    // const memberLogin = getMemberLogin();
-    // memberCodeRef.current = memberCode;
-    // const {
-    //   status,
-    //   data: { memberList },
-    // } = await switchMember();
-    // if (status) {
-    //   const { memberCode } = memberList.find(
-    //     (item) => item.memberCode === memberLogin
-    //   );
-    //   memberCodeRef.current = memberCode;
-    // } else {
-    //   Toast.show({
-    //     icon: "fail",
-    //     content: "获取人员信息失败",
-    //   });
-    // }
+  // const memberLogin = getMemberLogin();
+  // memberCodeRef.current = memberCode;
+  // const {
+  //   status,
+  //   data: { memberList },
+  // } = await switchMember();
+  // if (status) {
+  //   const { memberCode } = memberList.find(
+  //     (item) => item.memberCode === memberLogin
+  //   );
+  //   memberCodeRef.current = memberCode;
+  // } else {
+  //   Toast.show({
+  //     icon: "fail",
+  //     content: "获取人员信息失败",
+  //   });
+  // }
   // };
 
   useEffect(() => {
@@ -89,10 +89,59 @@ export default () => {
     getData();
   }, []);
 
+  //补充列表界面的返回逻辑
+  const back = useCallback(() => {
+    const plus = window.plus || {};
+    if (detailVis) {
+      console.log("关闭详情");
+      setDetailVis(false);
+    } else {
+      console.log("返回主页");
+      history.push("/");
+      plus?.key.removeEventListener("backbutton", back);
+    }
+  }, []);
+
+  const plusReady = useCallback(() => {
+    const plus = window.plus || {};
+    function back() {
+      if (detailVis) {
+        console.log("关闭详情");
+        setDetailVis(false);
+      } else {
+        console.log("返回主页");
+        history.push("/");
+        plus?.key.removeEventListener("backbutton", back);
+      }
+    }
+    plus?.key.addEventListener("backbutton", back);
+  }, [history, detailVis]);
+
+  const initDevicePlus = useCallback(() => {
+    if (window.plus) {
+      plusReady();
+    } else {
+      document.addEventListener("plusready", plusReady, false);
+    }
+  }, [plusReady]);
+
+  useEffect(() => {
+    // initPda();
+    initDevicePlus();
+    return () => {
+      const plus = window.plus || {};
+      // padStop({
+      //   endTime: configTime.current,
+      // });
+      document.removeEventListener("plusReady", plusReady);
+      plus?.key.removeEventListener("backbutton", back);
+    };
+  }, [/* initPda,  */initDevicePlus]);
+
   return (
     <>
       <div className={styles.inventoryContainer}>
-        <NavBar back="返回" onBack={back}>
+        <NavBar back="返回" onBack={handleBack}>
           盘点管理
         </NavBar>
         <div className={styles.listAndAmount}>

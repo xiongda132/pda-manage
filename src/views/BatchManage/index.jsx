@@ -21,7 +21,7 @@ import { saveAccountData } from "api/machine";
 import { getLocalStorage, setLocalStorage } from "utils/auth";
 // import { nodeObj } from "./test";
 import { DatePicker } from "antd";
-
+import CInput from "./component";
 const { Item } = Grid;
 
 const ListItemWithCheckbox = ({ obj, setSeletedData }) => {
@@ -79,8 +79,11 @@ export default () => {
   const [statusList, setStatusList] = useState([]);
   const gzDataRef = useRef([]);
   const [seletedData, setSeletedData] = useState([]);
+  // const [dateValue, setDateValue] = useState("");
 
   const onFinish = (formObj) => {
+    // console.log(formObj);
+    // console.log(formObj.usefulLife);
     if (!gzList.length) {
       return Toast.show({
         icon: "fail",
@@ -126,7 +129,7 @@ export default () => {
         content: "请下载工装信息",
       });
     }
-
+    alert("修改本地数据完成");
     //增加本地批量管理上传数据
     if (getLocalStorage("batchManageUpload")) {
       const batchManageUpload = [...getLocalStorage("batchManageUpload")];
@@ -134,6 +137,7 @@ export default () => {
     } else {
       setLocalStorage("batchManageUpload", gzData);
     }
+    alert("修改本地上传数据完成");
 
     Toast.show({
       icon: "success",
@@ -345,7 +349,14 @@ export default () => {
     getGzData();
     getPositionData();
     getStatusInfo();
+    formRef.current.setFieldsValue({
+      usefulLife: dayjs(),
+    });
   }, []);
+
+  // const handleDateInput = (value) => {
+  //   setDateValue(value);
+  // };
 
   return (
     <>
@@ -417,8 +428,11 @@ export default () => {
                   <Form.Item label="软件版本" name="version">
                     <Input placeholder="请输入版本..." />
                   </Form.Item>
-                  <Form.Item label="有效期" name="usefulLife">
+                  {/* <Form.Item label="有效期" name="usefulLife">
                     <DatePicker />
+                  </Form.Item> */}
+                  <Form.Item label="有效期" name="usefulLife">
+                    <CInput />
                   </Form.Item>
                 </Form>
               </div>

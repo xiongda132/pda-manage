@@ -26,7 +26,7 @@ export default () => {
   const memberCodeRef = useRef("");
   const [positionData, setPositionData] = useState([]);
 
-  const back = () => {
+  const handleBack = () => {
     history.go(-1);
   };
 
@@ -82,10 +82,59 @@ export default () => {
     getPositionData();
   }, []);
 
+    //补充列表界面的返回逻辑
+    const back = useCallback(() => {
+      const plus = window.plus || {};
+      if (detailVis) {
+        console.log("关闭详情");
+        setDetailVis(false);
+      } else {
+        console.log("返回主页");
+        history.push("/");
+        plus?.key.removeEventListener("backbutton", back);
+      }
+    }, []);
+  
+    const plusReady = useCallback(() => {
+      const plus = window.plus || {};
+      function back() {
+        if (detailVis) {
+          console.log("关闭详情");
+          setDetailVis(false);
+        } else {
+          console.log("返回主页");
+          history.push("/");
+          plus?.key.removeEventListener("backbutton", back);
+        }
+      }
+      plus?.key.addEventListener("backbutton", back);
+    }, [history, detailVis]);
+  
+    const initDevicePlus = useCallback(() => {
+      if (window.plus) {
+        plusReady();
+      } else {
+        document.addEventListener("plusready", plusReady, false);
+      }
+    }, [plusReady]);
+  
+    useEffect(() => {
+      // initPda();
+      initDevicePlus();
+      return () => {
+        const plus = window.plus || {};
+        // padStop({
+        //   endTime: configTime.current,
+        // });
+        document.removeEventListener("plusReady", plusReady);
+        plus?.key.removeEventListener("backbutton", back);
+      };
+    }, [/* initPda,  */initDevicePlus]);
+
   return (
     <>
       <div className={styles.inventoryContainer}>
-        <NavBar back="返回" onBack={back}>
+        <NavBar back="返回" onBack={handleBack}>
           盘点管理
         </NavBar>
         <div className={styles.listAndAmount}>
