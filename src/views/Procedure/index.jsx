@@ -68,6 +68,7 @@ export default () => {
   const billRef = useRef(null);
   const flowNodeNameRef = useRef(null);
   const [scanMode, setScanMode] = useState("");
+  const flowNodeFormRef = useRef(null);
 
   // const [deptName, setDeptName] = useState(getDeptName());
 
@@ -80,17 +81,55 @@ export default () => {
       currentPlace,
       gdhId,
     } = Object.assign({}, formObj);
-    const workflowForm = epcList.map((item) => ({
-      facilityCode: item.facilityCode,
-      nbName,
-      detailNodeName: procedureName,
-      productionMember: getMemberLogin(), //使用登录账号
-      nodeSecurity,
-      location: currentPlace,
-      gdhId,
-      newDate: dayjs().format("YYYY-MM-DD HH:mm:ss"),
-      nodeName: flowNodeNameRef.current,
-    }));
+
+    let workflowForm;
+    //选择了细化节点时
+
+    if (procedureName) {
+      workflowForm = epcList.map((item) => {
+        const findNodeName = flowNodeFormRef.current.find(
+          (item) => item.detailNodeName === procedureName
+        );
+        return {
+          facilityCode: item.facilityCode,
+          nbName,
+          detailNodeName: procedureName,
+          productionMember: getMemberLogin(),
+          nodeSecurity,
+          location: currentPlace,
+          gdhId,
+          newDate: dayjs().format("YYYY-MM-DD HH:mm:ss"),
+          nodeName: findNodeName.flowNodeName ? findNodeName.flowNodeName : "",
+        };
+      });
+    } else {
+      workflowForm = epcList.map((item) => {
+        return {
+          facilityCode: item.facilityCode,
+          nbName,
+          detailNodeName: procedureName,
+          productionMember: getMemberLogin(),
+          nodeSecurity,
+          location: currentPlace,
+          gdhId,
+          newDate: dayjs().format("YYYY-MM-DD HH:mm:ss"),
+          nodeName: "",
+        };
+      });
+    }
+
+    //原始逻辑
+    // const workflowForm = epcList.map((item) => ({
+    //   facilityCode: item.facilityCode,
+    //   nbName,
+    //   detailNodeName: procedureName,
+    //   productionMember: getMemberLogin(), //使用登录账号
+    //   nodeSecurity,
+    //   location: currentPlace,
+    //   gdhId,
+    //   newDate: dayjs().format("YYYY-MM-DD HH:mm:ss"),
+    //   nodeName: flowNodeNameRef.current,
+    // }));
 
     //本地逻辑, 对操作数据进行存储
     if (getLocalStorage("workflowFormUpload")) {
@@ -493,6 +532,7 @@ export default () => {
       data: { flowNodeForm },
     } = getLocalStorage("flowNodeForm");
     if (status) {
+      flowNodeFormRef.current = flowNodeForm; /* 保存引用 */
       const filterNodeForm = flowNodeForm.filter(
         (item) => item.flowName === workFlowName
       );
@@ -714,7 +754,7 @@ export default () => {
                       })}
                     </select>
                   </Form.Item>
-                  <Form.Item label="流程节点" name="procedureName">
+                  <Form.Item label="细化流程节点" name="procedureName">
                     <select
                       className={styles.select}
                       onChange={handledetailNodeChange}

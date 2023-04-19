@@ -100,12 +100,13 @@ export default () => {
       {},
       formObj
     );
+
     const gzData = gzList.map((item) => ({
       gzName: item.gzName,
-      currentPosition,
-      gzState,
+      currentPosition: currentPosition ? currentPosition : item.currentPosition,
+      gzState: gzState ? gzState : item.gzState,
       gzCode: item.gzCode,
-      version,
+      version: version ? version : item.version,
       usefulLife: usefulLife.format("YYYY-MM-DD"),
     }));
 
@@ -129,7 +130,6 @@ export default () => {
         content: "请下载工装信息",
       });
     }
-    alert("修改本地数据完成");
     //增加本地批量管理上传数据
     if (getLocalStorage("batchManageUpload")) {
       const batchManageUpload = [...getLocalStorage("batchManageUpload")];
@@ -137,7 +137,6 @@ export default () => {
     } else {
       setLocalStorage("batchManageUpload", gzData);
     }
-    alert("修改本地上传数据完成");
 
     Toast.show({
       icon: "success",

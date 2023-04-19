@@ -88,6 +88,7 @@ export default () => {
   const [deptName, setDeptName] = useState(getDeptName());
   const flowNodeNameRef = useRef(null);
   const breakDataRef = useRef(null);
+  const flowNodeFormRef = useRef(null)
 
   // const back = () => {
   //   history.go(-1);
@@ -108,11 +109,17 @@ export default () => {
       breakMessage,
     } = Object.assign({}, formObj);
     console.log("productionMember", productionMember);
+    //根据细化节点确认节点名称
+    const findNodeName = flowNodeFormRef.current.find(
+      (item) => item.detailNodeName === procedureName
+    );
+
     const formData = {
       gdhId,
       facilityCode,
       nbName,
-      nodeName: flowNodeNameRef.current,
+      // nodeName: flowNodeNameRef.current,
+      nodeName: findNodeName.flowNodeName ? findNodeName.flowNodeName : "",
       detailNodeName: procedureName,
       nodeSecurity,
       location: currentPlace,
@@ -299,6 +306,7 @@ export default () => {
       data: { flowNodeForm },
     } = getLocalStorage("flowNodeForm");
     if (status) {
+      flowNodeFormRef.current = flowNodeForm;
       const filterNodeForm = flowNodeForm.filter(
         (item) => item.flowName === workFlowName
       );
@@ -1212,7 +1220,7 @@ export default () => {
                     })}
                   </select> */}
                 </Form.Item>
-                <Form.Item label="流程节点" name="procedureName">
+                <Form.Item label="细化流程节点" name="procedureName">
                   <select
                     className={styles.select}
                     onChange={handledetailNodeChange}

@@ -51,6 +51,7 @@ const ListItemWithCheckbox = ({ obj, setSeletedData }) => {
   } = obj;
   const checkboxRef = useRef(null);
   useEffect(() => {
+    console.log("执行了一次选择");
     checkboxRef.current.check();
   }, []);
   return (
