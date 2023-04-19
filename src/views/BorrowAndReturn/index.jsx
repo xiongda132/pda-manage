@@ -5,7 +5,15 @@ import React, {
   useRef,
   useMemo,
 } from "react";
-import { NavBar, Toast, Button, Grid, Input } from "antd-mobile";
+import {
+  NavBar,
+  Toast,
+  Button,
+  Grid,
+  Input,
+  Checkbox,
+  List,
+} from "antd-mobile";
 import { useHistory } from "react-router-dom";
 import {
   pdaConfig,
@@ -23,6 +31,52 @@ import { getLocalStorage } from "utils/auth";
 
 const { Item } = Grid;
 
+const ListItemWithCheckbox = ({ obj, setSeletedData }) => {
+  const { gzName, currentPosition, gzState, gzCode, version, usefulLife } = obj;
+  const checkboxRef = useRef(null);
+  useEffect(() => {
+    checkboxRef.current.check();
+  }, []);
+  return (
+    <List.Item
+      prefix={
+        <div onClick={(e) => e.stopPropagation()}>
+          <Checkbox
+            // value={gzCode}
+            ref={checkboxRef}
+            onChange={(e) => {
+              setSeletedData((prev) => {
+                let cur = [...prev];
+                if (e) {
+                  cur.push(gzCode);
+                } else {
+                  cur = cur.filter((item) => gzCode !== item);
+                }
+                return cur;
+              });
+            }}
+          ></Checkbox>
+        </div>
+      }
+      onClick={() => {
+        checkboxRef.current.toggle();
+      }}
+      arrow={false}
+    >
+      <div className={styles.singleWrapper}>
+        <Grid columns={24} gap={8}>
+          <Item span={12}>工装编码: {gzCode}</Item>
+          <Item span={12}>工装状态: {gzState}</Item>
+          <Item span={12}>工装名称: {gzName}</Item>
+          <Item span={12}>软件版本: {version}</Item>
+          <Item span={12}>有效期: {usefulLife}</Item>
+          <Item span={12}>当前位置: {currentPosition}</Item>
+        </Grid>
+      </div>
+    </List.Item>
+  );
+};
+
 export default () => {
   const [loading, setLoading] = useState(false);
   const [qrCodeVal, setQrCodeVal] = useState("");
@@ -30,6 +84,7 @@ export default () => {
   const history = useHistory();
   const qrRef = useRef(null);
   const [scanMode, setScanMode] = useState("");
+  const [seletedData, setSeletedData] = useState([]);
 
   const handleBackMainPage = () => {
     history.push("/");
@@ -249,14 +304,18 @@ export default () => {
   }, [scanMode]);
 
   const handleSave = async () => {
+    console.log("seletedData", seletedData);
     if (!qrCodeVal) {
       return Toast.show({
         icon: "fail",
         content: "请扫描仓库二维码",
       });
     }
-    if (gzList.length) {
-      const data = gzList.map((item) => ({
+    const filterData = gzDataRef.current.filter(({ gzCode }) =>
+      seletedData.includes(gzCode)
+    );
+    if (filterData.length) {
+      const data = filterData.map((item) => ({
         name: item.gzName,
         code: item.gzCode,
         version: item.version,
@@ -325,7 +384,18 @@ export default () => {
             <p className={styles.waitScan}>等待扫描...</p>
           ) : (
             <div className={styles.list}>
-              {gzList.map((item, index) => {
+              <Checkbox.Group>
+                <List>
+                  {gzList.map((item) => (
+                    <ListItemWithCheckbox
+                      key={item.gzCode}
+                      obj={item}
+                      setSeletedData={setSeletedData}
+                    />
+                  ))}
+                </List>
+              </Checkbox.Group>
+              {/* {gzList.map((item, index) => {
                 const {
                   gzName,
                   currentPosition,
@@ -342,12 +412,11 @@ export default () => {
                       <Item span={12}>工装名称: {gzName}</Item>
                       <Item span={12}>软件版本: {version}</Item>
                       <Item span={12}>有效期: {usefulLife}</Item>
-                      {/* <Item span={12}>固有位置: {}</Item> */}
                       <Item span={12}>当前位置: {currentPosition}</Item>
                     </Grid>
                   </div>
                 );
-              })}
+              })} */}
             </div>
           )}
         </div>

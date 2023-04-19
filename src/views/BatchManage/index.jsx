@@ -100,8 +100,11 @@ export default () => {
       {},
       formObj
     );
+    const filterData = gzDataRef.current.filter(({ gzCode }) =>
+      seletedData.includes(gzCode)
+    );
 
-    const gzData = gzList.map((item) => ({
+    const gzData = filterData.map((item) => ({
       gzName: item.gzName,
       currentPosition: currentPosition ? currentPosition : item.currentPosition,
       gzState: gzState ? gzState : item.gzState,
