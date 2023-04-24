@@ -82,8 +82,8 @@ export default () => {
   // const [dateValue, setDateValue] = useState("");
 
   const onFinish = (formObj) => {
-    // console.log(formObj);
-    // console.log(formObj.usefulLife);
+    console.log(formObj);
+    console.log(formObj.usefulLife?.format("YYYY-MM-DD"));
     if (!gzList.length) {
       return Toast.show({
         icon: "fail",
@@ -110,7 +110,9 @@ export default () => {
       gzState: gzState ? gzState : item.gzState,
       gzCode: item.gzCode,
       version: version ? version : item.version,
-      usefulLife: usefulLife.format("YYYY-MM-DD"),
+      usefulLife: usefulLife?.format("YYYY-MM-DD")
+        ? usefulLife?.format("YYYY-MM-DD")
+        : item.usefulLife,
     }));
 
     //修改本地批量管理数据
@@ -331,17 +333,17 @@ export default () => {
         value: "正常",
       },
       {
-        label: "维修中",
-        value: "维修中",
+        label: "待维修",
+        value: "待维修",
       },
       {
         label: "待报废",
         value: "待报废",
       },
-      {
-        label: "报废",
-        value: "报废",
-      },
+      // {
+      //   label: "报废",
+      //   value: "报废",
+      // },
     ];
     statusList.unshift({ label: "请选择状态", value: "" });
     setStatusList(statusList);
@@ -351,9 +353,9 @@ export default () => {
     getGzData();
     getPositionData();
     getStatusInfo();
-    formRef.current.setFieldsValue({
-      usefulLife: dayjs(),
-    });
+    // formRef.current.setFieldsValue({
+    //   usefulLife: dayjs(),
+    // });
   }, []);
 
   // const handleDateInput = (value) => {

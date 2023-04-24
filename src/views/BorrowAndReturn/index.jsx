@@ -27,7 +27,7 @@ import {
 import dayjs from "dayjs";
 import styles from "./index.module.css";
 import { saveReturnTable } from "api/machine";
-import { getLocalStorage } from "utils/auth";
+import { getLocalStorage, setLocalStorage } from "utils/auth";
 
 const { Item } = Grid;
 
@@ -189,9 +189,28 @@ export default () => {
     }
   };
 
+  const getQrCode = () => {
+    if (localStorage.getItem("qrCodeVal")) {
+      const qrCode = localStorage.getItem("qrCodeVal");
+      setQrCodeVal(qrCode);
+      setPdaReady(false);
+      setScanMode("rfid");
+    } else {
+      initQrcode();
+    }
+  };
+
+  const qrCodeLocalstorage = useCallback(() => {
+    console.log("qrCodeVal", qrCodeVal, "1");
+    if (qrCodeVal) {
+      localStorage.setItem("qrCodeVal", qrCodeVal);
+    }
+  }, [qrCodeVal]);
+
   useEffect(() => {
-    initQrcode();
+    // initQrcode();
     initDevicePlus();
+    getQrCode();
     initTip();
     getGzData();
     return () => {
@@ -207,6 +226,13 @@ export default () => {
       plus?.key.removeEventListener("backbutton", back);
     };
   }, []);
+
+  //加依赖是因为副作用为初始闭包，而qrCodeVal会改变，防止调用了旧的闭包
+  useEffect(() => {
+    return () => {
+      qrCodeLocalstorage();
+    };
+  }, [qrCodeLocalstorage]);
 
   //二维码扫描轮询
   const refreshData = useCallback(async () => {
@@ -347,6 +373,16 @@ export default () => {
     return gzDataRef.current.filter(({ epcData }) => epcList.includes(epcData));
   }, [epcList]);
 
+  const handleRescan = () => {
+    if (localStorage.getItem("qrCodeVal")) {
+      localStorage.removeItem("qrCodeVal");
+    }
+    setPdaReadyEpc(false);
+    setScanMode("qrcode");
+    setQrCodeVal("");
+    qrRef.current.focus();
+  };
+
   return (
     <>
       <div style={{ height: "100vh" }}>
@@ -365,6 +401,12 @@ export default () => {
                 style={{ display: "inline-block", width: "30%" }}
                 value={qrCodeVal}
               />
+              <Button
+                style={{ marginRight: "10px", float: "right", width: "30%" }}
+                onClick={handleRescan}
+              >
+                重新扫描
+              </Button>
             </div>
             <div className={styles.buttonStyle}>
               <Button

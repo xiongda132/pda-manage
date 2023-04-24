@@ -416,6 +416,55 @@ export default () => {
     }
   };
 
+  //上传工装批量管理信息
+  const upLoadGzData = async () => {
+    if (getLocalStorage("batchManageUpload")) {
+      const data = getLocalStorage("batchManageUpload");
+      const res = await saveAccountData({ data });
+      if (res.status) {
+        Toast.show({
+          icon: "success",
+          content: "上传工装信息成功",
+        });
+        localStorage.removeItem("batchManageUpload"); //避免多次上传
+      } else {
+        Toast.show({
+          icon: "fail",
+          content: "上传工装信息失败",
+        });
+      }
+    } else {
+      Toast.show({
+        content: "没有可上传的工装批量管理数据",
+      });
+    }
+  };
+
+  //上传工装盘点信息
+  const upLoadGzInventory = async () => {
+    if (getLocalStorage("inventoryManageUpload")) {
+      const data = getLocalStorage("inventoryManageUpload");
+      const res = await saveGzCheck({ data });
+      if (res.status) {
+        Toast.show({
+          icon: "success",
+          content: "上传盘点管理信息成功",
+        });
+        localStorage.removeItem("inventoryManageUpload");
+      } else {
+        Toast.show({
+          icon: "fail",
+          content: "上传盘点管理信息失败",
+        });
+      }
+    } else {
+      Toast.show({
+        icon: "fail",
+        content: "没有可上传的数据",
+      });
+    }
+  };
+
   //上传所有数据
   const hanldeUpLoad = async () => {
     await zjtzDataUpload();
@@ -433,7 +482,9 @@ export default () => {
     });
   };
 
-  const handleGzDownLoad = async () => {
+  const handleGzSync = async () => {
+    await upLoadGzData();
+    await upLoadGzInventory();
     await getBatchManage();
     await getInventoryManage();
     await getLocation();
@@ -462,8 +513,8 @@ export default () => {
             </div>
             <div className={styles.gz}>
               <div className={styles.gzManage}>工装管理</div>
-              <div className={styles.gzDownload} onClick={handleGzDownLoad}>
-                数据一键下载
+              <div className={styles.gzDownload} onClick={handleGzSync}>
+                数据同步
               </div>
             </div>
           </div>
