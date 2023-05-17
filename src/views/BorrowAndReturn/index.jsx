@@ -26,7 +26,7 @@ import {
 } from "api/pda";
 import dayjs from "dayjs";
 import styles from "./index.module.css";
-import { saveReturnTable } from "api/machine";
+import { saveReturnTable, saveBorrowTable } from "api/machine";
 import { getLocalStorage, setLocalStorage } from "utils/auth";
 
 const { Item } = Grid;
@@ -329,7 +329,7 @@ export default () => {
     }
   }, [scanMode]);
 
-  const handleSave = async () => {
+  const handleReturnSave = async () => {
     console.log("seletedData", seletedData);
     if (!qrCodeVal) {
       return Toast.show({
@@ -350,6 +350,46 @@ export default () => {
         remarks: "",
       }));
       const res = await saveReturnTable({ data });
+      if (res.status) {
+        Toast.show({
+          icon: "success",
+          content: "上传成功",
+        });
+      } else {
+        Toast.show({
+          icon: "fail",
+          content: "上传失败",
+        });
+      }
+    } else {
+      Toast.show({
+        icon: "fail",
+        content: "请扫描工装",
+      });
+    }
+  };
+
+  const handleBorrowSave = async () => {
+    console.log("seletedData", seletedData);
+    if (!qrCodeVal) {
+      return Toast.show({
+        icon: "fail",
+        content: "请扫描仓库二维码",
+      });
+    }
+    const filterData = gzDataRef.current.filter(({ gzCode }) =>
+      seletedData.includes(gzCode)
+    );
+    if (filterData.length) {
+      const data = filterData.map((item) => ({
+        name: item.gzName,
+        code: item.gzCode,
+        version: item.version,
+        state: item.gzState,
+        usefulLife: item.usefulLife,
+        remarks: "",
+      }));
+      const res = await saveBorrowTable({ data });
       if (res.status) {
         Toast.show({
           icon: "success",
@@ -412,9 +452,16 @@ export default () => {
               <Button
                 color="primary"
                 style={{ width: "30%" }}
-                onClick={handleSave}
+                onClick={handleBorrowSave}
               >
-                保存上传
+                借用上传
+              </Button>
+              <Button
+                color="primary"
+                style={{ width: "30%" }}
+                onClick={handleReturnSave}
+              >
+                归还上传
               </Button>
             </div>
           </div>

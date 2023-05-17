@@ -26,8 +26,8 @@
 
 .buttonStyle {
   display: flex;
-  justify-content: center;
-  margin: 10px 0px;
+  justify-content: space-evenly;
+  margin: 15px 0px;
 }
 
 .code {
@@ -69,6 +69,6 @@
 }
 
 .list {
-  height: calc(100% - 185px);
+  height: calc(100% - 195px);
   overflow: scroll;
 }

@@ -103,6 +103,12 @@ export const saveReturnTable = (params) => {
   });
 };
 
+export const saveBorrowTable = (params) => {
+  return request("/seeyon/rest/api/saveBorrowTable", {
+    ...params,
+  });
+};
+
 export const saveGzCheck = (params) => {
   return request("/seeyon/rest/api/gzcheckResult", {
     ...params,
