@@ -207,6 +207,7 @@ export default () => {
         zjtzData.push({
           facilityCode: item.facilityCode,
           epcData: item.epcData,
+          gdhId: item.gdhId, //2023-6-5， 新增字段
         });
       }
     });
@@ -232,6 +233,7 @@ export default () => {
       zjtzDataUpload.push({
         facilityCode: qrCodeVal,
         epcData: epcCodeVal,
+        gdhId: dataMap.find((item) => item.facilityCode === qrCodeVal).gdhId, //2023-6-5， 新增字段
       });
       setLocalStorage("zjtzDataUpload", zjtzDataUpload);
     } else {
@@ -251,19 +253,6 @@ export default () => {
       setLocalStorage("unbindListUpload", unbindListUpload);
     }
 
-    //在线逻辑
-    // const { status } = await saveLedger({ zjtzData });
-    // if (status) {
-    //   Toast.show({
-    //     icon: "success",
-    //     content: "上传成功",
-    //   });
-    // } else {
-    //   Toast.show({
-    //     icon: "fail",
-    //     content: "上传失败",
-    //   });
-    // }
     setMachineList(dataMap);
     setEpcCodeVal("");
     setQrCodeVal("");
@@ -274,31 +263,6 @@ export default () => {
       qrRef.current.focus();
     }, 0);
   };
-
-  //点击读取epc逻辑
-  // const handleScan = async () => {
-  //   if (!epcCodeVal && !qrCodeVal) {
-  //     return Toast.show({
-  //       content: "绑定过程才能进行取消",
-  //     });
-  //   }
-  //   const res = await pdaSingle({
-  //     address: "2", //默认
-  //     blockCount: "2", //epc长度/4
-  //     password: "", //默认
-  //   });
-  //   console.log(res);
-  //   if (res.code === 1) {
-  //     if (res.epc) {
-  //       setEpcCodeVal(res.epc);
-  //     }
-  //   } else {
-  //     Toast.show({
-  //       icon: "fail",
-  //       content: "扫描epc失败",
-  //     });
-  //   }
-  // };
 
   const handleChange = async (e) => {
     const {
@@ -311,12 +275,7 @@ export default () => {
       status,
       data: { zjtzData },
     } = getLocalStorage("zjtzData");
-
-    //在线逻辑
-    // const {
-    //   status,
-    //   data: { zjtzData },
-    // } = await switchFileTable({ deptCode: depCodeRef.current });
+   
     if (status) {
       const machineList = zjtzData
         .filter((item) => item.gdhId === value)
@@ -334,8 +293,6 @@ export default () => {
         content: "获取整机信息失败",
       });
     }
-    // getMachineList();
-    // qrRef.current.focus();
   };
 
   useEffect(() => {
@@ -594,9 +551,6 @@ export default () => {
                 style={{ display: "inline-block", width: "80%" }}
                 value={epcCodeVal}
               />
-              {/* <Button style={{ width: "30%" }} onClick={handleScan}>
-                读取epc
-              </Button> */}
             </div>
             <div className={styles.buttonStyle}>
               <Button

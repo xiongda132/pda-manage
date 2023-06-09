@@ -514,21 +514,6 @@ export default () => {
         content: "保存完成",
       });
     }
-
-    // const { status } = await saveCardInfo({ cardMessageForm });
-    // if (status) {
-    //   Toast.show({
-    //     icon: "success",
-    //     content: "保存信息成功",
-    //   });
-    // } else {
-    //   Toast.show({
-    //     icon: "fail",
-    //     content: "保存信息失败",
-    //   });
-    // }
-    // setCardInfo([]);
-    // setIsScan(false);
   };
 
   const addTag = (tag, index) => {

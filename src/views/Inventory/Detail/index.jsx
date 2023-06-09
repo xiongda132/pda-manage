@@ -26,6 +26,7 @@ export default ({
 
   const handleSave = async () => {
     const checkListMap = predata.map((item) => ({
+      gdhId: item.gdhId, //2023-6-5, 补加gdh字段
       checkId: item.checkId,
       facilityCode: item.facilityCode,
       memberCode,
@@ -250,7 +251,6 @@ export default ({
     }
   }, [epcList]);
 
-  
   // const notBelongToBill = (epc) => {
   //   const zjtzDataRes = getLocalStorage("zjtzData");
   //   const epcObj = zjtzDataRes.data.zjtzData.find(

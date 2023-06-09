@@ -9,8 +9,8 @@ import { cardData } from "views/CardManage/test";
 const isDev = false;
 // const isDev = true;
 
-export const getToken = async (userName, passWord) => {
-  return await getRequest(
+export const getToken = (userName, passWord) => {
+  return getRequest(
     `/seeyon/rest/token/rest/4420c0f0-7789-464a-9269-ab075b8164b3`
   );
 };
@@ -141,7 +141,7 @@ export const switchMember = () => {
   }
 };
 
-export const switchToken = async (userName, passWord) => {
+export const switchToken = (userName, passWord) => {
   if (isDev) {
     return {
       bindingUser: null,
@@ -150,7 +150,7 @@ export const switchToken = async (userName, passWord) => {
     };
   } else {
     if (localStorage.getItem("serverPort")) {
-      return await getToken(userName, passWord);
+      return getToken(userName, passWord);
     }
   }
 };

@@ -1,6 +1,33 @@
 import { getUserToken } from "utils/auth";
 // const baseUrl = `http://${sessionStorage.getItem("serverPort")}`;
 // const token = getUserToken();
+function downloadTxtFile(content) {
+  const text =
+    typeof content === "object" ? JSON.stringify(content) : String(content);
+
+  // 创建一个 Blob 对象
+  const blob = new Blob([text], { type: "text/plain" });
+
+  // 创建一个 URL 对象
+  const url = URL.createObjectURL(blob);
+
+  // 创建一个 <a> 元素，并设置其属性
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "example.txt"; // 设置下载的文件名
+
+  // 将 <a> 元素添加到文档中
+  document.body.appendChild(link);
+
+  // 模拟点击链接进行下载
+  link.click();
+
+  // 清理资源
+  URL.revokeObjectURL(url);
+
+  // 移除 <a> 元素
+  document.body.removeChild(link);
+}
 
 export function request(api, params) {
   console.log(localStorage.getItem("serverPort"));
@@ -19,12 +46,17 @@ export function request(api, params) {
       }
     )
       .then((res) => {
+        // console.log("res", res);
         // alert(JSON.stringify(res), "成功回调");
         // console.log(JSON.stringify(res));
         let resObj = res.json();
-
+        // downloadTxtFile(res);
         // alert(JSON.stringify(resObj));
         resolve(resObj);
+        return res.text();
+      })
+      .then((r) => {
+        console.log("r", r);
       })
       .catch((err) => {
         // alert(err, "内层错误回调");
@@ -32,6 +64,8 @@ export function request(api, params) {
           ...err,
           url: `http://${localStorage.getItem("serverPort")}` + api,
         };
+        // console.log("2");
+        // downloadTxtFile(err);
         // alert(JSON.stringify(err_));
         reject(err_);
       });
@@ -42,12 +76,15 @@ export function request(api, params) {
       message: error.message,
       url: `http://${localStorage.getItem("serverPort")}` + api,
     };
+    // console.log("1");
+    downloadTxtFile(error);
     alert(JSON.stringify(err));
     return err;
   });
 }
 
 export function getRequest(api) {
+  console.log("登錄調用");
   console.log("serverPort", localStorage.getItem("serverPort"));
   return new Promise((resolve, reject) => {
     fetch(`http://${localStorage.getItem("serverPort")}` + api, {
@@ -56,31 +93,37 @@ export function getRequest(api) {
         "Content-Type": "application/json",
       },
     })
-      .then((res) => {
+      .then(async (res) => {
         // alert("成功" + res);
         // console.log(res.body);
         // let resa = "{"a":"123"}";
-        let resObj = res.json();
-
+        // downloadTxtFile(await res.json());
+        let resText = await res.text();
+        // downloadTxtFile(resText);
+        // let resObj = res.json();
         // alert(JSON.stringify(resObj));
-        resolve(resObj);
+        resolve(JSON.parse(resText));
       })
       .catch((err) => {
-        // alert(err, "内层错误回调");
+        console.log("内层错误回调", err);
         let err_ = {
           ...err,
           url: `http://${localStorage.getItem("serverPort")}` + api,
         };
+        // downloadTxtFile(err);
+        console.log("1");
+
         // alert(JSON.stringify(err_));
         reject(err_);
       });
   }).catch((error) => {
-    // alert(error, "外层错误回调");
+    alert("外层错误回调");
     let err = {
       code: -1,
       message: error.message,
       url: `http://${localStorage.getItem("serverPort")}` + api,
     };
+    downloadTxtFile(error);
     alert(JSON.stringify(err));
     return err;
   });

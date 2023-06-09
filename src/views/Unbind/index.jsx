@@ -110,6 +110,7 @@ export default () => {
   const formRef = useRef(null);
   const [flag, setFlag] = useState(false);
   const [seletedData, setSeletedData] = useState([]);
+  console.log("seletedData", seletedData);
 
   const handleUnbind = async () => {
     if (!seletedData.length) {
@@ -118,10 +119,11 @@ export default () => {
         content: "请选择需要解绑的产品",
       });
     }
-    console.log("seletedData", seletedData);
     const unbindList = seletedData?.map((item) => ({
       facilityCode: item,
+      gdhId: zjtzDataRef.current.find((item2) => item2.facilityCode === item)?.gdhId, //2023-6-6, 新增字段
     }));
+    
     const facilityCodeList = unbindList.map(({ facilityCode }) => facilityCode);
 
     //本地逻辑, 获取本地数据进行更新
@@ -344,7 +346,7 @@ export default () => {
   const back = useCallback(() => {
     const plus = window.plus || {};
     history.push("/");
-    plus?.key.removeEventListener("backbutton", back);
+    plus?.key?.removeEventListener("backbutton", back);
   }, []);
 
   const plusReady = useCallback(() => {
@@ -374,7 +376,7 @@ export default () => {
         endTime: configTime.current,
       });
       document.removeEventListener("plusReady", plusReady);
-      plus?.key.removeEventListener("backbutton", back);
+      plus?.key?.removeEventListener("backbutton", back);
     };
   }, []);
 
@@ -483,6 +485,7 @@ export default () => {
     }
   }, [scanMode]);
 
+  //将扫描到的facilityCode或epcData对应的详细信息找出来
   const viewList = useMemo(() => {
     if (scanMode === "qrcode") {
       return zjtzDataRef.current?.filter(

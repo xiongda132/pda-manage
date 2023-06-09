@@ -46,7 +46,7 @@ const CLogin = (props) => {
     return () => {
       const plus = window.plus || {};
       document.removeEventListener("plusReady", plusReady);
-      plus?.key.removeEventListener("backbutton", back);
+      plus?.key?.removeEventListener("backbutton", back);
     };
   }, [initDevicePlus]);
 
