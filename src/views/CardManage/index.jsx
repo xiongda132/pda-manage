@@ -509,11 +509,15 @@ export default () => {
           cardMessageForm: otherList,
         },
       });
-      Toast.show({
-        icon: "success",
-        content: "保存完成",
-      });
+      // Toast.show({
+      //   icon: "success",
+      //   content: "保存完成",
+      // });
     }
+    Toast.show({
+      icon: "success",
+      content: "保存完成",
+    });
   };
 
   const addTag = (tag, index) => {

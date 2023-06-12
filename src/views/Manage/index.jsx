@@ -88,7 +88,7 @@ export default () => {
   const [deptName, setDeptName] = useState(getDeptName());
   const flowNodeNameRef = useRef(null);
   const breakDataRef = useRef(null);
-  const flowNodeFormRef = useRef(null)
+  const flowNodeFormRef = useRef(null);
 
   // const back = () => {
   //   history.go(-1);
@@ -138,7 +138,8 @@ export default () => {
       " " +
       procedureName +
       " " +
-      productionMember + "\n";
+      productionMember +
+      "\n";
     formRef.current.setFieldsValue({
       record: getCurNodeInfo,
     });
@@ -210,9 +211,7 @@ export default () => {
 
     //对本地板卡上传进行修改
     if (getLocalStorage("cardMessageFormUpload")) {
-      const cardMessageFormArr = [
-        ...getLocalStorage("cardMessageFormUpload")
-      ];
+      const cardMessageFormArr = [...getLocalStorage("cardMessageFormUpload")];
       const breakDataMap = breakDataRef.current?.map((item) => ({
         cardName: item.split(" ")?.[1],
         cardNumber: item.split(" ")[0],
@@ -234,18 +233,10 @@ export default () => {
       }
     }
 
-    // const { status } = await saveWorkFlow({ workflowForm });
-    // if (status) {
-    //   Toast.show({
-    //     icon: "success",
-    //     content: "提交成功",
-    //   });
-    // } else {
-    //   Toast.show({
-    //     icon: "fail",
-    //     content: `提交失败`,
-    //   });
-    // }
+    Toast.show({
+      icon: "success",
+      content: "保存成功",
+    });
   };
 
   const handleSave = () => {

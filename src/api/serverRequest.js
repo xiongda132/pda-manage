@@ -1,6 +1,9 @@
 import { getUserToken } from "utils/auth";
 // const baseUrl = `http://${sessionStorage.getItem("serverPort")}`;
 // const token = getUserToken();
+
+
+
 function downloadTxtFile(content) {
   const text =
     typeof content === "object" ? JSON.stringify(content) : String(content);
@@ -77,7 +80,7 @@ export function request(api, params) {
       url: `http://${localStorage.getItem("serverPort")}` + api,
     };
     // console.log("1");
-    downloadTxtFile(error);
+    // downloadTxtFile(error);
     alert(JSON.stringify(err));
     return err;
   });
@@ -99,6 +102,7 @@ export function getRequest(api) {
         // let resa = "{"a":"123"}";
         // downloadTxtFile(await res.json());
         let resText = await res.text();
+        console.log("res", res);
         // downloadTxtFile(resText);
         // let resObj = res.json();
         // alert(JSON.stringify(resObj));
@@ -110,21 +114,17 @@ export function getRequest(api) {
           ...err,
           url: `http://${localStorage.getItem("serverPort")}` + api,
         };
-        // downloadTxtFile(err);
-        console.log("1");
-
-        // alert(JSON.stringify(err_));
+        // alert(JSON.stringify(err));
         reject(err_);
       });
   }).catch((error) => {
-    alert("外层错误回调");
+    // alert("外层错误回调");
     let err = {
       code: -1,
       message: error.message,
       url: `http://${localStorage.getItem("serverPort")}` + api,
     };
-    downloadTxtFile(error);
-    alert(JSON.stringify(err));
-    return err;
+    alert(JSON.stringify(error));
+    return error;
   });
 }
