@@ -103,19 +103,23 @@ export default () => {
         };
       });
     } else {
-      workflowForm = epcList.map((item) => {
-        return {
-          facilityCode: item.facilityCode,
-          nbName,
-          detailNodeName: procedureName,
-          productionMember: getMemberLogin(),
-          nodeSecurity,
-          location: currentPlace,
-          gdhId,
-          newDate: dayjs().format("YYYY-MM-DD HH:mm:ss"),
-          nodeName: "",
-        };
+      return Toast.show({
+        icon: "fail",
+        content: "提交失败，请选择细化流程节点",
       });
+      // workflowForm = epcList.map((item) => {
+      //   return {
+      //     facilityCode: item.facilityCode,
+      //     nbName,
+      //     detailNodeName: procedureName,
+      //     productionMember: getMemberLogin(),
+      //     nodeSecurity,
+      //     location: currentPlace,
+      //     gdhId,
+      //     newDate: dayjs().format("YYYY-MM-DD HH:mm:ss"),
+      //     nodeName: "",
+      //   };
+      // });
     }
 
     //原始逻辑
@@ -558,7 +562,8 @@ export default () => {
       flowNodeNameRef.current = [
         ...new Set(filterNodeForm.map((item) => item.flowNodeName)),
       ]?.[0];
-      procedureData.unshift({ label: "请选择工序", value: "" });
+      // procedureData.unshift({ label: "请选择工序", value: "" });
+      detailNodeNameMap.unshift({ label: "请选择工序", value: "" });
       setProcedureData(detailNodeNameMap);
     }
   };

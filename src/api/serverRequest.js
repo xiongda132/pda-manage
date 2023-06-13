@@ -2,8 +2,6 @@ import { getUserToken } from "utils/auth";
 // const baseUrl = `http://${sessionStorage.getItem("serverPort")}`;
 // const token = getUserToken();
 
-
-
 function downloadTxtFile(content) {
   const text =
     typeof content === "object" ? JSON.stringify(content) : String(content);
@@ -102,10 +100,10 @@ export function getRequest(api) {
         // let resa = "{"a":"123"}";
         // downloadTxtFile(await res.json());
         let resText = await res.text();
-        console.log("res", res);
         // downloadTxtFile(resText);
         // let resObj = res.json();
-        // alert(JSON.stringify(resObj));
+        alert(JSON.stringify(`状态码${res.status}`));
+        alert(JSON.stringify("后端返回"+ resText));
         resolve(JSON.parse(resText));
       })
       .catch((err) => {
