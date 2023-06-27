@@ -46,11 +46,13 @@ export function request(api, params) {
         body: JSON.stringify(params),
       }
     )
-      .then((res) => {
+      .then(async (res) => {
         // console.log("res", res);
         // alert(JSON.stringify(res), "成功回调");
         // console.log(JSON.stringify(res));
         let resObj = res.json();
+        // let resObj2 = await res.text()
+        // console.log(resObj2);
         // downloadTxtFile(res);
         // alert(JSON.stringify(resObj));
         resolve(resObj);

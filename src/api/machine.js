@@ -12,8 +12,8 @@ const isDev = false;
 export const getToken = (userName, password) => {
   return request(
     "/seeyon/rest/token", {
-      userName,
-      password
+      userName: "rest",
+      password: "4420c0f0-7789-464a-9269-ab075b8164b3"
     }
   );
 };
