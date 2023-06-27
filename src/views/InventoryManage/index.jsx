@@ -119,7 +119,6 @@ export default () => {
     }, [plusReady]);
   
     useEffect(() => {
-      // initPda();
       initDevicePlus();
       return () => {
         const plus = window.plus || {};
@@ -129,7 +128,7 @@ export default () => {
         document.removeEventListener("plusReady", plusReady);
         plus?.key.removeEventListener("backbutton", back);
       };
-    }, [/* initPda,  */initDevicePlus]);
+    }, [initDevicePlus]);
 
   return (
     <>

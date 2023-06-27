@@ -398,7 +398,7 @@ export default ({
                 </Item>
                 <Item span={7}>
                   <Button color="primary" onClick={handleSave}>
-                    盘点结束
+                    盘点保存
                   </Button>
                 </Item>
               </Grid>

@@ -9,9 +9,12 @@ import { cardData } from "views/CardManage/test";
 const isDev = false;
 // const isDev = true;
 
-export const getToken = (userName, passWord) => {
-  return getRequest(
-    `/seeyon/rest/token/rest/4420c0f0-7789-464a-9269-ab075b8164b3`
+export const getToken = (userName, password) => {
+  return request(
+    "/seeyon/rest/token", {
+      userName,
+      password
+    }
   );
 };
 

@@ -21,10 +21,10 @@ const LoginFormContent = () => {
   return (
     <div className={styles.container}>
       <Form
-        initialValues={{
-          userId: "X001",
-          pwd: "4420c0f0-7789-464a-9269-ab075b8164b3",
-        }}
+        // initialValues={{
+        //   userId: "X001",
+        //   pwd: "4420c0f0-7789-464a-9269-ab075b8164b3",
+        // }}
         onFinish={onFinish}
         layout="horizontal"
         style={{ "--prefix-width": "3.5em" }}

@@ -95,6 +95,7 @@ export default () => {
   // };
 
   const onFinish = async (formObj) => {
+    alert("执行了点击")
     const workflowForm = [];
     const {
       gdhId,
@@ -119,7 +120,7 @@ export default () => {
       facilityCode,
       nbName,
       // nodeName: flowNodeNameRef.current,
-      nodeName: findNodeName.flowNodeName ? findNodeName.flowNodeName : "",
+      nodeName: findNodeName?.flowNodeName ? findNodeName?.flowNodeName : "",
       detailNodeName: procedureName,
       nodeSecurity,
       location: currentPlace,

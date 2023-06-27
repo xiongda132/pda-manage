@@ -54,11 +54,11 @@ export function request(api, params) {
         // downloadTxtFile(res);
         // alert(JSON.stringify(resObj));
         resolve(resObj);
-        return res.text();
+        // return res.text();
       })
-      .then((r) => {
-        console.log("r", r);
-      })
+      // .then((r) => {
+      //   console.log("r", r);
+      // })
       .catch((err) => {
         // alert(err, "内层错误回调");
         let err_ = {
@@ -102,8 +102,8 @@ export function getRequest(api) {
         let resText = await res.text();
         // downloadTxtFile(resText);
         // let resObj = res.json();
-        alert(JSON.stringify(`状态码${res.status}`));
-        alert(JSON.stringify("后端返回"+ resText));
+        // alert(JSON.stringify(`状态码${res.status}`));
+        // alert(JSON.stringify("后端返回" + resText));
         resolve(JSON.parse(resText));
       })
       .catch((err) => {
