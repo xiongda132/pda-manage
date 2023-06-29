@@ -18,6 +18,15 @@ export const getToken = (userName, password) => {
   );
 };
 
+export const getLogin = (token, loginName, password) => {
+  return request(
+    `/seeyon/rest/api/login?token=${token}`, {
+      loginName,
+      password,
+    }
+  );
+};
+
 export const getFileTable = (params) => {
   return request("/seeyon/rest/api/dataInfo/filetable", {
     ...params,

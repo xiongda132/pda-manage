@@ -1,7 +1,7 @@
 import { setAuthentication } from "../utils/auth";
 import { Toast } from "antd-mobile";
 // import axios from "axios";
-import { getToken, switchToken, switchMember } from "api/machine";
+import { getToken, switchToken, switchMember, getLogin } from "api/machine";
 import {
   setUserToken,
   setMemberLogin,
@@ -56,7 +56,8 @@ const authActions = {
       //   position: "top",
       // });
       let id = res.id;
-      if (id) {
+      const res2 = await getLogin(id, userId, pwd);
+      if (res2.code === 200) {
         setUserToken(id);
         setAuthentication("1");
         setMemberLogin(userId);
