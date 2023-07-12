@@ -171,6 +171,13 @@ export default () => {
       const filterObj = zjtzData.find(
         (item) => item.facilityCode === scanValue
       );
+      if (!filterObj) { 
+        setScanValue("")
+        return  Toast.show({
+          icon: "fail",
+          content: "未匹配整机信息， 请重新扫描",
+        });
+      }
       const {
         status,
         data: { cardMessageForm },

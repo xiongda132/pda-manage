@@ -57,7 +57,7 @@ const authActions = {
       // });
       let id = res.id;
       const res2 = await getLogin(id, userId, pwd);
-      if (res2.code === 200) {
+      if (res2.success) {
         setUserToken(id);
         setAuthentication("1");
         setMemberLogin(userId);

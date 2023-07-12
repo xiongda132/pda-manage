@@ -128,3 +128,54 @@ export function getRequest(api) {
     return error;
   });
 }
+
+export function request2(api, params) {
+  console.log(localStorage.getItem("serverPort"));
+  console.log("params", params);
+  return new Promise((resolve, reject) => {
+    fetch(`http://${localStorage.getItem("serverPort")}` + api, {
+      method: "post",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(params),
+    })
+      .then(async (res) => {
+        // console.log("res", res);
+        // alert(JSON.stringify(res), "成功回调");
+        // console.log(JSON.stringify(res));
+        let resObj = res.json();
+        // let resObj2 = await res.text()
+        // console.log(resObj2);
+        // downloadTxtFile(res);
+        // alert(JSON.stringify(await resObj));
+        resolve(resObj);
+        // return res.text();
+      })
+      // .then((r) => {
+      //   console.log("r", r);
+      // })
+      .catch((err) => {
+        // alert(err, "内层错误回调");
+        let err_ = {
+          ...err,
+          url: `http://${localStorage.getItem("serverPort")}` + api,
+        };
+        // console.log("2");
+        // downloadTxtFile(err);
+        // alert(JSON.stringify(err_));
+        reject(err_);
+      });
+  }).catch((error) => {
+    // alert(error, "外层错误回调");
+    let err = {
+      code: -1,
+      message: error.message,
+      url: `http://${localStorage.getItem("serverPort")}` + api,
+    };
+    // console.log("1");
+    // downloadTxtFile(error);
+    alert(JSON.stringify(err));
+    return err;
+  });
+}

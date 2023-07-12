@@ -1,4 +1,4 @@
-import { request, getRequest } from "./serverRequest";
+import { request, getRequest, request2 } from "./serverRequest";
 import { getUserToken } from "utils/auth";
 import { accountObj, memberObj } from "views/TagBind/test";
 import { locationObj, nodeObj } from "views/Procedure/test";
@@ -19,7 +19,7 @@ export const getToken = (userName, password) => {
 };
 
 export const getLogin = (token, loginName, password) => {
-  return request(
+  return request2(
     `/seeyon/rest/api/login?token=${token}`, {
       loginName,
       password,

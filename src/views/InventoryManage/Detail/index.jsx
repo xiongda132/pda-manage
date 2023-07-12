@@ -100,7 +100,7 @@ const InventoryItem = ({ item, positionData, setPreData }) => {
           <Form.Item label="工装编码" name="gzCode">
             <Input readOnly />
           </Form.Item>
-          <Form.Item label="工装名称" name="gzState">
+          <Form.Item label="工装名称" name="gzName">
             <Input readOnly />
           </Form.Item>
           <Form.Item label="软件版本" name="version">
