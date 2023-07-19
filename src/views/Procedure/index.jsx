@@ -39,6 +39,7 @@ import {
   getMemberName,
 } from "utils/auth";
 import { nodeObj } from "./test";
+import { Select } from "antd";
 
 const { Item } = Grid;
 const { Group } = Radio;
@@ -444,7 +445,7 @@ export default () => {
         (item) => ({ label: item, value: item })
       );
       const data = [...gdhList];
-      data.unshift({ label: "请选择工单", value: "" });
+      // data.unshift({ label: "请选择工单", value: "" });
       setBillNo(data);
     } else {
       Toast.show({
@@ -542,7 +543,7 @@ export default () => {
       );
 
       //获取默认密级
-      const getDefaultSecurity = filterNodeForm?.[0].nodeSecurity;
+      const getDefaultSecurity = filterNodeForm?.[0]?.nodeSecurity;
       formRef.current.setFieldsValue({
         nodeSecurity: getDefaultSecurity,
       });
@@ -634,11 +635,28 @@ export default () => {
   const handleChange = (value) => {
     setCheckboxValue(value);
   };
-  const handleBillChange = (e) => {
-    if (e.target.value) {
-      billRef.current = e.target.value;
+  // const handleBillChange = (e) => {
+  //   if (e.target.value) {
+  //     billRef.current = e.target.value;
+  //     const { nbName, workFlowName } = zjtzDataRef.current.find(
+  //       (item) => item.gdhId === e.target.value
+  //     );
+  //     formRef.current.setFieldsValue({
+  //       nbName,
+  //     });
+  //     getProcedureData(workFlowName);
+  //   } else {
+  //     formRef.current.setFieldsValue({
+  //       nbName: "无",
+  //     });
+  //   }
+  // };
+
+   const handleBillChange = (value) => {
+    if (value) {
+      billRef.current = value;
       const { nbName, workFlowName } = zjtzDataRef.current.find(
-        (item) => item.gdhId === e.target.value
+        (item) => item.gdhId === value
       );
       formRef.current.setFieldsValue({
         nbName,
@@ -696,7 +714,7 @@ export default () => {
                   mode="card"
                 >
                   <Form.Item label="工单号" name="gdhId">
-                    <select
+                    {/* <select
                       className={styles.select}
                       onChange={handleBillChange}
                     >
@@ -707,7 +725,20 @@ export default () => {
                           </option>
                         );
                       })}
-                    </select>
+                    </select> */}
+                    <Select
+                      showSearch
+                      className={styles.select}
+                      placeholder="请选择工单"
+                      optionFilterProp="children"
+                      onChange={handleBillChange}
+                      filterOption={(input, option) =>
+                        (option?.label ?? "")
+                          .toLowerCase()
+                          .includes(input.toLowerCase())
+                      }
+                      options={billNo}
+                    />
                   </Form.Item>
                   <Form.Item label="内部名称" name="nbName">
                     <Input readOnly />

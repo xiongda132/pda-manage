@@ -38,6 +38,7 @@ import {
 } from "api/machine";
 import { getMemberLogin, getLocalStorage, setLocalStorage } from "utils/auth";
 import { accountObj, memberObj } from "./test";
+import { Select} from "antd";
 
 const { Item } = Grid;
 
@@ -70,7 +71,7 @@ export default () => {
         (item) => ({ label: item, value: item })
       );
       const data = [...gdhList];
-      data.unshift({ label: "请选择工单", value: "" });
+      // data.unshift({ label: "请选择工单", value: "" });
       setBillNo(data);
     } else {
       Toast.show({
@@ -275,7 +276,7 @@ export default () => {
       status,
       data: { zjtzData },
     } = getLocalStorage("zjtzData");
-   
+
     if (status) {
       const machineList = zjtzData
         .filter((item) => item.gdhId === value)
@@ -510,6 +511,33 @@ export default () => {
     return machineList.filter((item) => item.epcData)?.length;
   }, [machineList]);
 
+  const onChange = (value) => {
+    valueRef.current = value;
+    //本地逻辑
+    const {
+      status,
+      data: { zjtzData },
+    } = getLocalStorage("zjtzData");
+
+    if (status) {
+      const machineList = zjtzData
+        .filter((item) => item.gdhId === value)
+        .map((item) => ({
+          ...item,
+          bindState: item.epcData ? "已绑" : "未绑",
+        }));
+      setMachineList(machineList);
+      setPdaReady(true);
+      setLoading(true);
+      qrRef.current.focus();
+    } else {
+      Toast.show({
+        icon: "fail",
+        content: "获取整机信息失败",
+      });
+    }
+  };
+
   return (
     <>
       <div style={{ height: "100vh" }}>
@@ -519,7 +547,7 @@ export default () => {
         <div className={styles.body}>
           <div className={styles.top}>
             <div className={styles.bill}>工单</div>
-            <select
+            {/* <select
               name="select"
               className={styles.select}
               onChange={handleChange}
@@ -531,7 +559,20 @@ export default () => {
                   </option>
                 );
               })}
-            </select>
+            </select> */}
+            <Select
+              showSearch
+              className={styles.select}
+              placeholder="请选择工单1"
+              optionFilterProp="children"
+              onChange={onChange}
+              filterOption={(input, option) =>
+                (option?.label ?? "")
+                  .toLowerCase()
+                  .includes(input.toLowerCase())
+              }
+              options={billNo}
+            />
           </div>
           <div className={styles.detailsBox}>
             <div className={styles.details}>绑定明细</div>

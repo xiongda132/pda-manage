@@ -29,7 +29,8 @@ const getTip = async () => {
       setDeptCode(deptCode);
       setDeptName(deptName);
       setMemberName(memberName);
-      alert(`登录id为${memberLogin}; \n部门代码为${deptCode}`);
+      // alert(`登录id为${memberLogin}; \n部门代码为${deptCode}`);
+      alert(`人员名称为${memberName}; \n人员部门为${deptName}`);
     } else {
       alert(`部门代码为空`);
     }
